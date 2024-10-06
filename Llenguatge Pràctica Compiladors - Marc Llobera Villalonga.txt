@@ -1,0 +1,99 @@
+/// Definició i crida de funcions
+
+fnct nomFunció(paràmetre::tipusParàmetre):
+	/// Codi
+	rtrn valorARetornar;
+endfnct;
+
+nomFunció(paràmetre);
+
+-----------------------------------------
+Exemple:
+fnct suma(x::integer, y::integer):
+	rtrn x + y;
+endfnct;
+
+suma(10, 5);
+-----------------------------------------
+
+/// Tipus
+
+integer -> número enter
+logical -> valor booleà TRUE o FALSE
+
+/// Tipus definits
+
+tuple nomTupla = {tupla1::tipusTupla, tupla::tipusTupla};
+
+-----------------------------------------
+Exemple:
+tuple persona = {nom::integer, esHome::logical};
+-----------------------------------------
+
+/// Declaració i ús de variables
+
+val nomVariable::tipusVariable = valorVariable;
+nomVariable = nouValor;
+con nomConstant::tipusConstant = valorConstant;
+
+-----------------------------------------
+Exemple:
+val x::integer = 3;
+x = 2;
+
+con z::logical = TRUE;
+-----------------------------------------
+
+/// Operacions
+
+Assignació -> =
+Condicional -> if(): else: endif;
+Bucle while -> while(): endwhile;
+Bucle for -> for to : endfor;
+
+-----------------------------------------
+Exemple:
+val x::integer = suma(10, 2);
+
+if(x === 12):
+	/// Codi
+else:
+	/// Codi
+endif;
+
+while(x === 12):
+	/// Codi
+endwhile;
+
+for x::integer = 0 to 10:
+	/// Codi
+endfor; 
+-----------------------------------------
+
+/// Expressions aritmètiques i lògiques
+Suma -> +
+Resta -> -
+Igual -> ===
+Diferent -> /=
+And -> &&
+Or -> ||
+
+-----------------------------------------
+Exemple:
+val x::logical = z === 3 || y /= 3;
+val t::integer = 4 + 2;
+
+if(x /= TRUE && t === 6):
+	/// Codi
+endif;
+-----------------------------------------
+
+/// Operacions entrada i sortida
+Entrada -> in();
+Sortida -> out(valor);
+
+-----------------------------------------
+Exemple:
+con x::integer = in();
+out(x);
+-----------------------------------------
