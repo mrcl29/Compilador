@@ -3,7 +3,7 @@
 fnct nomFunció(paràmetre::tipusParàmetre):
 	/// Codi
 	rtrn valorARetornar;
-endfnct;
+endfnct
 
 nomFunció(paràmetre);
 
@@ -11,7 +11,7 @@ nomFunció(paràmetre);
 Exemple:
 fnct suma(x::integer, y::integer):
 	rtrn x + y;
-endfnct;
+endfnct
 
 suma(10, 5);
 -----------------------------------------
@@ -59,15 +59,15 @@ if(x === 12):
 	/// Codi
 else:
 	/// Codi
-endif;
+endif
 
 while(x === 12):
 	/// Codi
-endwhile;
+endwhile
 
 for x::integer = 0 to 10:
 	/// Codi
-endfor; 
+endfor 
 -----------------------------------------
 
 /// Expressions aritmètiques i lògiques
@@ -85,7 +85,7 @@ val t::integer = 4 + 2;
 
 if(x /= TRUE && t === 6):
 	/// Codi
-endif;
+endif
 -----------------------------------------
 
 /// Operacions entrada i sortida
