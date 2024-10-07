@@ -8,25 +8,26 @@
 
 Desarrollar un compilador para un lenguaje imperativo.
 
-### Funcionalidad del Procesador
+### Prerequisitos
 
-El compilador a desarrollar debe contemplar las siguientes funcionalidades:
+Tener la librería JFlex instalada. Hay una librería ya instalada en el proyecto pero por si acaso puede seguir estos pasos:
 
-- Deberá ser capaz de procesar el código fuente suministrado en un archivo de texto, proporcionado por el programador.
-- Deberá generar una serie de archivos como resultado de su ejecución:
+1. Descargar JFlex: <https://github.com/jflex-de/jflex/releases/download/v1.9.1/jflex-1.9.1.tar.gz>
 
-#### Front-end
+2. Descomprime el archivo en la carpeta deseada.
 
-- **Archivo de tókenos**: todos los tókenos generados según la secuencia de entrada.
-- **Tabla de símbolos**: toda la información de los datos introducidos en la tabla de símbolos una vez que se haya procesado completamente el código fuente.
+3. Ves a \jflex-1.9.1\bin\jflex.bat
 
-#### Back-end
+4. Edita la variable JFLEX_HOME para que apunte al directorio \jflex-1.9.1
 
-- **Tablas de variables y de procedimientos**: para poder comprobar la corrección del código de tres direcciones.
-- **Archivo de código intermedio**: el código intermedio correspondiente al programa en código fuente introducido.
-- **Archivo con código ensamblador, sin optimizar**: para cada instrucción de tres direcciones se mostrará un comentario con la instrucción y, a continuación, la traducción correspondiente.
-- **Archivo con código ensamblador, optimizado**: la idea es que el ejecutable obtenido con el código optimizado y el código sin optimizar haga lo mismo, pero se pueda ver la diferencia en el rendimiento.
+5. Incluye \jflex-1.9.1\bin al PATH en variables de entorno del sistema.
 
-#### Errores
+También se debe instalar el SDK de Java y añadirlo al PATH.
 
-- Si se detectan errores, se generará un documento con los errores detectados. En cada error se indicará la línea donde se ha detectado, el tipo de error (léxico, sintáctico, semántico) y un mensaje explicativo.
+### Ejecución
+
+1. Compilar el .jflex: jflex src/Lexer.jflex
+
+2. Compilar archivos .java: javac -d bin src/*.java
+
+3. Ejecutar el promgrama main: java -cp bin Main
