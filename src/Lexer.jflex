@@ -1,4 +1,4 @@
-/* Lexer for the custom language */
+/* Lexer per al llenguatge inventat */
 
 %%
 
@@ -14,7 +14,7 @@
   }
 %}
 
-/* Keywords */
+/* Paraules clau */
 FNCT = "fnct"
 ENDFNCT = "endfnct"
 RTRN = "rtrn"
@@ -32,11 +32,11 @@ IN = "in"
 OUT = "out"
 TUPLE = "tuple"
 
-/* Data types */
+/* Tipus de data */
 INTEGER = "integer"
 LOGICAL = "logical"
 
-/* Operators */
+/* Operadors */
 ASSIGN = "="
 PLUS = "+"
 MINUS = "-"
@@ -45,7 +45,7 @@ NOT_EQUAL = "/="
 AND = "&&"
 OR = "||"
 
-/* Symbols */
+/* Simbols */
 LPAREN = "("
 RPAREN = ")"
 COLON = ":"
@@ -59,7 +59,7 @@ INTEGER_LITERAL = [0-9]+
 BOOLEAN_LITERAL = "TRUE" | "FALSE"
 IDENTIFIER = [a-zA-Z][a-zA-Z0-9]*
 
-/* Whitespace and comments */
+/* Espais en blanc i comentaris */
 WHITESPACE = [ \t\n\r]+
 COMMENT = "///".*
 
@@ -105,7 +105,7 @@ COMMENT = "///".*
 {BOOLEAN_LITERAL} { return token("BOOLEAN_LITERAL"); }
 {IDENTIFIER} { return token("IDENTIFIER"); }
 
-{WHITESPACE} { /* Ignore whitespace */ }
-{COMMENT} { /* Ignore comments */ }
+{WHITESPACE} { /* Ignorar espais en blanc */ }
+{COMMENT} { /* Ignorar comentaris */ }
 
-. { throw new RuntimeException("Unrecognized character: " + yytext()); }
+. { throw new RuntimeException("Caracter no reconegut: " + yytext()); }
