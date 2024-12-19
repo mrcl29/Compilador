@@ -26,8 +26,6 @@ También se debe instalar el SDK de Java y añadirlo al PATH.
 
 ### Ejecución
 
-1. Compilar el .jflex: jflex src/Lexer.jflex
+1. Compilar Léxico: java -jar .\lib\JFlex\jflex-full-1.9.1.jar .\src\compilador\lexic\Lexer.jflex
 
-2. Compilar archivos .java: javac -d bin src/*.java
-
-3. Ejecutar el promgrama main: java -cp bin Main
+2. Compilar Sintáctico: java -jar .\lib\JavaCUP\java-cup-11b.jar -parser Parser -symbols ParserSym .\src\compilador\sintactic\Parser.cup

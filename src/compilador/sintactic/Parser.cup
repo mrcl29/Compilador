@@ -1,0 +1,143 @@
+/**
+ Per compilar aquest fitxer s'ha d'haver instal·lat JavaCup
+
+  java -jar java-cup-11b.jar Parser.cup
+
+alternativament
+
+  java -classpath path_fins_java-cup-11b.jar java_cup.Main Parser.cup
+
+ **/
+
+/* parser.cup */
+
+/**
+ * Assignatura 21780 - Compiladors
+ * Estudis: Grau en Informàtica
+ *
+ * Marc Llobera Villalonga
+ */
+
+/* Import the necessary classes for the parser */
+import java_cup.runtime.*;
+
+/* Definition of terminals (tokens) */
+terminal fnct, endfnct, rtrn, val, con, if, else, endif, while, endwhile, for, to, endfor, in, out, tuple;
+terminal integer, logical;
+terminal assign, plus, minus, equal, not_equal, and, or;
+terminal lparen, rparen, colon, double_colon, semicolon, comma, lbrace, rbrace, lbracket, rbracket;
+terminal integer_literal, boolean_literal, id, zero, one;
+
+/* Non-terminals */
+non terminal S, P, DECL, TIPO, VAR_DECL, CONS_DECL, TUPLA_DECL, FUNC_DECL, PARAM_LIST, PARAM, COS, FINAL_RTN, SENT, ASIG_SENT, IF_SENT, WHILE_SENT, FOR_SENT, FORINIT, FORLIMIT, TUPLA_ASSIGN, ENTR_SENT, SAL_SENT, CRID_FUNC, ARGS, ARGS_LIST, EXP, ARIT_TERM, LOG_TERM, TUPLA_ACCESS, TUPLA_INDEX, LIT, ENT_LIT, BOL_LIT;
+
+/* Precedence and associativity */
+precedence left and, or;        // Lowest precedence
+precedence left equal, not_equal; // Relational operators === and /=
+precedence left plus, minus;      // Arithmetic operators + and -
+
+/* The start symbol */
+start with S;
+
+/* Grammar rules and actions */
+
+S ::= P ;
+
+P ::= DECL P
+  | DECL ;
+
+DECL ::= VAR_DECL
+      | CONS_DECL
+      | TUPLA_DECL
+      | FUNC_DECL
+      | SENT ;
+
+VAR_DECL ::= val id double_colon TIPO assign EXP semicolon ;
+
+CONS_DECL ::= con id double_colon TIPO assign EXP semicolon ;
+
+TUPLA_DECL ::= tuple id assign lbrace TIPO comma TIPO rbrace semicolon ;
+
+FUNC_DECL ::= fnct TIPO id lparen PARAM_LIST rparen colon COS FINAL_RTN endfnct ;
+
+PARAM_LIST ::= PARAM
+             | PARAM comma PARAM_LIST
+             | ;  // Epsilon (empty production)
+
+PARAM ::= id double_colon TIPO ;
+
+COS ::= SENT COS
+     | SENT
+     ;
+
+FINAL_RTN ::= rtrn lparen EXP rparen semicolon ;
+
+SENT ::= ASIG_SENT
+      | IF_SENT
+      | WHILE_SENT
+      | FOR_SENT
+      | TUPLA_ASSIGN
+      | ENTR_SENT
+      | SAL_SENT
+      | CRID_FUNC ;
+
+ASIG_SENT ::= id assign EXP semicolon ;
+
+IF_SENT ::= if lparen EXP rparen colon COS else colon COS endif
+         | if lparen EXP rparen colon COS endif ;
+
+WHILE_SENT ::= while lparen EXP rparen colon COS endwhile ;
+
+FOR_SENT ::= for FORINIT to FORLIMIT colon COS endfor ;
+
+FORINIT ::= VAR_DECL
+         | EXP ;
+
+FORLIMIT ::= CONS_DECL
+           | EXP ;
+
+TUPLA_ASSIGN ::= TUPLA_ACCESS assign EXP semicolon ;
+
+ENTR_SENT ::= in lparen TIPO rparen semicolon ;
+
+SAL_SENT ::= out lparen EXP rparen semicolon ;
+
+CRID_FUNC ::= id lparen ARGS rparen
+           | id lparen rparen ;
+
+ARGS ::= EXP ARGS_LIST ;
+
+ARGS_LIST ::= comma EXP ARGS_LIST
+            | ;  // Epsilon (empty production)
+
+TIPO ::= integer
+       | logical ;
+
+EXP ::= ARIT_TERM
+     | LOG_TERM
+     | CRID_FUNC
+     | id
+     | TUPLA_ACCESS
+     | LIT ;
+
+ARIT_TERM ::= ARIT_TERM plus ARIT_TERM
+            | ARIT_TERM minus ARIT_TERM
+            | lparen EXP rparen ;
+
+LOG_TERM ::= EXP equal EXP
+           | EXP not_equal EXP
+           | EXP and EXP
+           | EXP or EXP ;
+
+TUPLA_ACCESS ::= id lbracket TUPLA_INDEX rbracket ;
+
+TUPLA_INDEX ::= zero
+              | one ;
+
+LIT ::= ENT_LIT
+     | BOL_LIT ;
+
+ENT_LIT ::= minus integer_literal
+          | integer_literal ;
+
+BOL_LIT ::= boolean_literal ;
