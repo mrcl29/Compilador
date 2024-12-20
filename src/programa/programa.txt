@@ -1,0 +1,3 @@
+fnct integer aaa(x::integer):
+    rtrn(x+12);
+endfnct

@@ -1,3 +1,5 @@
+package compilador.lexic;
+
 /**
   Per poder compilar aquest fitxer s'ha d'haver instal·lat JFlex
  **/
@@ -12,11 +14,9 @@
 /* Lexer per al llenguatge inventat */
 
 import java.io.*;
-
+import compilador.sintactic.sym;
 import java_cup.runtime.*;
-import java_cup.runtime.ComplexSymbolFactory.ComplexSymbol;
-
-import compiler.sintactic.ParserSym;
+import java_cup.runtime.Symbol;
 
 %%
 /** **
@@ -28,24 +28,20 @@ import compiler.sintactic.ParserSym;
  es fa ús de Java CUP.
  ****/
 %cup
-/****
-La línia anterior és una alternativa a la indicació element a element:
-
-%implements java_cup.runtime.Scanner
-%function next_token
-%type java_cup.runtime.Symbol
-
-****/
 
 %public              // Per indicar que la classe és pública
 %class Scanner       // El nom de la classe
-
-%char
 %line
+%char
 %column
 
+%init{
+    yyline = 1;
+    yychar = 1L; // Ensure yychar is initialized as long
+%init}
+
 %eofval{
-  return symbol(ParserSym.EOF);
+  return new Symbol(sym.EOF);
 %eofval}
 
 /* Paraules clau */
@@ -80,105 +76,84 @@ and = "&&"
 or = "||"
 
 /* Simbols */
-lparen = "\\("
-rparen = "\\)"
+lparen = "("
+rparen = ")"
 colon = ":"
 double_colon = "::"
 semicolon = ";"
 comma = ","
-lbrace = "\\{"
-rbrace = "\\}"
-lbracket = "\\["
-rbracket = "\\]"
+lbrace = "{"
+rbrace = "}"
+lbracket = "["
+rbracket = "]"
 
 /* Literals */
-zero = [0]
-one = [1]
 integer_literal = [0-9]+
-boolean_literal = "TRUE" | "FALSE" | "true" | "false"
+boolean_literal = "TRUE" | "FALSE"
 id = [a-zA-Z][a-zA-Z0-9]*
 
 /* Espais en blanc i comentaris */
 whitespace = [ \t\n\r]+
 comment = "///".*
 
-// El següent codi es copiarà també, dins de la classe. És a dir, si es posa res
-// ha de ser en el format adient: mètodes, atributs, etc.
-%{
-    /***
-       Mecanismes de gestió de símbols basat en ComplexSymbol. tot i que en
-       aquest cas potser no és del tot necessari.
-     ***/
-    /**
-     construcció d'un symbol sense atribut associat.
-     **/
-    private ComplexSymbol symbol(int type) {
-        return new ComplexSymbol(ParserSym.terminalNames[type], type);
-    }
-
-    /**
-     construcció d'un symbol amb un atribut associat.
-     **/
-    private Symbol symbol(int type, Object value) {
-        return new ComplexSymbol(ParserSym.terminalNames[type], type, value);
-    }
-%}
-
 /****************************************************************************/
 %%
 
 /* Paraules clau */
-{fnct}          { return symbol("fnct"); }
-{endfnct}       { return symbol("endfnct"); }
-{rtrn}          { return symbol("rtrn"); }
-{val}           { return symbol("val"); }
-{con}           { return symbol("con"); }
-{if}            { return symbol("if"); }
-{else}          { return symbol("else"); }
-{endif}         { return symbol("endif"); }
-{while}         { return symbol("while"); }
-{endwhile}      { return symbol("endwhile"); }
-{for}           { return symbol("for"); }
-{to}            { return symbol("to"); }
-{endfor}        { return symbol("endfor"); }
-{in}            { return symbol("in"); }
-{out}           { return symbol("out"); }
-{tuple}         { return symbol("tuple"); }
+{fnct}          { return new Symbol(sym.fnct,yyline,(int)yychar, yytext()); }
+{endfnct}       { return new Symbol(sym.endfnct,yyline,(int)yychar, yytext()); }
+{rtrn}          { return new Symbol(sym.rtrn,yyline,(int)yychar, yytext()); }
+{val}           { return new Symbol(sym.val,yyline,(int)yychar, yytext()); }
+{con}           { return new Symbol(sym.con,yyline,(int)yychar, yytext()); }
+{if}            { return new Symbol(sym.if_t,yyline,(int)yychar, yytext()); }
+{else}          { return new Symbol(sym.else_t,yyline,(int)yychar, yytext()); }
+{endif}         { return new Symbol(sym.endif,yyline,(int)yychar, yytext()); }
+{while}         { return new Symbol(sym.while_t,yyline,(int)yychar, yytext()); }
+{endwhile}      { return new Symbol(sym.endwhile,yyline,(int)yychar, yytext()); }
+{for}           { return new Symbol(sym.for_t,yyline,(int)yychar, yytext()); }
+{to}            { return new Symbol(sym.to,yyline,(int)yychar, yytext()); }
+{endfor}        { return new Symbol(sym.endfor,yyline,(int)yychar, yytext()); }
+{in}            { return new Symbol(sym.in,yyline,(int)yychar, yytext()); }
+{out}           { return new Symbol(sym.out,yyline,(int)yychar, yytext()); }
+{tuple}         { return new Symbol(sym.tuple,yyline,(int)yychar, yytext()); }
 
 /* Tipus de dades */
-{integer}       { return symbol("integer"); }
-{logical}       { return symbol("logical"); }
+{integer}       { return new Symbol(sym.integer,yyline,(int)yychar, yytext()); }
+{logical}       { return new Symbol(sym.logical,yyline,(int)yychar, yytext()); }
 
 /* Operadors */
-{assign}        { return symbol("assign"); }
-{plus}          { return symbol("plus"); }
-{minus}         { return symbol("minus"); }
-{equal}         { return symbol("equal"); }
-{not_equal}     { return symbol("not_equal"); }
-{and}           { return symbol("and"); }
-{or}            { return symbol("or"); }
+{assign}        { return new Symbol(sym.assign,yyline,(int)yychar, yytext()); }
+{plus}          { return new Symbol(sym.plus,yyline,(int)yychar, yytext()); }
+{minus}         { return new Symbol(sym.minus,yyline,(int)yychar, yytext()); }
+{equal}         { return new Symbol(sym.equal,yyline,(int)yychar, yytext()); }
+{not_equal}     { return new Symbol(sym.not_equal,yyline,(int)yychar, yytext()); }
+{and}           { return new Symbol(sym.and,yyline,(int)yychar, yytext()); }
+{or}            { return new Symbol(sym.or,yyline,(int)yychar, yytext()); }
 
 /* Simbols */
-{lparen}        { return symbol("lparen"); }
-{rparen}        { return symbol("rparen"); }
-{colon}         { return symbol("colon"); }
-{double_colon}  { return symbol("double_colon"); }
-{semicolon}     { return symbol("semicolon"); }
-{comma}         { return symbol("comma"); }
-{lbrace}        { return symbol("lbrace"); }
-{rbrace}        { return symbol("rbrace"); }
-{lbracket}      { return symbol("lbracket"); }
-{rbracket}      { return symbol("rbracket"); }
+{lparen}        { return new Symbol(sym.lparen,yyline,(int)yychar, yytext()); }
+{rparen}        { return new Symbol(sym.rparen,yyline,(int)yychar, yytext()); }
+{colon}         { return new Symbol(sym.colon,yyline,(int)yychar, yytext()); }
+{double_colon}  { return new Symbol(sym.double_colon,yyline,(int)yychar, yytext()); }
+{semicolon}     { return new Symbol(sym.semicolon,yyline,(int)yychar, yytext()); }
+{comma}         { return new Symbol(sym.comma,yyline,(int)yychar, yytext()); }
+{lbrace}        { return new Symbol(sym.lbrace,yyline,(int)yychar, yytext()); }
+{rbrace}        { return new Symbol(sym.rbrace,yyline,(int)yychar, yytext()); }
+{lbracket}      { return new Symbol(sym.lbracket,yyline,(int)yychar, yytext()); }
+{rbracket}      { return new Symbol(sym.rbracket,yyline,(int)yychar, yytext()); }
 
 /* Literals */
-{zero}        { return symbol("zero"); }
-{one}         { return symbol("one"); }
-{integer_literal}   { return symbol("integer_literal"); }
-{boolean_literal}   { return symbol("boolean_literal"); }
-{id}          { return symbol("id"); }
+{integer_literal}   { return new Symbol(sym.integer_literal,yyline,(int)yychar, yytext()); }
+{boolean_literal}   { return new Symbol(sym.boolean_literal,yyline,(int)yychar, yytext()); }
+{id}            { return new Symbol(sym.id,yyline,(int)yychar, yytext()); }
+
+\n { yyline++; yychar = 1L; }
 
 /* Espais en blanc i comentaris */
 {whitespace}        { /* Ignorar espais en blanc */ }
 {comment}           { /* Ignorar comentaris */ }
 
-[^]                 { return symbol(ParserSym.error);  }
+. {
+    System.out.println("Este es un error lexico: " + yytext() +
+    ", en la linea: " + yyline + ", en la columna: " + (int)yychar);
+}

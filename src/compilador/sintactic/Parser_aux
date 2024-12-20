@@ -68,9 +68,7 @@ CONS_DECL ::= con id double_colon TIPO assign EXP semicolon ;
 
 TUPLA_DECL ::= tuple id assign lbrace TIPO comma TIPO rbrace semicolon ;
 
-FUNC_DECL ::= fnct TIPO id lparen PARAM_LIST rparen colon COS FINAL_RTN endfnct
-            | fnct TIPO id lparen PARAM_LIST rparen colon FINAL_RTN endfnct
-            ;
+FUNC_DECL ::= fnct TIPO id lparen PARAM_LIST rparen colon COS FINAL_RTN endfnct ;
 
 PARAM_LIST ::= PARAM
              | PARAM comma PARAM_LIST
