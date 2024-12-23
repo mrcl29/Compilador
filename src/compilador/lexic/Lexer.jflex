@@ -99,6 +99,15 @@ comment = "///".*
 /****************************************************************************/
 %%
 
+\n {
+    yyline++;
+    yychar = 1;  // Reinicia la columna al inicio de una nueva línea
+}
+
+[ \t]+ {
+    yychar += yytext().length();  // Incrementa la columna por la longitud del texto ignorado
+}
+
 /* Paraules clau */
 {fnct}          { return new Symbol(sym.fnct,yyline,(int)yychar, yytext()); }
 {endfnct}       { return new Symbol(sym.endfnct,yyline,(int)yychar, yytext()); }
@@ -146,8 +155,6 @@ comment = "///".*
 {integer_literal}   { return new Symbol(sym.integer_literal,yyline,(int)yychar, yytext()); }
 {boolean_literal}   { return new Symbol(sym.boolean_literal,yyline,(int)yychar, yytext()); }
 {id}            { return new Symbol(sym.id,yyline,(int)yychar, yytext()); }
-
-\n { yyline++; yychar = 1L; }
 
 /* Espais en blanc i comentaris */
 {whitespace}        { /* Ignorar espais en blanc */ }

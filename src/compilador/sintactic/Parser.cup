@@ -9,24 +9,43 @@ package compilador.sintactic;
  */
 
 import java_cup.runtime.*;
+import java.util.*;
+
+action code
+{:
+    //public PilaSemantica pilaSemantica = new PilaSemantica();
+    //public PilaSemantica pilaSemantica_2 = new PilaSemantica();
+
+    public boolean dadesGlobals = true;
+:}
 
 parser code {:
-/**
- * Método al que se llama automáticamente ante algún error sintáctico.
- **/
-public void syntax_error(Symbol s) {
-    System.out.println("Error Sintáctico en la Línea " + (s.left) +
-    " Columna " + s.right + ". No se esperaba este componente: " + s.value + ".");
-}
+    @Override
+    protected int error_sync_size(){
+        return 1;
+    }
 
-/**
- * Método al que se llama automáticamente ante algún error sintáctico
- * en el que ya no es posible una recuperación de errores.
- **/
-public void unrecovered_syntax_error(Symbol s) throws java.lang.Exception {
-    System.out.println("Error sintáctico irrecuperable en la Línea " +
-    (s.left) + " Columna " + s.right + ". Componente " + s.value + " no reconocido.");
-}
+    private Symbol error;
+    public boolean hiHaErrors = false;
+
+    /**
+    * Método al que se llama automáticamente ante algún error sintáctico.
+    **/
+    public void syntax_error(Symbol s) {
+        System.out.println("Error Sintáctico en la Línea " + (s.left) +
+        " Columna " + s.right + ". No se esperaba este componente: " + s.value + ".");
+        throw new RuntimeException("Error sintáctico detectado. Terminando análisis.");
+    }
+
+    /**
+    * Método al que se llama automáticamente ante algún error sintáctico
+    * en el que ya no es posible una recuperación de errores.
+    **/
+    public void unrecovered_syntax_error(Symbol s) throws java.lang.Exception {
+        System.out.println("Error sintáctico irrecuperable en la Línea " +
+        (s.left) + " Columna " + s.right + ". Componente " + s.value + " no reconocido.");
+        throw new RuntimeException("Error sintáctico irrecuperable. Terminando análisis.");
+    }
 :}
 
 /* Definición de terminales (tokens) */

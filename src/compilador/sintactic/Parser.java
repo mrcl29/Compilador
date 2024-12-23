@@ -438,10 +438,21 @@ public class Parser extends java_cup.runtime.lr_parser {
 /**
  * Método al que se llama automáticamente ante algún error sintáctico.
  **/
-public void syntax_error(Symbol s) {
-    System.out.println("Error Sintáctico en la Línea " + (s.left) +
+    // Variable para almacenar el último token procesado correctamente
+    private Symbol lastValidToken;
+
+    public void syntax_error(Symbol s) {
+        String errorLocation;
+        if (lastValidToken != null) {
+            errorLocation = "Cerca de Línea " + lastValidToken.left + ", Columna " + lastValidToken.right;
+        } else {
+            errorLocation = "No se pudo determinar la posición exacta";
+        }
+
+    System.out.println("Error Sintáctico en la Línea " + (s.left) + " (o anterior: " + errorLocation + ") +
     " Columna " + s.right + ". No se esperaba este componente: " + s.value + ".");
-}
+    throw new RuntimeException("Error sintáctico detectado. Terminando análisis.");
+    }
 
 /**
  * Método al que se llama automáticamente ante algún error sintáctico
@@ -450,6 +461,7 @@ public void syntax_error(Symbol s) {
 public void unrecovered_syntax_error(Symbol s) throws java.lang.Exception {
     System.out.println("Error sintáctico irrecuperable en la Línea " +
     (s.left) + " Columna " + s.right + ". Componente " + s.value + " no reconocido.");
+    throw new RuntimeException("Error sintáctico irrecuperable. Terminando análisis.");
 }
 
 
