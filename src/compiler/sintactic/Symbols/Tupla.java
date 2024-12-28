@@ -1,11 +1,13 @@
-package compilador.utils;
+package compiler.sintactic.Symbols;
 
-public class Tupla extends Token {
+import compiler.sintactic.Symbols.Simbol.tipusDades;
+
+public class Tupla extends Simbol {
     private tipusDades valor1;
     private tipusDades valor2;
 
-    public Tupla(String id, tipusDades valor1, tipusDades valor2, String nivell, int fila, int columna) {
-        super(id, nivell, fila, columna);
+    public Tupla(String id, tipusDades valor1, tipusDades valor2, int fila, int columna) {
+        super(id, fila, columna);
         this.valor1 = valor1;
         this.valor2 = valor2;
     }

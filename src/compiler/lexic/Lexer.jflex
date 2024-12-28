@@ -1,4 +1,4 @@
-package compilador.lexic;
+package compiler.lexic;
 
 /**
   Per poder compilar aquest fitxer s'ha d'haver instal·lat JFlex
@@ -14,7 +14,7 @@ package compilador.lexic;
 /* Lexer per al llenguatge inventat */
 
 import java.io.*;
-import compilador.sintactic.sym;
+import compiler.sintactic.sym;
 import java_cup.runtime.*;
 import java_cup.runtime.Symbol;
 

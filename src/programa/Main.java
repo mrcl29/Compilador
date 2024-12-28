@@ -1,9 +1,10 @@
 package programa;
 
 import java.io.FileReader;
+
+import compiler.lexic.Scanner;
+import compiler.sintactic.Parser;
 import java_cup.runtime.Symbol;
-import compilador.lexic.Scanner;
-import compilador.sintactic.Parser;
 
 public class Main {
     public static void main(String[] args) {

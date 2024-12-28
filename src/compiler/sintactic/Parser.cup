@@ -1,4 +1,4 @@
-package compilador.sintactic;
+package compiler.sintactic;
 /**
  * parser.cup
  *
@@ -9,24 +9,48 @@ package compilador.sintactic;
  */
 
 import java_cup.runtime.*;
+import java.util.*;
+import compiler.sintactic.Symbols.TaulaTokens;
 
 parser code {:
-/**
- * Método al que se llama automáticamente ante algún error sintáctico.
- **/
-public void syntax_error(Symbol s) {
-    System.out.println("Error Sintáctico en la Línea " + (s.left) +
-    " Columna " + s.right + ". No se esperaba este componente: " + s.value + ".");
-}
+    TaulaTokens taulaTokens = new TaulaTokens();
 
-/**
- * Método al que se llama automáticamente ante algún error sintáctico
- * en el que ya no es posible una recuperación de errores.
- **/
-public void unrecovered_syntax_error(Symbol s) throws java.lang.Exception {
-    System.out.println("Error sintáctico irrecuperable en la Línea " +
-    (s.left) + " Columna " + s.right + ". Componente " + s.value + " no reconocido.");
-}
+    @Override
+    protected int error_sync_size(){
+        return 1;
+    }
+
+    private Symbol error;
+
+    /**
+    * Método al que se llama automáticamente ante algún error sintáctico.
+    **/
+    public void syntax_error(Symbol s) {
+        try{
+            String lexema = s.value.toString();
+            int fila = s.left + 1;
+            int columna = s.right;
+            error = s;
+
+            System.err.println("Error sintáctico en la línea: " + fila + " y columna: " + columna + ". No se esperaba el componente: " + lexema);
+        }catch(Exception e){}
+    }
+
+    /**
+    * Método al que se llama automáticamente ante algún error sintáctico
+    * en el que ya no es posible una recuperación de errores.
+    **/
+    public void unrecovered_syntax_error(Symbol s) throws java.lang.Exception {
+        try
+        {
+            String lexema = s.value.toString();
+            int fila = s.left + 1;
+            int columna = s.right;
+
+            System.err.println("Error sintactico inrrecuperable en la linea: " + fila + " y columna: " + columna + ". No se esperaba el componente: " + lexema);
+        }catch(Exception e) {}
+        done_parsing();
+    }
 :}
 
 /* Definición de terminales (tokens) */
@@ -68,7 +92,9 @@ CONS_DECL ::= con id double_colon TIPO assign EXP semicolon ;
 
 TUPLA_DECL ::= tuple id assign lbrace TIPO comma TIPO rbrace semicolon ;
 
-FUNC_DECL ::= fnct TIPO id lparen PARAM_LIST rparen colon COS FINAL_RTN endfnct ;
+FUNC_DECL ::= fnct TIPO id lparen PARAM_LIST rparen colon COS FINAL_RTN endfnct
+            | fnct TIPO id lparen PARAM_LIST rparen colon FINAL_RTN endfnct
+            ;
 
 PARAM_LIST ::= PARAM
              | PARAM comma PARAM_LIST

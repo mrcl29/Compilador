@@ -5,8 +5,9 @@ public class CompilarArchivos {
     private static final String JFLEX_PATH = "./lib/JFlex/jflex-full-1.8.2.jar";
     private static final String CUP_PATH = "./lib/JavaCUP/java-cup-11b.jar";
     private static final String BIN_PATH = "./bin/";
-    private static final String LEXIC_PATH = "./src/compilador/lexic/";
-    private static final String SINTACTIC_PATH = "./src/compilador/sintactic/";
+    private static final String UTILS_PATH = "./src/compiler/sintactic/Symbols/*.java";
+    private static final String LEXIC_PATH = "./src/compiler/lexic/";
+    private static final String SINTACTIC_PATH = "./src/compiler/sintactic/";
     private static final String LEXER_FILE = LEXIC_PATH + "Lexer.jflex";
     private static final String CUP_FILE = SINTACTIC_PATH + "Parser.cup";
 
@@ -88,7 +89,8 @@ public class CompilarArchivos {
         ProcessBuilder processBuilder = new ProcessBuilder("javac", "--release",
                 "20", "-cp", CUP_PATH, "-d", "./bin",
                 LEXIC_PATH + "Scanner.java", SINTACTIC_PATH + "Parser.java", SINTACTIC_PATH +
-                        "sym.java");
+                        "sym.java",
+                UTILS_PATH);
         processBuilder.inheritIO();
         Process process = processBuilder.start();
         process.waitFor();
