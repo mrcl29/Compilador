@@ -1,1 +1,2 @@
-val x :: integer = 10#; val x :: nteger = 1;
+val x :: integer = 10;
+val x :: integer = 1;

@@ -9,18 +9,41 @@ package compiler.sintactic;
  */
 
 import java_cup.runtime.*;
+import java_cup.runtime.Symbol;
 import java.util.*;
-import compiler.sintactic.Symbols.TaulaTokens;
+import compiler.sintactic.Symbols.TaulaSimbols;
 
 parser code {:
-    TaulaTokens taulaTokens = new TaulaTokens();
+    TaulaSimbols taulaSimbols = new TaulaSimbols();
+
+    public boolean errorSemantic = false;
+
+    public boolean DEBUG = true;
+
+    public void print_this(String msg){
+        if(DEBUG){
+            System.out.println(msg);
+        }
+    }
+
+    public boolean declararVariable(String id, String tipus, Object info){
+        try{
+            if(info instanceof Symbol){
+                Symbol aux = (Symbol) info;
+                int fila = aux.left + 1;
+                int columna = aux.right;
+                return taulaSimbols.declararVariable(id, tipus, fila, columna);
+            }
+        }catch(Exception e){
+            System.err.println(e);
+        }
+        return false;
+    }
 
     @Override
     protected int error_sync_size(){
         return 1;
     }
-
-    private Symbol error;
 
     /**
     * Método al que se llama automáticamente ante algún error sintáctico.
@@ -30,10 +53,11 @@ parser code {:
             String lexema = s.value.toString();
             int fila = s.left + 1;
             int columna = s.right;
-            error = s;
 
-            System.err.println("Error sintáctico en la línea: " + fila + " y columna: " + columna + ". No se esperaba el componente: " + lexema);
-        }catch(Exception e){}
+            System.err.println("Error sintáctico en la línea " + fila + " y columna " + columna + ". No se esperaba el componente: " + lexema);
+        }catch(Exception e){
+            System.err.println(e);
+        }
     }
 
     /**
@@ -41,14 +65,35 @@ parser code {:
     * en el que ya no es posible una recuperación de errores.
     **/
     public void unrecovered_syntax_error(Symbol s) throws java.lang.Exception {
-        try
-        {
+        try{
             String lexema = s.value.toString();
             int fila = s.left + 1;
             int columna = s.right;
 
-            System.err.println("Error sintactico inrrecuperable en la linea: " + fila + " y columna: " + columna + ". No se esperaba el componente: " + lexema);
-        }catch(Exception e) {}
+            System.err.println("Error sintactico inrrecuperable en la linea " + fila + " y columna " + columna + ". No se esperaba el componente: " + lexema);
+        }catch(Exception e) {
+            System.err.println(e);
+        }
+        done_parsing();
+    }
+
+    /**
+    * Mètode per mostrar un error semàntic
+    **/
+    public void semantic_error(String t, Object info){
+        try{
+            print_this("Imprimiendo error semántico...");
+            if(info instanceof Symbol){
+                Symbol aux = (Symbol) info;
+                int fila = aux.left + 1;
+                int columna = aux.right;
+                System.err.println("Error semántico en la linea " + fila + " y columna " + columna + " --> " + t);
+            }else{
+                print_this("Info no es Symbol");
+            }
+        }catch(Exception e) {
+            System.err.println(e);
+        }
         done_parsing();
     }
 :}
@@ -86,7 +131,18 @@ DECL ::= VAR_DECL
       | FUNC_DECL
       | SENT ;
 
-VAR_DECL ::= val id double_colon TIPO assign EXP semicolon ;
+VAR_DECL ::= val id:v1 double_colon TIPO:v2 assign EXP semicolon
+{:
+    print_this("Nombre Variable: " + v1.toString());
+    print_this("Tipo Variable: " + v2.toString());
+    errorSemantic = !declararVariable(v1.toString(), v2.toString(), v1);
+    if(errorSemantic){
+        print_this("Error semántico");
+        String e = ("Ya existe una variable o constante con el nombre '" + v1.toString() + "'");
+        semantic_error(e, v1);
+    }
+:}
+;
 
 CONS_DECL ::= con id double_colon TIPO assign EXP semicolon ;
 
@@ -154,8 +210,9 @@ ARGS ::= EXP ARGS_LIST ;
 ARGS_LIST ::= comma EXP ARGS_LIST
             | /* epsilon */ ;
 
-TIPO ::= integer
-       | logical ;
+TIPO ::= integer {: RESULT = "INTEGER"; :}
+       | logical {: RESULT = "BOOLEAN"; :}
+;
 
 EXP ::= LOG_TERM
      | ARIT_TERM
