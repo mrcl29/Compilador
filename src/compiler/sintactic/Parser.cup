@@ -8,72 +8,94 @@ package compiler.sintactic;
  * Marc Llobera Villalonga
  */
 
+import java.lang.Exception;
 import java_cup.runtime.*;
-import java_cup.runtime.Symbol;
 import java.util.*;
+import java_cup.runtime.ComplexSymbolFactory.ComplexSymbol;
+import java_cup.runtime.ComplexSymbolFactory.Location;
 import compiler.sintactic.Symbols.TaulaSimbols;
+import compiler.sintactic.Symbols.Simbol;
+
+class Parser;
 
 parser code {:
+/***
+    private Scanner scanner;
+    public Parser(Scanner scanner) {
+        this.scanner = scanner;
+    }
+***/
+
     TaulaSimbols taulaSimbols = new TaulaSimbols();
 
     public boolean errorSemantic = false;
+    public boolean error_generico = false;
 
     public boolean DEBUG = true;
-
     public void print_this(String msg){
         if(DEBUG){
             System.out.println(msg);
         }
     }
 
-    public boolean declararVariable(String id, String tipus, Object info){
+    public boolean declararVariableConstant(Object id, String tipus, boolean constant){
         try{
-            if(info instanceof Symbol){
-                Symbol aux = (Symbol) info;
-                int fila = aux.left + 1;
-                int columna = aux.right;
-                return taulaSimbols.declararVariable(id, tipus, fila, columna);
-            }
+            return taulaSimbols.declararVariableConstant(id, tipus, constant);
         }catch(Exception e){
             System.err.println(e);
         }
         return false;
     }
 
-    @Override
-    protected int error_sync_size(){
-        return 1;
-    }
-
-    /**
-    * Método al que se llama automáticamente ante algún error sintáctico.
-    **/
-    public void syntax_error(Symbol s) {
+    public boolean declararTupla(Object id, String tipus1, String tipus2){
         try{
-            String lexema = s.value.toString();
-            int fila = s.left + 1;
-            int columna = s.right;
-
-            System.err.println("Error sintáctico en la línea " + fila + " y columna " + columna + ". No se esperaba el componente: " + lexema);
+            return taulaSimbols.declararTupla(id, tipus1, tipus2);
         }catch(Exception e){
             System.err.println(e);
         }
+        return false;
     }
 
-    /**
-    * Método al que se llama automáticamente ante algún error sintáctico
-    * en el que ya no es posible una recuperación de errores.
-    **/
-    public void unrecovered_syntax_error(Symbol s) throws java.lang.Exception {
+    public boolean declararFuncio(Object id, ArrayList<> parametres, String tipus){
         try{
-            String lexema = s.value.toString();
-            int fila = s.left + 1;
-            int columna = s.right;
-
-            System.err.println("Error sintactico inrrecuperable en la linea " + fila + " y columna " + columna + ". No se esperaba el componente: " + lexema);
-        }catch(Exception e) {
+            return taulaSimbols.declararFuncio(id, parametres, tipus);
+        }catch(Exception e){
             System.err.println(e);
         }
+        return false;
+    }
+
+    /**************************************************************
+    ************************ GESTIÓ ERRORS ************************
+    **************************************************************/
+
+    @Override
+    public void syntax_error(Symbol s) {
+        report_error("Error sintáctico", s);
+    }
+
+    @Override
+    public void unrecovered_syntax_error(Symbol s) throws Exception {
+        report_error("Error sintáctico inrrecuperable", s);
+        done_parsing();
+    }
+
+    @Override
+    public void report_error(String t, Object info) {
+        print_this("Reportando error...");
+        if(info instanceof Symbol){
+            ComplexSymbol token = (ComplexSymbol)info;
+            Location l = token.getLeft();
+
+            System.err.println("Error en la linea " + l.getLine() + " y columna " + l.getColumn() + " --> " + t);
+        }else{
+            print_error("info no es Symbol en report_error");
+        }
+    }
+
+    @Override
+    public void report_fatal_error(String message, Object info) throws Exception {
+        report_error("Error fatal ("+message+")", info);
         done_parsing();
     }
 
@@ -81,19 +103,24 @@ parser code {:
     * Mètode per mostrar un error semàntic
     **/
     public void semantic_error(String t, Object info){
-        try{
-            print_this("Imprimiendo error semántico...");
-            if(info instanceof Symbol){
-                Symbol aux = (Symbol) info;
-                int fila = aux.left + 1;
-                int columna = aux.right;
-                System.err.println("Error semántico en la linea " + fila + " y columna " + columna + " --> " + t);
-            }else{
-                print_this("Info no es Symbol");
-            }
-        }catch(Exception e) {
-            System.err.println(e);
+        print_this("Imprimiendo error semántico...");
+        if(info instanceof Simbol){
+            Simbol token = (Simbol) info;
+
+            System.err.println("Error semántico en la linea " + token.getFila() + " y columna " + token.getColumna() + " --> " + t);
+        }else{
+            print_error("info no es Symbol en semantic_error");
         }
+        done_parsing();
+    }
+
+    /**
+    * Mètode per mostrar un error genèric
+    **/
+    public void print_error(String msg){
+        error_generico = true;
+        print_this("Imprimiendo error genérico...");
+        System.err.println("Error--> " + msg);
         done_parsing();
     }
 :}
@@ -103,7 +130,9 @@ terminal fnct, endfnct, rtrn, val, con, if_t, else_t, endif, while_t, endwhile, 
 terminal integer, logical;
 terminal assign, plus, minus, equal, not_equal, and, or;
 terminal lparen, rparen, colon, double_colon, semicolon, comma, lbrace, rbrace, lbracket, rbracket;
-terminal index_literal, integer_literal, boolean_literal, id;
+terminal Simbol integer_literal;
+terminal Simbol boolean_literal;
+terminal Simbol id;
 
 /* No terminales */
 non terminal S, P, DECL, VAR_DECL, CONS_DECL, TUPLA_DECL, FUNC_DECL, PARAM_LIST, PARAM, COS, FINAL_RTN, SENT;
@@ -122,31 +151,70 @@ start with S;
 
 S ::= P ;
 
-P ::= DECL P
-  | DECL ;
+P ::= DECL P    {:  :}
+  | DECL        {:  :}
+  ;
 
-DECL ::= VAR_DECL
-      | CONS_DECL
-      | TUPLA_DECL
-      | FUNC_DECL
-      | SENT ;
+DECL ::= VAR_DECL   {:  :}
+      | CONS_DECL   {:  :}
+      | TUPLA_DECL  {:  :}
+      | FUNC_DECL   {:  :}
+      | SENT        {:  :}
+      ;
 
 VAR_DECL ::= val id:v1 double_colon TIPO:v2 assign EXP semicolon
 {:
-    print_this("Nombre Variable: " + v1.toString());
-    print_this("Tipo Variable: " + v2.toString());
-    errorSemantic = !declararVariable(v1.toString(), v2.toString(), v1);
-    if(errorSemantic){
-        print_this("Error semántico");
-        String e = ("Ya existe una variable o constante con el nombre '" + v1.toString() + "'");
-        semantic_error(e, v1);
+    if(!errorSemantic && !error_generico){
+        print_this("Declarando Variable '"+ v1.getValue() +"' de tipo '" + v2.toString() + "'");
+        errorSemantic = !declararVariableConstant(v1.getValue(), v2.toString(), false);
+        if(!error_generico){
+            if(errorSemantic){
+                print_this("Error semántico");
+                String e = ("Ya existe una variable o constante con el nombre '" + v1.getValue() + "'");
+                semantic_error(e, v1);
+            }else{
+                print_this("Variable '" + v1.getValue() + "' creada con éxito");
+            }
+        }
     }
 :}
 ;
 
-CONS_DECL ::= con id double_colon TIPO assign EXP semicolon ;
+CONS_DECL ::= con id:v1 double_colon TIPO:v2 assign EXP semicolon
+{:
+    if(!errorSemantic && !error_generico){
+        print_this("Declarando Constante '"+ v1.getValue() +"' de tipo '" + v2.toString() + "'");
+        errorSemantic = !declararVariableConstant(v1.getValue(), v2.toString(), true);
+        if(!error_generico){
+            if(errorSemantic){
+                print_this("Error semántico");
+                String e = ("Ya existe una variable o constante con el nombre '" + v1.getValue() + "'");
+                semantic_error(e, v1);
+            }else{
+                print_this("Constante '" + v1.getValue() + "' creada con éxito");
+            }
+        }
+    }
+:}
+;
 
-TUPLA_DECL ::= tuple id assign lbrace TIPO comma TIPO rbrace semicolon ;
+TUPLA_DECL ::= tuple id:v1 assign lbrace TIPO:v2 comma TIPO:v3 rbrace semicolon
+{:
+    if(!errorSemantic && !error_generico){
+        print_this("Declarando Tupla: '"+ v1.getValue() +"' de [tipo1: "+ v2.toString() +", tipo2: "+ v3.toString() +"]");
+        errorSemantic = !declararTupla(v1.getValue(), v2.toString(), v3.toString());
+        if(!error_generico){
+            if(errorSemantic){
+                print_this("Error semántico");
+                String e = ("Ya existe una tupla con el nombre '" + v1.getValue() + "'");
+                semantic_error(e, v1);
+            }else{
+                print_this("Tupla '" + v1.getValue() + "["+ v2.toString() +", "+ v3.toString() +"]' creada con éxito");
+            }
+        }
+    }
+:}
+;
 
 FUNC_DECL ::= fnct TIPO id lparen PARAM_LIST rparen colon COS FINAL_RTN endfnct
             | fnct TIPO id lparen PARAM_LIST rparen colon FINAL_RTN endfnct
@@ -237,13 +305,19 @@ LOG_TERM ::= EXP equal EXP
            | EXP and EXP
            | EXP or EXP ;
 
-TUPLA_ACCESS ::= id lbracket index_literal rbracket ;
+TUPLA_ACCESS ::= id:v1 lbracket integer_literal:v2 rbracket
+{:
+RESULT = (String) v1.getValue();
+RESULT = "[";
+RESULT = (Integer) v2.getValue();
+RESULT = "]";
+:};
 
 LIT ::= NEG_ENT_LIT
      | BOL_LIT ;
 
-POS_ENT_LIT ::= integer_literal ;
+POS_ENT_LIT ::= integer_literal:v {: RESULT = (Integer)v.getValue(); :};
 
-NEG_ENT_LIT ::= minus integer_literal ;
+NEG_ENT_LIT ::= minus integer_literal:v {: RESULT = -1*(Integer)v.getValue(); :};
 
-BOL_LIT ::= boolean_literal ;
+BOL_LIT ::= boolean_literal:v {: RESULT = v.getValue(); :};

@@ -50,7 +50,7 @@ public class CompilarArchivos {
         String[] filesToDelete = {
                 LEXIC_PATH + "Scanner.java",
                 SINTACTIC_PATH + "Parser.java",
-                SINTACTIC_PATH + "sym.java"
+                SINTACTIC_PATH + "ParserSym.java"
         };
         for (String filePath : filesToDelete) {
             File file = new File(filePath);
@@ -89,7 +89,7 @@ public class CompilarArchivos {
         ProcessBuilder processBuilder = new ProcessBuilder("javac", "--release",
                 "20", "-cp", CUP_PATH, "-d", "./bin",
                 LEXIC_PATH + "Scanner.java", SINTACTIC_PATH + "Parser.java", SINTACTIC_PATH +
-                        "sym.java",
+                        "ParserSym.java",
                 UTILS_PATH);
         processBuilder.inheritIO();
         Process process = processBuilder.start();

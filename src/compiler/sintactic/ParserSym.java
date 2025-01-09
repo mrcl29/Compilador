@@ -6,7 +6,7 @@
 package compiler.sintactic;
 
 /** CUP generated interface containing symbol constants. */
-public interface sym {
+public interface ParserSym {
   /* terminals */
   public static final int rtrn = 4;
   public static final int tuple = 17;
@@ -19,11 +19,10 @@ public interface sym {
   public static final int rbrace = 34;
   public static final int logical = 19;
   public static final int for_t = 12;
-  public static final int index_literal = 37;
   public static final int comma = 32;
   public static final int endfnct = 3;
   public static final int not_equal = 24;
-  public static final int integer_literal = 38;
+  public static final int integer_literal = 37;
   public static final int equal = 23;
   public static final int endwhile = 11;
   public static final int EOF = 0;
@@ -36,10 +35,10 @@ public interface sym {
   public static final int colon = 29;
   public static final int endif = 9;
   public static final int fnct = 2;
-  public static final int boolean_literal = 39;
+  public static final int boolean_literal = 38;
   public static final int integer = 18;
   public static final int while_t = 10;
-  public static final int id = 40;
+  public static final int id = 39;
   public static final int rparen = 28;
   public static final int double_colon = 30;
   public static final int out = 16;
@@ -87,7 +86,6 @@ public interface sym {
   "rbrace",
   "lbracket",
   "rbracket",
-  "index_literal",
   "integer_literal",
   "boolean_literal",
   "id"

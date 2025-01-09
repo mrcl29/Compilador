@@ -5,22 +5,24 @@ public class Simbol {
         INTEGER, BOOLEAN
     }
 
-    private String id;
-    private int fila;
-    private int columna;
+    private Object value;
+    private Integer fila;
+    private Integer columna;
 
-    public Simbol(String id, int fila, int columna) {
-        this.id = id;
+    public Simbol(Object value) {
+        this.value = value;
+    }
+
+    public Simbol(int fila, int columna, Object value) {
         this.fila = fila;
         this.columna = columna;
+        this.value = value;
     }
 
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
+    public Simbol(Integer fila, Integer columna, Object value) {
+        this.fila = fila;
+        this.columna = columna;
+        this.value = value;
     }
 
     public int getFila() {
@@ -39,4 +41,11 @@ public class Simbol {
         this.columna = columna;
     }
 
+    public Object getValue() {
+        return value;
+    }
+
+    public void setValue(Object value) {
+        this.value = value;
+    }
 }

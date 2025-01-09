@@ -1,13 +1,11 @@
 package compiler.sintactic.Symbols;
 
-import compiler.sintactic.Symbols.Simbol.tipusDades;
-
 public class VariableConstant extends Simbol {
     private tipusDades tipus;
     private boolean esConstant;
 
-    public VariableConstant(String id, tipusDades tipus, boolean esConstant, int fila, int columna) {
-        super(id, fila, columna);
+    public VariableConstant(Object id, tipusDades tipus, boolean esConstant) {
+        super(id);
         this.tipus = tipus;
         this.esConstant = esConstant;
     }

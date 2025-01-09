@@ -2,15 +2,12 @@ package compiler.sintactic.Symbols;
 
 import java.util.ArrayList;
 
-import compiler.sintactic.Symbols.Simbol.tipusDades;
-
 public class Funcio extends Simbol {
     private ArrayList<VariableConstant> parametres;
     private tipusDades tipus;
 
-    public Funcio(String id, ArrayList<VariableConstant> parametres, tipusDades tipus, int fila,
-            int columna) {
-        super(id, fila, columna);
+    public Funcio(Object id, ArrayList<VariableConstant> parametres, tipusDades tipus) {
+        super(id);
         this.parametres = parametres;
         this.tipus = tipus;
     }

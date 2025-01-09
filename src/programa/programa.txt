@@ -1,2 +1,2 @@
-val x :: integer = 10;
-val x :: integer = 1;
+tuple x = {integer, logical};
+tuple x = {integer, logical};

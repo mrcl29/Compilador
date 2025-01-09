@@ -1,13 +1,11 @@
 package compiler.sintactic.Symbols;
 
-import compiler.sintactic.Symbols.Simbol.tipusDades;
-
 public class Tupla extends Simbol {
     private tipusDades valor1;
     private tipusDades valor2;
 
-    public Tupla(String id, tipusDades valor1, tipusDades valor2, int fila, int columna) {
-        super(id, fila, columna);
+    public Tupla(Object id, tipusDades valor1, tipusDades valor2) {
+        super(id);
         this.valor1 = valor1;
         this.valor2 = valor2;
     }
