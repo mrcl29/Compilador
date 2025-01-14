@@ -1,7 +1,6 @@
 package compiler.sintactic.Symbols;
 
 import java.util.ArrayList;
-import compiler.sintactic.Symbols.Simbol.tipusDades;
 
 public class TaulaSimbols {
     private ArrayList<Simbol> taulaSimbols;
@@ -10,63 +9,102 @@ public class TaulaSimbols {
         taulaSimbols = new ArrayList<Simbol>();
     }
 
-    public boolean declararVariableConstant(Object id, String tipus, boolean constant) throws Exception {
+    public boolean existeixSimbol(Object id) {
         Simbol simbol;
         for (int i = 0; i < taulaSimbols.size(); i++) {
             simbol = taulaSimbols.get(i);
-            if (simbol instanceof VariableConstant) {
-                if (simbol.getValue().equals(id)) {
-                    return false;
-                }
+            if (simbol.getValue().equals(id)) {
+                return true;
             }
         }
-        tipusDades aux = tipusDades.valueOf(tipus);
+        return false;
+    }
+
+    public boolean declararVariableConstant(Object id, String tipus, boolean constant) throws Exception {
+        if (existeixSimbol(id)) {
+            return false;
+        }
+        TipusDades aux = TipusDades.valueOf(tipus);
         taulaSimbols.add(new VariableConstant(id, aux, constant));
         return true;
     }
 
     public boolean declararTupla(Object id, String tipus1, String tipus2) throws Exception {
-        Simbol simbol;
-        for (int i = 0; i < taulaSimbols.size(); i++) {
-            simbol = taulaSimbols.get(i);
-            if (simbol instanceof Tupla) {
-                if (simbol.getValue().equals(id)) {
-                    return false;
-                }
-            }
+        if (existeixSimbol(id)) {
+            return false;
         }
-        tipusDades aux1 = tipusDades.valueOf(tipus1);
-        tipusDades aux2 = tipusDades.valueOf(tipus2);
+        TipusDades aux1 = TipusDades.valueOf(tipus1);
+        TipusDades aux2 = TipusDades.valueOf(tipus2);
         taulaSimbols.add(new Tupla(id, aux1, aux2));
         return true;
     }
 
-    public boolean declararFuncio(Object id, ArrayList<VariableConstant> parametres, String tipus) throws Exception {
-        Simbol simbol;
-        for (int i = 0; i < taulaSimbols.size(); i++) {
-            simbol = taulaSimbols.get(i);
-            if (simbol instanceof Funcio) {
-                if (simbol.getValue().equals(id)) {
-                    return false;
-                }
-            }
+    public boolean declararFuncio(Object id, ArrayList<Simbol> parametres, String tipus) throws Exception {
+        if (existeixSimbol(id)) {
+            return false;
         }
-        tipusDades aux = tipusDades.valueOf(tipus);
+        TipusDades aux = TipusDades.valueOf(tipus);
         taulaSimbols.add(new Funcio(id, parametres, aux));
         return true;
     }
 
-    public void usarVariableConstant(Object id, boolean assignacio) throws Exception {
-        VariableConstant simbol;
+    public TipusDades usarSimbol(Object id) {
+        Simbol simbol;
         for (int i = 0; i < taulaSimbols.size(); i++) {
-            simbol = (VariableConstant) taulaSimbols.get(i);
+            simbol = taulaSimbols.get(i);
             if (simbol.getValue().equals(id)) {
-                if (assignacio && simbol.isEsConstant()) {
-                    throw new Exception("No se puede assignar un valor nuevo a la constante '" + id + "'");
+                if (simbol instanceof VariableConstant) {
+                    VariableConstant aux = (VariableConstant) simbol;
+                    return aux.getTipus();
                 }
-                return;
+                if (simbol instanceof Tupla) {
+                    Tupla aux = (Tupla) simbol;
+                    return aux.getTipus(1);
+                }
+                if (simbol instanceof Funcio) {
+                    Funcio aux = (Funcio) simbol;
+                    return aux.getTipus();
+                }
+                return null;
             }
         }
-        throw new Exception("La variable o constante con id '" + id + "' no ha sido declarada");
+        return null;
     }
+
+    public VariableConstant usarVariableConstant(Object id) {
+        Simbol simbol;
+        for (int i = 0; i < taulaSimbols.size(); i++) {
+            simbol = taulaSimbols.get(i);
+            if (simbol instanceof VariableConstant && simbol.getValue().equals(id)) {
+                VariableConstant aux = (VariableConstant) simbol;
+                return aux;
+            }
+        }
+        return null;
+    }
+
+    public Tupla usarTupla(Object id) {
+        Simbol simbol;
+        for (int i = 0; i < taulaSimbols.size(); i++) {
+            simbol = taulaSimbols.get(i);
+            if (simbol instanceof Tupla && simbol.getValue().equals(id)) {
+                Tupla aux = (Tupla) simbol;
+                return aux;
+            }
+        }
+        return null;
+    }
+
+    public Funcio usarFuncio(Object id) {
+        Simbol simbol;
+        for (int i = 0; i < taulaSimbols.size(); i++) {
+            simbol = taulaSimbols.get(i);
+            if (simbol instanceof Funcio && simbol.getValue().equals(id)) {
+                Funcio aux = (Funcio) simbol;
+                return aux;
+            }
+        }
+        return null;
+    }
+
 }

@@ -3,28 +3,28 @@ package compiler.sintactic.Symbols;
 import java.util.ArrayList;
 
 public class Funcio extends Simbol {
-    private ArrayList<VariableConstant> parametres;
-    private tipusDades tipus;
+    private ArrayList<Simbol> parametres;
+    private TipusDades tipus;
 
-    public Funcio(Object id, ArrayList<VariableConstant> parametres, tipusDades tipus) {
+    public Funcio(Object id, ArrayList<Simbol> parametres, TipusDades tipus) {
         super(id);
         this.parametres = parametres;
         this.tipus = tipus;
     }
 
-    public ArrayList<VariableConstant> getParametres() {
+    public ArrayList<Simbol> getParametres() {
         return parametres;
     }
 
-    public void setParametres(ArrayList<VariableConstant> parametres) {
+    public void setParametres(ArrayList<Simbol> parametres) {
         this.parametres = parametres;
     }
 
-    public tipusDades getTipus() {
+    public TipusDades getTipus() {
         return tipus;
     }
 
-    public void setTipus(tipusDades tipus) {
+    public void setTipus(TipusDades tipus) {
         this.tipus = tipus;
     }
 

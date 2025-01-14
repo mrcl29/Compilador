@@ -13,8 +13,7 @@ import java_cup.runtime.*;
 import java.util.*;
 import java_cup.runtime.ComplexSymbolFactory.ComplexSymbol;
 import java_cup.runtime.ComplexSymbolFactory.Location;
-import compiler.sintactic.Symbols.TaulaSimbols;
-import compiler.sintactic.Symbols.Simbol;
+import compiler.sintactic.Symbols.*;
 
 class Parser;
 
@@ -27,9 +26,9 @@ parser code {:
 ***/
 
     TaulaSimbols taulaSimbols = new TaulaSimbols();
+    ArrayList<Simbol> parametres_decl_func = new ArrayList<Simbol>();
 
-    public boolean errorSemantic = false;
-    public boolean error_generico = false;
+    public boolean error_detectat = false;
 
     public boolean DEBUG = true;
     public void print_this(String msg){
@@ -56,7 +55,7 @@ parser code {:
         return false;
     }
 
-    public boolean declararFuncio(Object id, ArrayList<> parametres, String tipus){
+    public boolean declararFuncio(Object id, ArrayList<Simbol> parametres, String tipus){
         try{
             return taulaSimbols.declararFuncio(id, parametres, tipus);
         }catch(Exception e){
@@ -87,7 +86,7 @@ parser code {:
             ComplexSymbol token = (ComplexSymbol)info;
             Location l = token.getLeft();
 
-            System.err.println("Error en la linea " + l.getLine() + " y columna " + l.getColumn() + " --> " + t);
+            print_error("Error en la linea " + l.getLine() + " y columna " + l.getColumn() + " --> " + t);
         }else{
             print_error("info no es Symbol en report_error");
         }
@@ -107,7 +106,7 @@ parser code {:
         if(info instanceof Simbol){
             Simbol token = (Simbol) info;
 
-            System.err.println("Error semántico en la linea " + token.getFila() + " y columna " + token.getColumna() + " --> " + t);
+            print_error("Error semántico en la linea " + token.getFila() + " y columna " + token.getColumna() + " --> " + t);
         }else{
             print_error("info no es Symbol en semantic_error");
         }
@@ -115,21 +114,20 @@ parser code {:
     }
 
     /**
-    * Mètode per mostrar un error genèric
+    * Mètode per mostrar un error
     **/
     public void print_error(String msg){
-        error_generico = true;
-        print_this("Imprimiendo error genérico...");
+        error_detectat = true;
         System.err.println("Error--> " + msg);
         done_parsing();
     }
 :}
 
 /* Definición de terminales (tokens) */
-terminal fnct, endfnct, rtrn, val, con, if_t, else_t, endif, while_t, endwhile, for_t, to, endfor, in, out, tuple;
-terminal integer, logical;
-terminal assign, plus, minus, equal, not_equal, and, or;
-terminal lparen, rparen, colon, double_colon, semicolon, comma, lbrace, rbrace, lbracket, rbracket;
+terminal Simbol fnct, endfnct, rtrn, val, con, if_t, else_t, endif, while_t, endwhile, for_t, to, endfor, in, out, tuple;
+terminal Simbol integer, logical;
+terminal Simbol assign, plus, minus, equal, not_equal, and, or;
+terminal Simbol lparen, rparen, colon, double_colon, semicolon, comma, lbrace, rbrace, lbracket, rbracket;
 terminal Simbol integer_literal;
 terminal Simbol boolean_literal;
 terminal Simbol id;
@@ -151,103 +149,208 @@ start with S;
 
 S ::= P ;
 
-P ::= DECL P    {:  :}
-  | DECL        {:  :}
-  ;
+P ::= COS         {: :}
+    | FUNC_DECL P {: :}
+    | FUNC_DECL   {: :}
+    ;
 
-DECL ::= VAR_DECL   {:  :}
-      | CONS_DECL   {:  :}
-      | TUPLA_DECL  {:  :}
-      | FUNC_DECL   {:  :}
-      | SENT        {:  :}
+COS ::= SENT COS
+      | SENT
       ;
+
+SENT ::= DECL         {: :}
+       | ASIG_SENT    {: :}
+       | IF_SENT      {: :}
+       | WHILE_SENT   {: :}
+       | FOR_SENT     {: :}
+       | TUPLA_ASSIGN {: :}
+       | ENTR_SENT    {: :}
+       | SAL_SENT     {: :}
+       | CRID_FUNC    {: :}
+       ;
+
+DECL ::= VAR_DECL   {: :}
+       | CONS_DECL  {: :}
+       | TUPLA_DECL {: :}
+       ;
+
+ASIG_SENT ::= id:v1 assign EXP:v2 semicolon
+{:
+    if(!error_detectat){
+        VariableConstant aux = taulaSimbols.usarVariableConstant(v1.getValue());
+        if(aux != null){
+            if(!aux.isEsConstant()){
+                if(aux.getTipus().toString() != v2.toString()){
+                    print_this("Error semántico ASIG_SENT");
+                    String e = ("Se está intentando asignar un tipo incorrecto a la variable " + v1.getValue());
+                    semantic_error(e, v1);
+                }
+            }else{
+                print_this("Error semántico ASIG_SENT");
+                String e = ("Se esta intentando asignar un nuevo valor a la constante " + v1.getValue());
+                semantic_error(e, v1);
+            }
+        }else{
+            print_this("Error semántico ASIG_SENT");
+            String e = ("La variable " + v1.getValue() + " no ha sido declarada");
+            semantic_error(e, v1);
+        }
+    }
+:}
+;
+
+IF_SENT ::= if_t:v1 lparen EXP:v2 rparen colon COS else_t colon COS endif
+{:
+    if(!error_detectat){
+        if(v2 != TipusDades.BOOLEAN){
+            print_this("Error semántico IF_SENT");
+            String e = ("La condición de la sentencia 'if' no es correcta");
+            semantic_error(e, v1);
+        }
+    }
+:}
+          | if_t:v1 lparen EXP:v2 rparen colon COS endif
+{:
+    if(!error_detectat){
+        if(v2 != TipusDades.BOOLEAN){
+            print_this("Error semántico IF_SENT");
+            String e = ("La condición de la sentencia 'if' no es correcta");
+            semantic_error(e, v1);
+        }
+    }
+:}
+;
+
+WHILE_SENT ::= while_t:v1 lparen EXP:v2 rparen colon COS endwhile
+{:
+    if(!error_detectat){
+        if(v2 != TipusDades.BOOLEAN){
+            print_this("Error semántico WHILE_SENT");
+            String e = ("La condición de la sentencia 'while' no es correcta");
+            semantic_error(e, v1);
+        }
+    }
+:}
+;
+
+FOR_SENT ::= for_t:v1 FORINIT:v2 to FORLIMIT:v3 colon COS endfor
+{:
+    if(!error_detectat){
+        if(v2 != TipusDades.INTEGER || v3 != TipusDades.INTEGER){
+            print_this("Error semántico FOR_SENT");
+            String e = ("La condición de la sentencia 'for' no es correcta");
+            semantic_error(e, v1);
+        }
+    }
+:}
+;
+
+TUPLA_ASSIGN ::= TUPLA_ACCESS:v1 assign EXP:v2 semicolon
+{:
+    if(!error_detectat){
+        VariableConstant aux = (VariableConstant) v1;
+        if(aux.getTipus().toString() != v2.toString()){
+            print_this("Error semántico TUPLA_ASSIGN");
+            String e = ("A la tupla " + aux.getValue() + " se le esta asignando un tipo incorrecto.");
+            semantic_error(e, aux);
+        }
+    }
+:}
+;
+
+ENTR_SENT ::= in lparen TIPO rparen semicolon ;
+
+SAL_SENT ::= out lparen OUT_EXP rparen semicolon ;
+
+CRID_FUNC ::= id lparen ARGS rparen
+            | id lparen rparen
+            ;
+
+FUNC_DECL ::= fnct TIPO:v1 id:v2 lparen PARAM_LIST rparen colon COS FINAL_RTN endfnct
+{:
+    if(!error_detectat){
+        print_this("Declarando Función: '"+ v2.getValue() +"' de tipo '" + v1.toString() + "' y con los parámetros:");
+        for(int i = 0; i < parametres_decl_func.size(); i++){
+            VariableConstant aux = (VariableConstant)parametres_decl_func.get(i);
+            print_this(aux.toString());
+        }
+        error_detectat = !declararFuncio(v2.getValue(), parametres_decl_func, v1.toString());
+        parametres_decl_func = new ArrayList<Simbol>();
+        if(error_detectat){
+            print_this("Error semántico");
+            String e = ("Ya existe una función con el nombre '" + v2.getValue() + "'");
+            semantic_error(e, v2);
+        }else{
+            print_this("Función '" + v2.getValue() + " de tipo " + v1.toString() + " creada con éxito");
+        }
+    }
+:}
+            | fnct TIPO:v1 id:v2 lparen PARAM_LIST:v3 rparen colon FINAL_RTN endfnct
+            ;
 
 VAR_DECL ::= val id:v1 double_colon TIPO:v2 assign EXP semicolon
 {:
-    if(!errorSemantic && !error_generico){
+    if(!error_detectat){
         print_this("Declarando Variable '"+ v1.getValue() +"' de tipo '" + v2.toString() + "'");
-        errorSemantic = !declararVariableConstant(v1.getValue(), v2.toString(), false);
-        if(!error_generico){
-            if(errorSemantic){
-                print_this("Error semántico");
-                String e = ("Ya existe una variable o constante con el nombre '" + v1.getValue() + "'");
-                semantic_error(e, v1);
-            }else{
-                print_this("Variable '" + v1.getValue() + "' creada con éxito");
-            }
+        error_detectat = !declararVariableConstant(v1.getValue(), v2.toString(), false);
+        if(error_detectat){
+            print_this("Error semántico");
+            String e = ("Ya existe una variable o constante con el nombre '" + v1.getValue() + "'");
+            semantic_error(e, v1);
+        }else{
+            print_this("Variable '" + v1.getValue() + "' creada con éxito");
         }
     }
+
+    RESULT = new VariableConstant(v1.toString(), v2.toString(), false);
 :}
 ;
 
 CONS_DECL ::= con id:v1 double_colon TIPO:v2 assign EXP semicolon
 {:
-    if(!errorSemantic && !error_generico){
+    if(!error_detectat){
         print_this("Declarando Constante '"+ v1.getValue() +"' de tipo '" + v2.toString() + "'");
-        errorSemantic = !declararVariableConstant(v1.getValue(), v2.toString(), true);
-        if(!error_generico){
-            if(errorSemantic){
-                print_this("Error semántico");
-                String e = ("Ya existe una variable o constante con el nombre '" + v1.getValue() + "'");
-                semantic_error(e, v1);
-            }else{
-                print_this("Constante '" + v1.getValue() + "' creada con éxito");
-            }
+        error_detectat = !declararVariableConstant(v1.getValue(), v2.toString(), true);
+        if(error_detectat){
+            print_this("Error semántico");
+            String e = ("Ya existe una variable o constante con el nombre '" + v1.getValue() + "'");
+            semantic_error(e, v1);
+        }else{
+            print_this("Constante '" + v1.getValue() + "' creada con éxito");
         }
     }
+
+     RESULT = new VariableConstant(v1.toString(), v2.toString(), true);
 :}
 ;
 
 TUPLA_DECL ::= tuple id:v1 assign lbrace TIPO:v2 comma TIPO:v3 rbrace semicolon
 {:
-    if(!errorSemantic && !error_generico){
+    if(!error_detectat){
         print_this("Declarando Tupla: '"+ v1.getValue() +"' de [tipo1: "+ v2.toString() +", tipo2: "+ v3.toString() +"]");
-        errorSemantic = !declararTupla(v1.getValue(), v2.toString(), v3.toString());
-        if(!error_generico){
-            if(errorSemantic){
-                print_this("Error semántico");
-                String e = ("Ya existe una tupla con el nombre '" + v1.getValue() + "'");
-                semantic_error(e, v1);
-            }else{
-                print_this("Tupla '" + v1.getValue() + "["+ v2.toString() +", "+ v3.toString() +"]' creada con éxito");
-            }
+        error_detectat = !declararTupla(v1.getValue(), v2.toString(), v3.toString());
+        if(error_detectat){
+            print_this("Error semántico");
+            String e = ("Ya existe una tupla con el nombre '" + v1.getValue() + "'");
+            semantic_error(e, v1);
+        }else{
+            print_this("Tupla '" + v1.getValue() + "["+ v2.toString() +", "+ v3.toString() +"]' creada con éxito");
         }
     }
+
+    RESULT = new Tupla(v1.toString(), v2.toString(), v3.toString());
 :}
 ;
 
-FUNC_DECL ::= fnct TIPO id lparen PARAM_LIST rparen colon COS FINAL_RTN endfnct
-            | fnct TIPO id lparen PARAM_LIST rparen colon FINAL_RTN endfnct
-            ;
-
-PARAM_LIST ::= PARAM
-             | PARAM comma PARAM_LIST
-             | /* epsilon */ ;
-
-PARAM ::= id double_colon TIPO ;
-
-COS ::= SENT COS
-     | SENT ;
-
-FINAL_RTN ::= rtrn lparen EXP rparen semicolon ;
-
-SENT ::= ASIG_SENT
-      | IF_SENT
-      | WHILE_SENT
-      | FOR_SENT
-      | TUPLA_ASSIGN
-      | ENTR_SENT
-      | SAL_SENT
-      | CRID_FUNC ;
-
-ASIG_SENT ::= id assign EXP semicolon ;
-
-IF_SENT ::= if_t lparen EXP rparen colon COS else_t colon COS endif
-         | if_t lparen EXP rparen colon COS endif ;
-
-WHILE_SENT ::= while_t lparen EXP rparen colon COS endwhile ;
-
-FOR_SENT ::= for_t FORINIT to FORLIMIT colon COS endfor ;
+EXP ::= LOG_TERM
+      | ARIT_TERM
+      | CRID_FUNC
+      | id
+      | TUPLA_ACCESS
+      | LIT
+      | ENTR_FUNC
+      | SAL_FUNC
+      ;
 
 FORINIT ::= VAR_DECL
          | EXP ;
@@ -255,69 +358,76 @@ FORINIT ::= VAR_DECL
 FORLIMIT ::= CONS_DECL
            | EXP ;
 
-TUPLA_ASSIGN ::= TUPLA_ACCESS assign EXP semicolon ;
+TUPLA_ACCESS ::= id:v1 lbracket integer_literal:v2 rbracket
+{:
+    if(!error_detectat){
+        Tupla aux = taulaSimbols.usarTupla(v1.getValue());
+        if(aux != null){
+            Integer index = (Integer) v2.getValue();
+            if(index == 0 || index == 1){
+                RESULT = new VariableConstant(v1.getValue(), aux.getTipus(index), false, v1.getFila(), v1.getColumna());
+            }else{
+                print_this("Error semántico TUPLA_ACCESS");
+                String e = ("El índice '" + index + "' de la tupla " + v1.getValue() + " no es correcto. Los índices de tupla solo permíten 0 o 1.");
+                semantic_error(e, v1);
+            }
+        }else{
+            print_this("Error semántico TUPLA_ACCESS");
+                String e = ("La tupla " + v1.getValue() + " no ha sido declarada.");
+                semantic_error(e, v1);
+        }
+    }
+:}
+;
 
-ENTR_SENT ::= in lparen TIPO rparen semicolon ;
+TIPO ::= integer {: RESULT = TipusDades.INTEGER; :}
+       | logical {: RESULT = TipusDades.BOOLEAN; :}
+       ;
 
-SAL_SENT ::= out lparen OUT_EXP rparen semicolon ;
-
-ENTR_FUNC ::= in lparen TIPO rparen ;
-
-SAL_FUNC ::= out lparen OUT_EXP rparen ;
-
-OUT_EXP ::= id
+OUT_EXP ::= id          {:  :}
           | CRID_FUNC
           | ARIT_TERM
           | LOG_TERM ;
 
-CRID_FUNC ::= id lparen ARGS rparen
-           | id lparen rparen ;
-
 ARGS ::= EXP ARGS_LIST ;
 
-ARGS_LIST ::= comma EXP ARGS_LIST
-            | /* epsilon */ ;
+PARAM_LIST ::= PARAM:v {: :}
+             | PARAM comma PARAM_LIST {: :}
+             | /* epsilon */
+             ;
 
-TIPO ::= integer {: RESULT = "INTEGER"; :}
-       | logical {: RESULT = "BOOLEAN"; :}
-;
-
-EXP ::= LOG_TERM
-     | ARIT_TERM
-     | CRID_FUNC
-     | id
-     | TUPLA_ACCESS
-     | LIT
-     | ENTR_FUNC
-     | SAL_FUNC ;
-
-ARIT_TERM ::= ARIT_FACTOR ARIT_TERM_REST ;
-
-ARIT_TERM_REST ::= plus ARIT_FACTOR ARIT_TERM_REST
-                 | minus ARIT_FACTOR ARIT_TERM_REST
-                 | /* epsilon */ ;
-
-ARIT_FACTOR ::= lparen EXP rparen
-              | POS_ENT_LIT ;
+FINAL_RTN ::= rtrn lparen EXP rparen semicolon;
 
 LOG_TERM ::= EXP equal EXP
            | EXP not_equal EXP
            | EXP and EXP
            | EXP or EXP ;
 
-TUPLA_ACCESS ::= id:v1 lbracket integer_literal:v2 rbracket
-{:
-RESULT = (String) v1.getValue();
-RESULT = "[";
-RESULT = (Integer) v2.getValue();
-RESULT = "]";
-:};
+ARIT_TERM ::= ARIT_FACTOR ARIT_TERM_REST ;
 
-LIT ::= NEG_ENT_LIT
-     | BOL_LIT ;
+LIT ::= NEG_ENT_LIT:v {: RESULT = v; :}
+     | BOL_LIT:v      {: RESULT = v; :}
+     ;
 
-POS_ENT_LIT ::= integer_literal:v {: RESULT = (Integer)v.getValue(); :};
+ENTR_FUNC ::= in lparen TIPO rparen ;
+
+SAL_FUNC ::= out lparen OUT_EXP rparen ;
+
+ARGS_LIST ::= comma EXP ARGS_LIST
+            | /* epsilon */ ;
+
+PARAM ::= id:v1 double_colon TIPO:v2 {: RESULT = parametres_decl_func.add(new VariableConstant(v1.getValue(), v2.toString(), false)); :};
+
+ARIT_FACTOR ::= lparen EXP rparen
+              | POS_ENT_LIT:v     {: RESULT = v; :}
+              ;
+
+ARIT_TERM_REST ::= plus ARIT_FACTOR ARIT_TERM_REST
+                 | minus ARIT_FACTOR ARIT_TERM_REST
+                 | /* epsilon */ ;
 
 NEG_ENT_LIT ::= minus integer_literal:v {: RESULT = -1*(Integer)v.getValue(); :};
 
 BOL_LIT ::= boolean_literal:v {: RESULT = v.getValue(); :};
+
+POS_ENT_LIT ::= integer_literal:v {: RESULT = (Integer)v.getValue(); :};

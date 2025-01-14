@@ -1,11 +1,8 @@
 package compiler.sintactic.Symbols;
 
 public class Simbol {
-    public static enum tipusDades {
-        INTEGER, BOOLEAN
-    }
 
-    private Object value;
+    public Object value;
     private Integer fila;
     private Integer columna;
 
