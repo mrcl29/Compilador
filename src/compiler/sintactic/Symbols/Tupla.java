@@ -4,14 +4,20 @@ public class Tupla extends Simbol {
     private TipusDades valor1;
     private TipusDades valor2;
 
+    public Tupla() {
+        super("", TipusDades.NULL);
+        valor1 = TipusDades.NULL;
+        valor2 = TipusDades.NULL;
+    }
+
     public Tupla(Object id, TipusDades valor1, TipusDades valor2) {
-        super(id);
+        super(id, TipusDades.NULL);
         this.valor1 = valor1;
         this.valor2 = valor2;
     }
 
     public Tupla(Object id, String valor1, String valor2) {
-        super(id);
+        super(id, TipusDades.NULL);
         this.valor1 = TipusDades.valueOf(valor1);
         this.valor2 = TipusDades.valueOf(valor2);
     }

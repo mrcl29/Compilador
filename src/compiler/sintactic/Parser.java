@@ -455,42 +455,14 @@ public class Parser extends java_cup.runtime.lr_parser {
 ***/
 
     TaulaSimbols taulaSimbols = new TaulaSimbols();
-    ArrayList<Simbol> parametres_decl_func = new ArrayList<Simbol>();
 
     public boolean error_detectat = false;
 
     public boolean DEBUG = true;
-    public void print_this(String msg){
+    public void print_this(Object msg){
         if(DEBUG){
             System.out.println(msg);
         }
-    }
-
-    public boolean declararVariableConstant(Object id, String tipus, boolean constant){
-        try{
-            return taulaSimbols.declararVariableConstant(id, tipus, constant);
-        }catch(Exception e){
-            System.err.println(e);
-        }
-        return false;
-    }
-
-    public boolean declararTupla(Object id, String tipus1, String tipus2){
-        try{
-            return taulaSimbols.declararTupla(id, tipus1, tipus2);
-        }catch(Exception e){
-            System.err.println(e);
-        }
-        return false;
-    }
-
-    public boolean declararFuncio(Object id, ArrayList<Simbol> parametres, String tipus){
-        try{
-            return taulaSimbols.declararFuncio(id, parametres, tipus);
-        }catch(Exception e){
-            System.err.println(e);
-        }
-        return false;
     }
 
     /**************************************************************
@@ -603,7 +575,7 @@ class CUP$Parser$actions {
           case 2: // P ::= COS 
             {
               Object RESULT =null;
-		 
+
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("P",1, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -612,7 +584,7 @@ class CUP$Parser$actions {
           case 3: // P ::= FUNC_DECL P 
             {
               Object RESULT =null;
-		 
+
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("P",1, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -621,7 +593,7 @@ class CUP$Parser$actions {
           case 4: // P ::= FUNC_DECL 
             {
               Object RESULT =null;
-		 
+
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("P",1, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -648,7 +620,7 @@ class CUP$Parser$actions {
           case 7: // SENT ::= DECL 
             {
               Object RESULT =null;
-		 
+
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("SENT",11, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -657,7 +629,7 @@ class CUP$Parser$actions {
           case 8: // SENT ::= ASIG_SENT 
             {
               Object RESULT =null;
-		 
+
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("SENT",11, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -666,7 +638,7 @@ class CUP$Parser$actions {
           case 9: // SENT ::= IF_SENT 
             {
               Object RESULT =null;
-		 
+
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("SENT",11, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -675,7 +647,7 @@ class CUP$Parser$actions {
           case 10: // SENT ::= WHILE_SENT 
             {
               Object RESULT =null;
-		 
+
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("SENT",11, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -684,7 +656,7 @@ class CUP$Parser$actions {
           case 11: // SENT ::= FOR_SENT 
             {
               Object RESULT =null;
-		 
+
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("SENT",11, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -693,7 +665,7 @@ class CUP$Parser$actions {
           case 12: // SENT ::= TUPLA_ASSIGN 
             {
               Object RESULT =null;
-		 
+
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("SENT",11, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -702,7 +674,7 @@ class CUP$Parser$actions {
           case 13: // SENT ::= ENTR_SENT 
             {
               Object RESULT =null;
-		 
+
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("SENT",11, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -711,7 +683,7 @@ class CUP$Parser$actions {
           case 14: // SENT ::= SAL_SENT 
             {
               Object RESULT =null;
-		 
+
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("SENT",11, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -720,7 +692,7 @@ class CUP$Parser$actions {
           case 15: // SENT ::= CRID_FUNC 
             {
               Object RESULT =null;
-		 
+
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("SENT",11, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -729,7 +701,7 @@ class CUP$Parser$actions {
           case 16: // DECL ::= VAR_DECL 
             {
               Object RESULT =null;
-		 
+
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("DECL",2, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -738,7 +710,7 @@ class CUP$Parser$actions {
           case 17: // DECL ::= CONS_DECL 
             {
               Object RESULT =null;
-		 
+
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("DECL",2, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -747,7 +719,7 @@ class CUP$Parser$actions {
           case 18: // DECL ::= TUPLA_DECL 
             {
               Object RESULT =null;
-		 
+
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("DECL",2, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -763,11 +735,12 @@ class CUP$Parser$actions {
 		int v2right = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)).right;
 		Object v2 = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-1)).value;
 		
-    if(!error_detectat){
-        VariableConstant aux = taulaSimbols.usarVariableConstant(v1.getValue());
-        if(aux != null){
-            if(!aux.isEsConstant()){
-                if(aux.getTipus().toString() != v2.toString()){
+    if(!error_detectat ){
+        VariableConstant aux_v1 = taulaSimbols.usarVariableConstant(v1.getValue());
+        Simbol aux_v2 = (Simbol) v2;
+        if(aux_v1.getValue() != ""){
+            if(!aux_v1.isEsConstant()){
+                if(aux_v1.getTipus() != aux_v2.getTipus()){
                     print_this("Error semántico ASIG_SENT");
                     String e = ("Se está intentando asignar un tipo incorrecto a la variable " + v1.getValue());
                     semantic_error(e, v1);
@@ -800,7 +773,8 @@ class CUP$Parser$actions {
 		Object v2 = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-7)).value;
 		
     if(!error_detectat){
-        if(v2 != TipusDades.BOOLEAN){
+        Simbol aux_v2 = (Simbol) v2;
+        if(aux_v2.getTipus() != TipusDades.BOOLEAN){
             print_this("Error semántico IF_SENT");
             String e = ("La condición de la sentencia 'if' no es correcta");
             semantic_error(e, v1);
@@ -823,7 +797,8 @@ class CUP$Parser$actions {
 		Object v2 = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-4)).value;
 		
     if(!error_detectat){
-        if(v2 != TipusDades.BOOLEAN){
+        Simbol aux_v2 = (Simbol) v2;
+        if(aux_v2.getTipus() != TipusDades.BOOLEAN){
             print_this("Error semántico IF_SENT");
             String e = ("La condición de la sentencia 'if' no es correcta");
             semantic_error(e, v1);
@@ -846,7 +821,8 @@ class CUP$Parser$actions {
 		Object v2 = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-4)).value;
 		
     if(!error_detectat){
-        if(v2 != TipusDades.BOOLEAN){
+        Simbol aux_v2 = (Simbol) v2;
+        if(aux_v2.getTipus() != TipusDades.BOOLEAN){
             print_this("Error semántico WHILE_SENT");
             String e = ("La condición de la sentencia 'while' no es correcta");
             semantic_error(e, v1);
@@ -872,7 +848,9 @@ class CUP$Parser$actions {
 		Object v3 = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-3)).value;
 		
     if(!error_detectat){
-        if(v2 != TipusDades.INTEGER || v3 != TipusDades.INTEGER){
+        Simbol aux_v2 = (Simbol) v2;
+        Simbol aux_v3 = (Simbol) v3;
+        if(aux_v2.getTipus() != TipusDades.INTEGER || aux_v3.getTipus() != TipusDades.INTEGER){
             print_this("Error semántico FOR_SENT");
             String e = ("La condición de la sentencia 'for' no es correcta");
             semantic_error(e, v1);
@@ -895,11 +873,13 @@ class CUP$Parser$actions {
 		Object v2 = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-1)).value;
 		
     if(!error_detectat){
-        VariableConstant aux = (VariableConstant) v1;
-        if(aux.getTipus().toString() != v2.toString()){
+        Tupla aux_v1 = (Tupla) v1;
+        Simbol aux_v2 = (Simbol) v2;
+        print_this("Asignando valor a Tupla: "+ aux_v1.getValue());
+        if(aux_v1.getTipus() != aux_v2.getTipus()){
             print_this("Error semántico TUPLA_ASSIGN");
-            String e = ("A la tupla " + aux.getValue() + " se le esta asignando un tipo incorrecto.");
-            semantic_error(e, aux);
+            String e = ("A la tupla " + aux_v1.getValue() + " se le esta asignando un tipo incorrecto.");
+            semantic_error(e, aux_v1);
         }
     }
 
@@ -911,7 +891,10 @@ class CUP$Parser$actions {
           case 25: // ENTR_SENT ::= in lparen TIPO rparen semicolon 
             {
               Object RESULT =null;
-
+		int v1left = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)).left;
+		int v1right = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)).right;
+		Object v1 = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-2)).value;
+		 RESULT = v1; 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("ENTR_SENT",19, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-4)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -920,7 +903,10 @@ class CUP$Parser$actions {
           case 26: // SAL_SENT ::= out lparen OUT_EXP rparen semicolon 
             {
               Object RESULT =null;
-
+		int v1left = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)).left;
+		int v1right = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)).right;
+		Object v1 = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-2)).value;
+		 RESULT = v1; 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("SAL_SENT",20, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-4)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -929,6 +915,31 @@ class CUP$Parser$actions {
           case 27: // CRID_FUNC ::= id lparen ARGS rparen 
             {
               Object RESULT =null;
+		int v1left = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-3)).left;
+		int v1right = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-3)).right;
+		Simbol v1 = (Simbol)((java_cup.runtime.Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-3)).value;
+		int v2left = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)).left;
+		int v2right = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)).right;
+		Object v2 = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-1)).value;
+		
+    if(!error_detectat){
+        ArrayList<TipusDades> aux_v2 = (ArrayList<TipusDades>) v2;
+        print_this("Llamando a Función: "+ v1.getValue());
+        Funcio aux = taulaSimbols.usarFuncio(v1);
+        if(aux.getValue() != ""){
+            if(aux.mateixosParametres(aux_v2)){
+                RESULT = aux;
+            }else{
+                print_this("Error semántico CRID_FUNC");
+                String e = ("A la funcion " + v1.getValue() + " no se le estan pasando los parámetros correctos");
+                semantic_error(e, v1);
+            }
+        }else{
+            print_this("Error semántico CRID_FUNC");
+            String e = ("La funcion " + v1.getValue() + " no ha sido creada");
+            semantic_error(e, v1);
+        }
+    }
 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("CRID_FUNC",21, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-3)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
@@ -938,6 +949,21 @@ class CUP$Parser$actions {
           case 28: // CRID_FUNC ::= id lparen rparen 
             {
               Object RESULT =null;
+		int v1left = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)).left;
+		int v1right = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)).right;
+		Simbol v1 = (Simbol)((java_cup.runtime.Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-2)).value;
+		
+    if(!error_detectat){
+        print_this("Llamando a Función: "+ v1.getValue());
+        Funcio aux = taulaSimbols.usarFuncio(v1);
+        if(aux.getValue() != ""){
+            RESULT = aux;
+        }else{
+            print_this("Error semántico CRID_FUNC");
+            String e = ("La funcion " + v1.getValue() + " no ha sido creada");
+            semantic_error(e, v1);
+        }
+    }
 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("CRID_FUNC",21, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
@@ -953,21 +979,34 @@ class CUP$Parser$actions {
 		int v2left = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-7)).left;
 		int v2right = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-7)).right;
 		Simbol v2 = (Simbol)((java_cup.runtime.Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-7)).value;
+		int v3left = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-5)).left;
+		int v3right = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-5)).right;
+		Object v3 = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-5)).value;
+		int v4left = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)).left;
+		int v4right = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)).right;
+		Object v4 = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-1)).value;
 		
     if(!error_detectat){
         print_this("Declarando Función: '"+ v2.getValue() +"' de tipo '" + v1.toString() + "' y con los parámetros:");
-        for(int i = 0; i < parametres_decl_func.size(); i++){
-            VariableConstant aux = (VariableConstant)parametres_decl_func.get(i);
-            print_this(aux.toString());
+        ArrayList<VariableConstant> aux = (ArrayList<VariableConstant>) v3;
+        for(int i = 0; i < aux.size() && !error_detectat; i++){
+            print_this(aux.get(i).toString());
+            error_detectat = !taulaSimbols.declararVariableConstant(aux.get(i), v2.toString());
+            if(error_detectat){
+                print_this("Error semántico FUNC_DECL");
+                String e = ("Ya existe una variable con el nombre "+ aux.get(i).getValue());
+                semantic_error(e, v2);
+            }
         }
-        error_detectat = !declararFuncio(v2.getValue(), parametres_decl_func, v1.toString());
-        parametres_decl_func = new ArrayList<Simbol>();
-        if(error_detectat){
-            print_this("Error semántico");
-            String e = ("Ya existe una función con el nombre '" + v2.getValue() + "'");
-            semantic_error(e, v2);
-        }else{
-            print_this("Función '" + v2.getValue() + " de tipo " + v1.toString() + " creada con éxito");
+        if(!error_detectat){
+            error_detectat = !taulaSimbols.declararFuncio(v2.getValue(), aux, v1.toString());
+            if(error_detectat){
+                print_this("Error semántico FUNC_DECL");
+                String e = ("Ya existe una función con el nombre '" + v2.getValue() + "'");
+                semantic_error(e, v2);
+            }else{
+                print_this("Función '" + v2.getValue() + " de tipo " + v1.toString() + " creada con éxito");
+            }
         }
     }
 
@@ -1006,17 +1045,19 @@ class CUP$Parser$actions {
 		
     if(!error_detectat){
         print_this("Declarando Variable '"+ v1.getValue() +"' de tipo '" + v2.toString() + "'");
-        error_detectat = !declararVariableConstant(v1.getValue(), v2.toString(), false);
+        VariableConstant aux = new VariableConstant(v1.getValue(), (TipusDades) v2, false);
+        error_detectat = !taulaSimbols.declararVariableConstant(aux);
         if(error_detectat){
-            print_this("Error semántico");
+            print_this("Error semántico VAR_DECL");
             String e = ("Ya existe una variable o constante con el nombre '" + v1.getValue() + "'");
             semantic_error(e, v1);
         }else{
             print_this("Variable '" + v1.getValue() + "' creada con éxito");
+            RESULT = aux;
         }
+    }else{
+        RESULT = new VariableConstant();
     }
-
-    RESULT = new VariableConstant(v1.toString(), v2.toString(), false);
 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("VAR_DECL",3, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-6)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
@@ -1035,17 +1076,19 @@ class CUP$Parser$actions {
 		
     if(!error_detectat){
         print_this("Declarando Constante '"+ v1.getValue() +"' de tipo '" + v2.toString() + "'");
-        error_detectat = !declararVariableConstant(v1.getValue(), v2.toString(), true);
+        VariableConstant aux = new VariableConstant(v1.getValue(), (TipusDades) v2, true);
+        error_detectat = !taulaSimbols.declararVariableConstant(aux);
         if(error_detectat){
-            print_this("Error semántico");
+            print_this("Error semántico CONS_DECL");
             String e = ("Ya existe una variable o constante con el nombre '" + v1.getValue() + "'");
             semantic_error(e, v1);
         }else{
             print_this("Constante '" + v1.getValue() + "' creada con éxito");
+            RESULT = aux;
         }
+    }else{
+        RESULT = new VariableConstant();
     }
-
-     RESULT = new VariableConstant(v1.toString(), v2.toString(), true);
 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("CONS_DECL",4, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-6)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
@@ -1067,17 +1110,19 @@ class CUP$Parser$actions {
 		
     if(!error_detectat){
         print_this("Declarando Tupla: '"+ v1.getValue() +"' de [tipo1: "+ v2.toString() +", tipo2: "+ v3.toString() +"]");
-        error_detectat = !declararTupla(v1.getValue(), v2.toString(), v3.toString());
+        Tupla aux = new Tupla(v1.getValue(), (TipusDades) v2, (TipusDades) v3);
+        error_detectat = !taulaSimbols.declararTupla(aux);
         if(error_detectat){
-            print_this("Error semántico");
+            print_this("Error semántico TUPLA_DECL");
             String e = ("Ya existe una tupla con el nombre '" + v1.getValue() + "'");
             semantic_error(e, v1);
         }else{
             print_this("Tupla '" + v1.getValue() + "["+ v2.toString() +", "+ v3.toString() +"]' creada con éxito");
+            RESULT = aux;
         }
+    }else{
+        RESULT = new Tupla();
     }
-
-    RESULT = new Tupla(v1.toString(), v2.toString(), v3.toString());
 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("TUPLA_DECL",5, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-8)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
@@ -1114,7 +1159,10 @@ class CUP$Parser$actions {
           case 37: // EXP ::= id 
             {
               Object RESULT =null;
-
+		int v1left = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).left;
+		int v1right = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
+		Simbol v1 = (Simbol)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
+		 RESULT = taulaSimbols.usarSimbol(v1.getValue()); 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("EXP",25, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -1203,11 +1251,13 @@ class CUP$Parser$actions {
 		Simbol v2 = (Simbol)((java_cup.runtime.Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-1)).value;
 		
     if(!error_detectat){
+        print_this("Accediendo a la Tupla: " + v1.getValue() + "(" + v2.getValue() + ")");
         Tupla aux = taulaSimbols.usarTupla(v1.getValue());
-        if(aux != null){
+        if(aux.getValue() != ""){
             Integer index = (Integer) v2.getValue();
             if(index == 0 || index == 1){
-                RESULT = new VariableConstant(v1.getValue(), aux.getTipus(index), false, v1.getFila(), v1.getColumna());
+                aux.setTipus(aux.getTipus(index));
+                RESULT = aux;
             }else{
                 print_this("Error semántico TUPLA_ACCESS");
                 String e = ("El índice '" + index + "' de la tupla " + v1.getValue() + " no es correcto. Los índices de tupla solo permíten 0 o 1.");
@@ -1215,9 +1265,11 @@ class CUP$Parser$actions {
             }
         }else{
             print_this("Error semántico TUPLA_ACCESS");
-                String e = ("La tupla " + v1.getValue() + " no ha sido declarada.");
-                semantic_error(e, v1);
+            String e = ("La tupla " + v1.getValue() + " no ha sido declarada.");
+            semantic_error(e, v1);
         }
+    } else {
+        RESULT = new Tupla();
     }
 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("TUPLA_ACCESS",30, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-3)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
@@ -1228,7 +1280,7 @@ class CUP$Parser$actions {
           case 47: // TIPO ::= integer 
             {
               Object RESULT =null;
-		 RESULT = TipusDades.INTEGER; 
+		 RESULT = new Simbol("", TipusDades.INTEGER); 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("TIPO",24, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -1237,7 +1289,7 @@ class CUP$Parser$actions {
           case 48: // TIPO ::= logical 
             {
               Object RESULT =null;
-		 RESULT = TipusDades.BOOLEAN; 
+		 RESULT = new Simbol("", TipusDades.BOOLEAN); 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("TIPO",24, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -1246,7 +1298,10 @@ class CUP$Parser$actions {
           case 49: // OUT_EXP ::= id 
             {
               Object RESULT =null;
-		  
+		int v1left = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).left;
+		int v1right = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
+		Simbol v1 = (Simbol)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
+		 RESULT = taulaSimbols.usarSimbol(v1.getValue()); 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("OUT_EXP",35, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -1282,6 +1337,21 @@ class CUP$Parser$actions {
           case 53: // ARGS ::= EXP ARGS_LIST 
             {
               Object RESULT =null;
+		int v1left = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)).left;
+		int v1right = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)).right;
+		Object v1 = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-1)).value;
+		int v2left = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).left;
+		int v2right = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
+		Object v2 = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
+		
+    if(!error_detectat){
+        Simbol aux_v1 = (Simbol) v1;
+        ArrayList<TipusDades> aux_v2 = (ArrayList<TipusDades>) v2;
+        aux_v2.add(0, aux_v1.getTipus());
+        RESULT = aux_v2;
+    }else{
+        RESULT = new ArrayList<TipusDades>();
+    }
 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("ARGS",22, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
@@ -1291,10 +1361,10 @@ class CUP$Parser$actions {
           case 54: // PARAM_LIST ::= PARAM 
             {
               Object RESULT =null;
-		int vleft = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).left;
-		int vright = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
-		Object v = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
-		 
+		int v1left = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).left;
+		int v1right = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
+		Object v1 = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
+		 RESULT = new ArrayList<VariableConstant>(Arrays.asList((VariableConstant) v1)); 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("PARAM_LIST",7, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -1303,7 +1373,22 @@ class CUP$Parser$actions {
           case 55: // PARAM_LIST ::= PARAM comma PARAM_LIST 
             {
               Object RESULT =null;
-		 
+		int v1left = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)).left;
+		int v1right = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)).right;
+		Object v1 = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-2)).value;
+		int v2left = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).left;
+		int v2right = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
+		Object v2 = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
+		
+    if(!error_detectat){
+        VariableConstant aux_v1 = (VariableConstant) v1;
+        ArrayList<VariableConstant> aux_v2 = (ArrayList<VariableConstant>) v2;
+        aux_v2.add(0, aux_v1);
+        RESULT = aux_v2;
+    }else{
+        RESULT = new ArrayList<VariableConstant>();
+    }
+
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("PARAM_LIST",7, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -1312,7 +1397,7 @@ class CUP$Parser$actions {
           case 56: // PARAM_LIST ::= 
             {
               Object RESULT =null;
-
+		 RESULT = new ArrayList<TipusDades>(); 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("PARAM_LIST",7, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -1321,7 +1406,10 @@ class CUP$Parser$actions {
           case 57: // FINAL_RTN ::= rtrn lparen EXP rparen semicolon 
             {
               Object RESULT =null;
-
+		int v1left = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)).left;
+		int v1right = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)).right;
+		Object v1 = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-2)).value;
+		 RESULT = v1; 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("FINAL_RTN",10, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-4)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -1330,6 +1418,26 @@ class CUP$Parser$actions {
           case 58: // LOG_TERM ::= EXP equal EXP 
             {
               Object RESULT =null;
+		int v1left = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)).left;
+		int v1right = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)).right;
+		Object v1 = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-2)).value;
+		int v2left = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).left;
+		int v2right = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
+		Object v2 = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
+		
+    if(!error_detectat){
+        Simbol aux_v1 = (Simbol) v1;
+        Simbol aux_v2 = (Simbol) v2;
+        if(aux_v1.getTipus() == aux_v2.getTipus()){
+            RESULT = aux_v1;
+        }else{
+            print_this("Error semántico LOG_TERM");
+            String e = (aux_v1.getValue() + " no es del mismo tipo que " + aux_v2.getValue());
+            semantic_error(e, aux_v1);
+        }
+    }else{
+        RESULT = new Simbol();
+    }
 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("LOG_TERM",29, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
@@ -1339,6 +1447,26 @@ class CUP$Parser$actions {
           case 59: // LOG_TERM ::= EXP not_equal EXP 
             {
               Object RESULT =null;
+		int v1left = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)).left;
+		int v1right = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)).right;
+		Object v1 = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-2)).value;
+		int v2left = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).left;
+		int v2right = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
+		Object v2 = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
+		
+    if(!error_detectat){
+        Simbol aux_v1 = (Simbol) v1;
+        Simbol aux_v2 = (Simbol) v2;
+        if(aux_v1.getTipus() == aux_v2.getTipus()){
+            RESULT = aux_v1;
+        }else{
+            print_this("Error semántico LOG_TERM");
+            String e = (aux_v1.getValue() + " no es del mismo tipo que " + aux_v2.getValue());
+            semantic_error(e, aux_v1);
+        }
+    }else{
+        RESULT = new Simbol();
+    }
 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("LOG_TERM",29, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
@@ -1348,7 +1476,12 @@ class CUP$Parser$actions {
           case 60: // LOG_TERM ::= EXP and EXP 
             {
               Object RESULT =null;
-
+		int v1left = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)).left;
+		int v1right = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)).right;
+		Object v1 = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-2)).value;
+		 Simbol aux_v1 = (Simbol) v1;
+                               aux_v1.setTipus(TipusDades.BOOLEAN);
+                               RESULT = aux_v1; 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("LOG_TERM",29, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -1357,7 +1490,12 @@ class CUP$Parser$actions {
           case 61: // LOG_TERM ::= EXP or EXP 
             {
               Object RESULT =null;
-
+		int v1left = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)).left;
+		int v1right = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)).right;
+		Object v1 = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-2)).value;
+		 Simbol aux_v1 = (Simbol) v1;
+                               aux_v1.setTipus(TipusDades.BOOLEAN);
+                               RESULT = aux_v1; 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("LOG_TERM",29, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -1366,6 +1504,26 @@ class CUP$Parser$actions {
           case 62: // ARIT_TERM ::= ARIT_FACTOR ARIT_TERM_REST 
             {
               Object RESULT =null;
+		int v1left = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)).left;
+		int v1right = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)).right;
+		Object v1 = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-1)).value;
+		int v2left = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).left;
+		int v2right = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
+		Object v2 = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
+		
+    if(!error_detectat){
+        Simbol aux_v1 = (Simbol) v1;
+        Simbol aux_v2 = (Simbol) v2;
+        if(aux_v1.getTipus() == aux_v2.getTipus()){
+            RESULT = aux_v1;
+        }else{
+            print_this("Error semántico ARIT_TERM");
+            String e = (aux_v1.getValue() + " no es del mismo tipo que " + aux_v2.getValue());
+            semantic_error(e, aux_v1);
+        }
+    }else{
+        RESULT = new Simbol();
+    }
 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("ARIT_TERM",26, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
@@ -1375,10 +1533,7 @@ class CUP$Parser$actions {
           case 63: // LIT ::= NEG_ENT_LIT 
             {
               Object RESULT =null;
-		int vleft = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).left;
-		int vright = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
-		Object v = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
-		 RESULT = v; 
+
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("LIT",31, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -1387,10 +1542,7 @@ class CUP$Parser$actions {
           case 64: // LIT ::= BOL_LIT 
             {
               Object RESULT =null;
-		int vleft = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).left;
-		int vright = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
-		Object v = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
-		 RESULT = v; 
+
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("LIT",31, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -1399,7 +1551,10 @@ class CUP$Parser$actions {
           case 65: // ENTR_FUNC ::= in lparen TIPO rparen 
             {
               Object RESULT =null;
-
+		int v1left = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)).left;
+		int v1right = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)).right;
+		Object v1 = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-1)).value;
+		 RESULT = v1; 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("ENTR_FUNC",36, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-3)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -1408,7 +1563,10 @@ class CUP$Parser$actions {
           case 66: // SAL_FUNC ::= out lparen OUT_EXP rparen 
             {
               Object RESULT =null;
-
+		int v1left = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)).left;
+		int v1right = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)).right;
+		Object v1 = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-1)).value;
+		 RESULT = v1; 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("SAL_FUNC",37, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-3)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -1417,6 +1575,21 @@ class CUP$Parser$actions {
           case 67: // ARGS_LIST ::= comma EXP ARGS_LIST 
             {
               Object RESULT =null;
+		int v1left = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)).left;
+		int v1right = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)).right;
+		Object v1 = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-1)).value;
+		int v2left = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).left;
+		int v2right = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
+		Object v2 = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
+		
+    if(!error_detectat){
+        Simbol aux_v1 = (Simbol) v1;
+        ArrayList<TipusDades> aux_v2 = (ArrayList<TipusDades>) v2;
+        aux_v2.add(0, aux_v1.getTipus());
+        RESULT = aux_v2;
+    }else{
+        RESULT = new ArrayList<TipusDades>();
+    }
 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("ARGS_LIST",23, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
@@ -1426,7 +1599,7 @@ class CUP$Parser$actions {
           case 68: // ARGS_LIST ::= 
             {
               Object RESULT =null;
-
+		 RESULT = new ArrayList<TipusDades>(); 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("ARGS_LIST",23, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -1441,7 +1614,7 @@ class CUP$Parser$actions {
 		int v2left = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).left;
 		int v2right = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		Object v2 = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
-		 RESULT = parametres_decl_func.add(new VariableConstant(v1.getValue(), v2.toString(), false)); 
+		 RESULT = new VariableConstant(v1.getValue(), (TipusDades) v2, false); 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("PARAM",8, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -1450,7 +1623,10 @@ class CUP$Parser$actions {
           case 70: // ARIT_FACTOR ::= lparen EXP rparen 
             {
               Object RESULT =null;
-
+		int v1left = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)).left;
+		int v1right = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)).right;
+		Object v1 = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-1)).value;
+		 RESULT = v1; 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("ARIT_FACTOR",27, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -1459,10 +1635,7 @@ class CUP$Parser$actions {
           case 71: // ARIT_FACTOR ::= POS_ENT_LIT 
             {
               Object RESULT =null;
-		int vleft = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).left;
-		int vright = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
-		Object v = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
-		 RESULT = v; 
+
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("ARIT_FACTOR",27, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -1471,6 +1644,26 @@ class CUP$Parser$actions {
           case 72: // ARIT_TERM_REST ::= plus ARIT_FACTOR ARIT_TERM_REST 
             {
               Object RESULT =null;
+		int v1left = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)).left;
+		int v1right = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)).right;
+		Object v1 = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-1)).value;
+		int v2left = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).left;
+		int v2right = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
+		Object v2 = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
+		
+    if(!error_detectat){
+        Simbol aux_v1 = (Simbol) v1;
+        Simbol aux_v2 = (Simbol) v2;
+        if(aux_v1.getTipus() == aux_v2.getTipus()){
+            RESULT = aux_v1;
+        }else{
+            print_this("Error semántico ARIT_TERM_REST");
+            String e = (aux_v1.getValue() + " no es del mismo tipo que " + aux_v2.getValue());
+            semantic_error(e, aux_v1);
+        }
+    }else{
+        RESULT = new Simbol();
+    }
 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("ARIT_TERM_REST",28, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
@@ -1480,6 +1673,26 @@ class CUP$Parser$actions {
           case 73: // ARIT_TERM_REST ::= minus ARIT_FACTOR ARIT_TERM_REST 
             {
               Object RESULT =null;
+		int v1left = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)).left;
+		int v1right = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)).right;
+		Object v1 = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-1)).value;
+		int v2left = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).left;
+		int v2right = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
+		Object v2 = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
+		
+    if(!error_detectat){
+        Simbol aux_v1 = (Simbol) v1;
+        Simbol aux_v2 = (Simbol) v2;
+        if(aux_v1.getTipus() == aux_v2.getTipus()){
+            RESULT = aux_v1;
+        }else{
+            print_this("Error semántico ARIT_TERM_REST");
+            String e = (aux_v1.getValue() + " no es del mismo tipo que " + aux_v2.getValue());
+            semantic_error(e, aux_v1);
+        }
+    }else{
+        RESULT = new Simbol();
+    }
 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("ARIT_TERM_REST",28, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
@@ -1489,7 +1702,7 @@ class CUP$Parser$actions {
           case 74: // ARIT_TERM_REST ::= 
             {
               Object RESULT =null;
-
+		 RESULT = new Simbol(); 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("ARIT_TERM_REST",28, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -1498,10 +1711,10 @@ class CUP$Parser$actions {
           case 75: // NEG_ENT_LIT ::= minus integer_literal 
             {
               Object RESULT =null;
-		int vleft = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).left;
-		int vright = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
-		Simbol v = (Simbol)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
-		 RESULT = -1*(Integer)v.getValue(); 
+		int v1left = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).left;
+		int v1right = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
+		Simbol v1 = (Simbol)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
+		 RESULT = v1; 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("NEG_ENT_LIT",33, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -1510,10 +1723,7 @@ class CUP$Parser$actions {
           case 76: // BOL_LIT ::= boolean_literal 
             {
               Object RESULT =null;
-		int vleft = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).left;
-		int vright = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
-		Simbol v = (Simbol)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
-		 RESULT = v.getValue(); 
+
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("BOL_LIT",34, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -1522,10 +1732,7 @@ class CUP$Parser$actions {
           case 77: // POS_ENT_LIT ::= integer_literal 
             {
               Object RESULT =null;
-		int vleft = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).left;
-		int vright = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
-		Simbol v = (Simbol)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
-		 RESULT = (Integer)v.getValue(); 
+
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("POS_ENT_LIT",32, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;

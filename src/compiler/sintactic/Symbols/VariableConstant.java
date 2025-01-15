@@ -1,40 +1,34 @@
 package compiler.sintactic.Symbols;
 
 public class VariableConstant extends Simbol {
-    private TipusDades tipus;
     private boolean esConstant;
     private String ambit = "";
 
+    public VariableConstant() {
+        super("", TipusDades.NULL);
+        this.esConstant = false;
+    }
+
     public VariableConstant(Object id, TipusDades tipus, boolean esConstant) {
-        super(id);
-        this.tipus = tipus;
+        super(id, tipus);
         this.esConstant = esConstant;
+    }
+
+    public VariableConstant(Object id, TipusDades tipus, boolean esConstant, String ambit) {
+        super(id, tipus);
+        this.esConstant = esConstant;
+        this.ambit = ambit;
     }
 
     public VariableConstant(Object id, TipusDades tipus, boolean esConstant, int fila, int columna) {
-        super(fila, columna, id);
-        this.tipus = tipus;
-        this.esConstant = esConstant;
-    }
-
-    public VariableConstant(Object id, String tipus, boolean esConstant) {
-        super(id);
-        this.tipus = TipusDades.valueOf(tipus);
+        super(fila, columna, id, tipus);
         this.esConstant = esConstant;
     }
 
     @Override
     public String toString() {
-        return value.toString() + " " + tipus.toString() + " es "
+        return value.toString() + " " + getTipus().toString() + " es "
                 + (esConstant ? "constante" : "variable");
-    }
-
-    public TipusDades getTipus() {
-        return tipus;
-    }
-
-    public void setTipus(TipusDades tipus) {
-        this.tipus = tipus;
     }
 
     public boolean isEsConstant() {

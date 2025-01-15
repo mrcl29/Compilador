@@ -5,14 +5,18 @@ public class Simbol {
     public Object value;
     private Integer fila;
     private Integer columna;
+    private TipusDades tipus;
+
+    public Simbol() {
+        this.value = "";
+    }
 
     public Simbol(Object value) {
         this.value = value;
     }
 
-    public Simbol(int fila, int columna, Object value) {
-        this.fila = fila;
-        this.columna = columna;
+    public Simbol(Object value, TipusDades tipus) {
+        this.tipus = tipus;
         this.value = value;
     }
 
@@ -22,20 +26,11 @@ public class Simbol {
         this.value = value;
     }
 
-    public int getFila() {
-        return fila;
-    }
-
-    public void setFila(int fila) {
+    public Simbol(Integer fila, Integer columna, Object value, TipusDades tipus) {
         this.fila = fila;
-    }
-
-    public int getColumna() {
-        return columna;
-    }
-
-    public void setColumna(int columna) {
         this.columna = columna;
+        this.value = value;
+        this.tipus = tipus;
     }
 
     public Object getValue() {
@@ -44,5 +39,29 @@ public class Simbol {
 
     public void setValue(Object value) {
         this.value = value;
+    }
+
+    public Integer getFila() {
+        return fila;
+    }
+
+    public void setFila(Integer fila) {
+        this.fila = fila;
+    }
+
+    public Integer getColumna() {
+        return columna;
+    }
+
+    public void setColumna(Integer columna) {
+        this.columna = columna;
+    }
+
+    public TipusDades getTipus() {
+        return tipus;
+    }
+
+    public void setTipus(TipusDades tipus) {
+        this.tipus = tipus;
     }
 }

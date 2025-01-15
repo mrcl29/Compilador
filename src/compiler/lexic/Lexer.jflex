@@ -19,6 +19,7 @@ import java_cup.runtime.*;
 import java_cup.runtime.ComplexSymbolFactory.ComplexSymbol;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 import compiler.sintactic.Symbols.Simbol;
+import compiler.sintactic.Symbols.TipusDades;
 
 import compiler.sintactic.ParserSym;
 
@@ -89,7 +90,7 @@ rbracket = "]"
 
 /* Literals */
 integer_literal = [0-9]+
-boolean_literal = "TRUE" | "FALSE"
+boolean_literal = "TRUE" | "FALSE" | "true" | "false"
 id = [a-zA-Z][a-zA-Z0-9]*
 
 /* Espais en blanc i comentaris */
@@ -122,7 +123,7 @@ comment = "///".*
         Location esquerra = new Location(yyline+1, yycolumn+1);
         Location dreta = new Location(yyline+1, yycolumn+yytext().length()+1);
 
-        return new ComplexSymbol(ParserSym.terminalNames[type], type, esquerra, dreta, new Simbol((Integer) yyline+1, (Integer) yycolumn+1, value.getValue()));
+        return new ComplexSymbol(ParserSym.terminalNames[type], type, esquerra, dreta, new Simbol((Integer) yyline+1, (Integer) yycolumn+1, value.getValue(), value.getTipus()));
     }
 %}
 
@@ -135,12 +136,12 @@ comment = "///".*
 {rtrn}          { return symbol(ParserSym.rtrn); }
 {val}           { return symbol(ParserSym.val); }
 {con}           { return symbol(ParserSym.con); }
-{if}            { return symbol(ParserSym.if_t); }
+{if}            { return symbol(ParserSym.if_t, new Simbol(this.yytext())); }
 {else}          { return symbol(ParserSym.else_t); }
 {endif}         { return symbol(ParserSym.endif); }
-{while}         { return symbol(ParserSym.while_t); }
+{while}         { return symbol(ParserSym.while_t, new Simbol(this.yytext())); }
 {endwhile}      { return symbol(ParserSym.endwhile); }
-{for}           { return symbol(ParserSym.for_t); }
+{for}           { return symbol(ParserSym.for_t, new Simbol(this.yytext())); }
 {to}            { return symbol(ParserSym.to); }
 {endfor}        { return symbol(ParserSym.endfor); }
 {in}            { return symbol(ParserSym.in); }
@@ -173,8 +174,8 @@ comment = "///".*
 {rbracket}      { return symbol(ParserSym.rbracket); }
 
 /* Literals */
-{integer_literal}   { return symbol(ParserSym.integer_literal, new Simbol(Integer.parseInt(this.yytext()))); }
-{boolean_literal}   { return symbol(ParserSym.boolean_literal, new Simbol(this.yytext())); }
+{integer_literal}   { return symbol(ParserSym.integer_literal, new Simbol(Integer.parseInt(this.yytext()), TipusDades.INTEGER)); }
+{boolean_literal}   { return symbol(ParserSym.boolean_literal, new Simbol(this.yytext(), TipusDades.BOOLEAN)); }
 {id}                { return symbol(ParserSym.id, new Simbol(this.yytext())); }
 
 /* Espais en blanc i comentaris */

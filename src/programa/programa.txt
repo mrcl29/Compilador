@@ -1,9 +1,1 @@
-fnct integer aa232 (x::integer, ydfsaa::logical):
-x = 1;
-rtrn (1);
-endfnct
-
-fnct integer aa232 (aa232::integer, ydfsaa::logical):
-x = 1;
-rtrn (1);
-endfnct
+aaa(s)
