@@ -14,6 +14,7 @@ import java.util.*;
 import java_cup.runtime.ComplexSymbolFactory.ComplexSymbol;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 import compiler.sintactic.Symbols.*;
+import compiler.c3a.*;
 
 class Parser;
 
@@ -35,6 +36,10 @@ parser code {:
             System.out.println(msg);
         }
     }
+
+    GenerarCodi c3a = new GenerarCodi();
+
+    int nbytes = 2
 
     /**************************************************************
     ************************ GESTIÓ ERRORS ************************
@@ -106,7 +111,7 @@ terminal Simbol id;
 /* No terminales */
 non terminal S, P, BODY, DECL, VAR_DECL, CONS_DECL, TUPLA_DECL, FUNC_DECL, PARAM_LIST, PARAM, COS, FINAL_RTN, SENT;
 non terminal ASIG_SENT, IF_SENT, WHILE_SENT, FOR_SENT, FORINIT, FORLIMIT, SAL_SENT, CRID_FUNC_SENT, CRID_FUNC, ARGS, ARGS_LIST;
-non terminal TIPO, EXP, CRID_SIMB, ARIT_TERM, LOG_TERM, TUPLA_ACCESS, LIT, ENT_LIT, POS_ENT_LIT, NEG_ENT_LIT, BOL_LIT, OUT_EXP, ENTR_FUNC;
+non terminal TIPO, EXP, CRID_SIMB, ARIT_TERM, LOG_TERM, TUPLA_ACCESS, LIT, ENT_LIT, POS_ENT_LIT, BOL_LIT, OUT_EXP, ENTR_FUNC;
 
 /* Precedencia y asociatividad */
 precedence left and, or;        // Menor precedencia
@@ -587,19 +592,97 @@ EXP ::= LOG_TERM:v1     {: print_this("Estas en EXP termino lógico"); RESULT = 
       | ENTR_FUNC:v1    {: print_this("Estas en EXP entrada de sistema"); RESULT = v1; :}
       ;
 
-LIT ::= ENT_LIT:v1 {: print_this("Estas en LIT integer"); RESULT = v1; :}
-      | BOL_LIT:v1 {: print_this("Estas en LIT booleano"); RESULT = v1; :}
-      ;
+LIT ::= ENT_LIT:v1
+{:
+    print_this("Estas en LIT integer");
+    Simbol aux_v1 = (Simbol) v1;
 
-ENT_LIT ::= POS_ENT_LIT:v1 {: print_this("Estas en ENT_LIT positivo"); RESULT = v1; :}
-          | NEG_ENT_LIT:v1 {: print_this("Estas en ENT_LIT negativo"); RESULT = v1; :}
-          ;
+    if(aux_v1.getD() == -2){
+        //aux_v1.setR(aux_v1.getR());
+    }else{
+        int t = c3a.novavar();
+        c3a.genera("idx_val", aux_v1.getR(), aux_v1.getD(), t);
+        aux_v1.setR(t);
+    }
 
-POS_ENT_LIT ::= integer_literal:v1 {: print_this("Positive integer"); RESULT = v1; :};
+    RESULT = aux_v1;
+:}
+      | BOL_LIT:v1
+{:
+    print_this("Estas en LIT booleano");
+    Simbol aux_v1 = (Simbol) v1;
 
-NEG_ENT_LIT ::= minus integer_literal:v1 {: print_this("Negative integer"); RESULT = v1; :};
+    if(aux_v1.getD() == -2){
+        //aux_v1.setR(aux_v1.getR());
+    }else{
+        int t = c3a.novavar();
+        c3a.genera("idx_val", aux_v1.getR(), aux_v1.getD(), t);
+        aux_v1.setR(t);
+    }
 
-BOL_LIT ::= boolean_literal:v1 {: print_this("Boolean literal"); RESULT = v1; :};
+    RESULT = aux_v1;
+:}
+;
+
+ENT_LIT ::= POS_ENT_LIT:v1
+{:
+    print_this("Estas en ENT_LIT positivo");
+    Simbol aux_v1 = (Simbol) v1;
+
+    if(aux_v1.getD() == -2){
+        //aux_v1.setR(aux_v1.getR());
+    }else{
+        int t = c3a.novavar();
+        c3a.genera("idx_val", aux_v1.getR(), aux_v1.getD(), t);
+        aux_v1.setR(t);
+    }
+
+    RESULT = aux_v1;
+:}
+          | minus POS_ENT_LIT:v1
+{:
+    print_this("Estas en ENT_LIT negativo");
+    Simbol aux_v1 = (Simbol) v1;
+
+    t = c3a.novavar();
+    c3a.genera("neg", (Integer) aux_v1.getR(), -2, t);
+    aux_v1.setR(t);
+
+    RESULT = aux_v1;
+:}
+;
+
+POS_ENT_LIT ::= integer_literal:v1
+{:
+    print_this("Positive integer");
+    Simbol aux_v1 = (Simbol) v1;
+
+    t = c3a.novavar();
+    c3a.genera("copy", (Integer) aux_v1.getValue(), -2, t);
+    aux_v1.setR(t);
+
+    RESULT = aux_v1;
+:}
+;
+
+BOL_LIT ::= boolean_literal:v1
+{:
+    print_this("Boolean literal");
+    Simbol aux_v1 = (Simbol) v1;
+    int val = -2;
+    if((String) aux_v1.getValue() == "TRUE" || (String) aux_v1.getValue() == "true"){
+    val = -1;
+    }else{
+    val = 0;
+    }
+
+    t = c3a.novavar();
+    c3a.genera("copy", val, -2, t);
+    aux_v1.setR(t);
+
+    RESULT = aux_v1;
+:}
+;
 
 TUPLA_ACCESS ::= id:v1 lbracket integer_literal:v2 rbracket
 {:
@@ -612,6 +695,11 @@ TUPLA_ACCESS ::= id:v1 lbracket integer_literal:v2 rbracket
         if(aux_tupla.getValue() != ""){
             if(index == 0 || index == 1){
                 aux_tupla.setTipus(aux_tupla.getTipus(index));
+
+                int t1 = ((Integer) v2.getValue()) - 0;
+                int t2 = t1 * nbytes;
+                aux_tupla.setD(t2);
+
                 RESULT = aux_tupla;
             }else{
                 print_this("Error semántico TUPLA_ACCESS");
@@ -724,7 +812,17 @@ LOG_TERM ::= EXP:v1 equal EXP:v2
             }else{
                 if(aux_v1.getTipus() == aux_v2.getTipus()){
                     print_this(aux_v1.getValue() + " equal " + aux_v2.getValue());
-                    RESULT = new Simbol(aux_v1.getFila(), aux_v1.getColumna(), aux_v1.getValue(), TipusDades.BOOLEAN);
+
+                    int t = c3a.novavar();
+                    int e1 = c3a.novaetiqueta();
+                    int e2 = c3a.novaetiqueta();
+                    c3a.genera("ifNE", aux_v1.getR(), aux_v2.getR(), e1);
+                    c3a.genera("copy", 0, -2, t);
+                    c3a.genera("goto", -2, -2, e2);
+                    c3a.genera("skip", -2, -2, e1);
+                    c3a.genera("copy", -1, -2, t);
+                    c3a.genera("skip", -2, -2, e2);
+                    RESULT = new Simbol(aux_v1.getFila(), aux_v1.getColumna(), aux_v1.getValue(), TipusDades.BOOLEAN, t);
                 }else{
                     print_this("Error semántico LOG_TERM");
                     String e = (aux_v1.getValue() + " no es del mismo tipo que " + aux_v2.getValue());
@@ -752,7 +850,17 @@ LOG_TERM ::= EXP:v1 equal EXP:v2
             }else{
                 if(aux_v1.getTipus() == aux_v2.getTipus()){
                     print_this(aux_v1.getValue() + " not_equal "+aux_v2.getValue());
-                    RESULT = new Simbol(aux_v1.getFila(), aux_v1.getColumna(), aux_v1.getValue(), TipusDades.BOOLEAN);
+
+                    int t = c3a.novavar();
+                    int e1 = c3a.novaetiqueta();
+                    int e2 = c3a.novaetiqueta();
+                    c3a.genera("ifEQ", aux_v1.getR(), aux_v2.getR(), e1);
+                    c3a.genera("copy", 0, -2, t);
+                    c3a.genera("goto", -2, -2, e2);
+                    c3a.genera("skip", -2, -2, e1);
+                    c3a.genera("copy", -1, -2, t);
+                    c3a.genera("skip", -2, -2, e2);
+                    RESULT = new Simbol(aux_v1.getFila(), aux_v1.getColumna(), aux_v1.getValue(), TipusDades.BOOLEAN, t);
                 }else{
                     print_this("Error semántico LOG_TERM");
                     String e = (aux_v1.getValue() + " no es del mismo tipo que " + aux_v2.getValue());
@@ -779,7 +887,10 @@ LOG_TERM ::= EXP:v1 equal EXP:v2
                 semantic_error(e, v2);
             }else{
                 print_this(aux_v1.getValue() + " and " + aux_v2.getValue());
-                RESULT = new Simbol(aux_v1.getFila(), aux_v1.getColumna(), aux_v1.getValue(), TipusDades.BOOLEAN);
+
+                int t = c3a.novavar();
+                c3a.genera("and", aux_v1.getR(), aux_v2.getR(), t);
+                RESULT = new Simbol(aux_v1.getFila(), aux_v1.getColumna(), aux_v1.getValue(), TipusDades.BOOLEAN, t);
             }
         }
     }
@@ -801,7 +912,10 @@ LOG_TERM ::= EXP:v1 equal EXP:v2
                 semantic_error(e, v2);
             }else{
                 print_this(aux_v1.getValue() + " or " + aux_v2.getValue());
-                RESULT = new Simbol(aux_v1.getFila(), aux_v1.getColumna(), aux_v1.getValue(), TipusDades.BOOLEAN);
+
+                int t = c3a.novavar();
+                c3a.genera("or", aux_v1.getR(), aux_v2.getR(), t);
+                RESULT = new Simbol(aux_v1.getFila(), aux_v1.getColumna(), aux_v1.getValue(), TipusDades.BOOLEAN, t);
             }
         }
     }
@@ -815,6 +929,11 @@ ARIT_TERM ::= EXP:v1 plus EXP:v2
         Simbol aux_v1 = (Simbol) v1;
         Simbol aux_v2 = (Simbol) v2;
         if(aux_v1.getTipus() == TipusDades.INTEGER || aux_v2.getTipus() ==  TipusDades.INTEGER){
+
+            int t = c3a.novavar();
+            c3a.genera("add", aux_v1.getR(), aux_v2.getR(), t);
+            aux_v1.setR(t);
+
             RESULT = aux_v1;
         }else{
             print_this("Error semántico ARIT_TERM");
@@ -830,6 +949,11 @@ ARIT_TERM ::= EXP:v1 plus EXP:v2
         Simbol aux_v1 = (Simbol) v1;
         Simbol aux_v2 = (Simbol) v2;
         if(aux_v1.getTipus() == aux_v2.getTipus() || aux_v2.getTipus() ==  TipusDades.NULL){
+
+            int t = c3a.novavar();
+            c3a.genera("sub", aux_v1.getR(), aux_v2.getR(), t);
+            aux_v1.setR(t);
+
             RESULT = aux_v1;
         }else{
             print_this("Error semántico ARIT_TERM");
@@ -847,6 +971,17 @@ CRID_SIMB ::= id:v1
     print_this("Estas en CRID_SIMB id");
     Simbol aux_v1 = taulaSimbols.usarSimbol(v1.getValue());
     if(aux_v1.getValue() != ""){
+
+        //d = consulta(ts, id.id);
+        //if d.td = dvar {
+        //R.r = d.nv; d.nv té el número de variable
+        //} else {
+        int t = c3a.novavar();
+        c3a.genera("copy", aux_v1.getValor(), -2, t)
+        aux_v1.setR(t);
+        //}
+        aux_v1.setD(-2);
+
         RESULT = aux_v1;
     }else{
         print_this("Error semántico EXP");
@@ -854,6 +989,35 @@ CRID_SIMB ::= id:v1
         semantic_error(e, v1);
     }
 :}
-            | CRID_FUNC:v1    {: print_this("Estas en CRID_SIMB funcion"); RESULT = v1; :}
-            | TUPLA_ACCESS:v1 {: print_this("Estas en CRID_SIMB tupla"); RESULT = v1; :}
-            ;
+            | CRID_FUNC:v1
+{:
+    print_this("Estas en CRID_SIMB funcion");
+    Simbol aux_v1 = (Simbol) v1;
+
+    if(aux_v1.getD() == -2){
+        //aux_v1.setR(aux_v1.getR());
+    }else{
+        int t = c3a.novavar();
+        c3a.genera("idx_val", aux_v1.getR(), aux_v1.getD(), t);
+        aux_v1.setR(t);
+    }
+
+    RESULT = aux_v1;
+:}
+            | TUPLA_ACCESS:v1
+{:
+    print_this("Estas en CRID_SIMB tupla");
+
+    Simbol aux_v1 = (Simbol) v1;
+
+    if(aux_v1.getD() == -2){
+        //aux_v1.setR(aux_v1.getR());
+    }else{
+        int t = c3a.novavar();
+        c3a.genera("idx_val", aux_v1.getR(), aux_v1.getD(), t);
+        aux_v1.setR(t);
+    }
+
+    RESULT = aux_v1;
+:}
+;

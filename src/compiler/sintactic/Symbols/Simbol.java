@@ -6,6 +6,9 @@ public class Simbol {
     private Integer fila;
     private Integer columna;
     private TipusDades tipus = TipusDades.NULL;
+    private int r = -2;
+    private int d = -2;
+    private int valor;
 
     public Simbol() {
         this.value = "";
@@ -31,6 +34,14 @@ public class Simbol {
         this.columna = columna;
         this.value = value;
         this.tipus = tipus;
+    }
+
+    public Simbol(Integer fila, Integer columna, Object value, TipusDades tipus, int r) {
+        this.fila = fila;
+        this.columna = columna;
+        this.value = value;
+        this.tipus = tipus;
+        this.r = r;
     }
 
     public Object getValue() {
@@ -69,4 +80,29 @@ public class Simbol {
     public String toString() {
         return getValue().toString();
     }
+
+    public int getR() {
+        return r;
+    }
+
+    public void setR(int r) {
+        this.r = r;
+    }
+
+    public int getD() {
+        return d;
+    }
+
+    public void setD(int d) {
+        this.d = d;
+    }
+
+    public int getValor() {
+        return valor;
+    }
+
+    public void setValor(int valor) {
+        this.valor = valor;
+    }
+
 }
