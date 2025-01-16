@@ -44,6 +44,6 @@ public class Tupla extends Simbol {
         } else if (i == 2) {
             return valor2;
         }
-        return null;
+        return TipusDades.NULL;
     }
 }

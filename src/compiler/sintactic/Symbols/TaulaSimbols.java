@@ -44,12 +44,11 @@ public class TaulaSimbols {
         return true;
     }
 
-    public boolean declararFuncio(Object id, ArrayList<VariableConstant> parametres, String tipus) {
-        if (existeixSimbol(id)) {
+    public boolean declararFuncio(Funcio fun) {
+        if (existeixSimbol(fun.getValue())) {
             return false;
         }
-        TipusDades aux = TipusDades.valueOf(tipus);
-        taulaSimbols.add(new Funcio(id, parametres, aux));
+        taulaSimbols.add(fun);
         return true;
     }
 

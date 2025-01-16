@@ -1,1 +1,45 @@
-aaa(s)
+//// Programa de prueba para el lenguaje definido
+
+//// Declaración de variables y constantes
+val x :: integer = 5;
+val y :: integer = 10;
+con z :: integer = 15;
+
+/// Declaración de tuplas
+tuple t1 = {integer, logical};
+
+/// Declaración de funciones
+fnct integer suma(a :: integer, b :: integer):
+    val res :: integer = a + b;
+    rtrn(res);
+endfnct
+
+/// Uso de funciones
+val result :: integer = suma(x, y);
+out(result);
+
+/// Estructuras de control
+if(TRUE):
+    out("Condición verdadera");
+else:
+    out("Condición falsa");
+endif
+
+while(x < 20):
+    x = x + 1;
+endwhile
+
+/// Iteración con bucles for
+for(val i :: integer = 0; i to 10):
+    out(i);
+endfor
+
+/// Ejemplo con errores
+val a :: logical = 5;  /// Error semántico: Asignación de tipo incorrecto
+val b :: integer = suma(x, "texto");  /// Error semántico: Argumento de tipo incorrecto
+if(42):  /// Error semántico: Condición no booleana
+    out("Error de tipo en condición");
+endif
+
+/// Acceso incorrecto a una tupla
+t1[2] = TRUE;  /// Error semántico: Índice fuera de rango

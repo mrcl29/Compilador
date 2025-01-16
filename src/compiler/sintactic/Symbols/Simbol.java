@@ -5,7 +5,7 @@ public class Simbol {
     public Object value;
     private Integer fila;
     private Integer columna;
-    private TipusDades tipus;
+    private TipusDades tipus = TipusDades.NULL;
 
     public Simbol() {
         this.value = "";
