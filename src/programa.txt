@@ -1,0 +1,48 @@
+//// Programa de prueba para el lenguaje definido
+
+//// Declaración de variables y constantes
+val x :: integer = 5;
+val y :: integer = 10;
+con z :: integer = 15;
+
+/// Declaración de tuplas
+tuple x = {integer, logical};
+
+/// Declaración de funciones
+fnct integer suma(zzzz::integer, dadfga::logical):
+    val a :: integer = 1;
+    val b :: integer = 2;
+    val res :: integer = a - b;
+
+    rtrn(res);
+endfnct
+
+/// Uso de funciones
+val result :: integer = suma();
+out(result);
+
+/// Estructuras de control
+if(TRUE):
+    out(1 === 21);
+else:
+    out(1);
+endif
+
+while(x /= 20):
+    x = x + 1;
+endwhile
+
+/// Iteración con bucles for
+for i :: integer = 0 to 10:
+    out(i);
+endfor
+
+/// Ejemplo con errores
+val dsadaa :: logical = 5;  /// Error semántico: Asignación de tipo incorrecto
+val bgfasgsf :: integer = suma(x, true || false);  /// Error semántico: Argumento de tipo incorrecto
+if(true && 1===2):  /// Error semántico: Condición no booleana
+    out(true);
+endif
+
+/// Acceso incorrecto a una tupla
+x[1] = TRUE;  /// Error semántico: Índice fuera de rango

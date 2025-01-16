@@ -64,4 +64,9 @@ public class Simbol {
     public void setTipus(TipusDades tipus) {
         this.tipus = tipus;
     }
+
+    @Override
+    public String toString() {
+        return getValue().toString();
+    }
 }

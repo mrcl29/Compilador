@@ -29,7 +29,7 @@ parser code {:
 
     public boolean error_detectat = false;
 
-    public boolean DEBUG = true;
+    public boolean DEBUG = false;
     public void print_this(Object msg){
         if(DEBUG){
             System.out.println(msg);
@@ -74,7 +74,6 @@ parser code {:
     * Mètode per mostrar un error semàntic
     **/
     public void semantic_error(String t, Object info){
-        print_this("Imprimiendo error semántico...");
         if(info instanceof Simbol){
             Simbol token = (Simbol) info;
 
@@ -106,8 +105,8 @@ terminal Simbol id;
 
 /* No terminales */
 non terminal S, P, BODY, DECL, VAR_DECL, CONS_DECL, TUPLA_DECL, FUNC_DECL, PARAM_LIST, PARAM, COS, FINAL_RTN, SENT;
-non terminal ASIG_SENT, IF_SENT, WHILE_SENT, FOR_SENT, FORINIT, FORLIMIT, TUPLA_ASSIGN, ENTR_SENT, SAL_SENT, CRID_FUNC, ARGS, ARGS_LIST;
-non terminal TIPO, EXP, ARIT_TERM, ARIT_FACTOR, ARIT_TERM_REST, LOG_TERM, TUPLA_ACCESS, LIT, POS_ENT_LIT, NEG_ENT_LIT, BOL_LIT, OUT_EXP, ENTR_FUNC, SAL_FUNC;
+non terminal ASIG_SENT, IF_SENT, WHILE_SENT, FOR_SENT, FORINIT, FORLIMIT, SAL_SENT, CRID_FUNC_SENT, CRID_FUNC, ARGS, ARGS_LIST;
+non terminal TIPO, EXP, CRID_SIMB, ARIT_TERM, LOG_TERM, TUPLA_ACCESS, LIT, ENT_LIT, POS_ENT_LIT, NEG_ENT_LIT, BOL_LIT, OUT_EXP, ENTR_FUNC;
 
 /* Precedencia y asociatividad */
 precedence left and, or;        // Menor precedencia
@@ -121,16 +120,11 @@ start with S;
 
 S ::= P ;
 
-P ::= BODY;
+P ::= BODY
+    | /* epsilon */;
 
 BODY ::= SENT BODY
-      | SENT
       | FUNC_DECL BODY
-      | FUNC_DECL
-      ;
-
-COS ::= SENT COS
-      | SENT
       ;
 
 SENT ::= DECL
@@ -138,10 +132,8 @@ SENT ::= DECL
        | IF_SENT
        | WHILE_SENT
        | FOR_SENT
-       | TUPLA_ASSIGN
-       | ENTR_SENT
        | SAL_SENT
-       | CRID_FUNC
+       | CRID_FUNC_SENT
        ;
 
 DECL ::= VAR_DECL
@@ -151,6 +143,7 @@ DECL ::= VAR_DECL
 
 ASIG_SENT ::= id:v1 assign EXP:v2 semicolon
 {:
+    print_this("Estas en ASIG_SENT para símbolo");
     if(!error_detectat){
         VariableConstant aux_v1 = taulaSimbols.usarVariableConstant(v1.getValue());
         Simbol aux_v2 = (Simbol) v2;
@@ -181,10 +174,32 @@ ASIG_SENT ::= id:v1 assign EXP:v2 semicolon
         }
     }
 :}
+            | TUPLA_ACCESS:v1 assign EXP:v2 semicolon
+{:
+    print_this("Estas en ASIG_SENT para tupla");
+    if(!error_detectat){
+        Tupla aux_v1 = (Tupla) v1;
+        Simbol aux_v2 = (Simbol) v2;
+        print_this("Asignando valor a Tupla: "+ aux_v1.getValue());
+        if(aux_v2.getTipus() == TipusDades.NULL){
+            print_this("Error semántico ASIG_SENT");
+            String e = ("Valor no asignado");
+            semantic_error(e, v2);
+        }else{
+            if(aux_v1.getTipus() != aux_v2.getTipus()){
+                print_this("Error semántico ASIG_SENT");
+                String e = ("A la tupla " + aux_v1.getValue() + " se le esta asignando un tipo incorrecto.");
+                semantic_error(e, v1);
+            }
+            RESULT = v1;
+        }
+    }
+:}
 ;
 
 IF_SENT ::= if_t lparen EXP:v1 rparen colon COS else_t colon COS endif
 {:
+    print_this("Estas en IF_SENT con else");
     if(!error_detectat){
         Simbol aux_v1 = (Simbol) v1;
         if(aux_v1.getTipus() == TipusDades.NULL){
@@ -202,6 +217,7 @@ IF_SENT ::= if_t lparen EXP:v1 rparen colon COS else_t colon COS endif
 :}
           | if_t lparen EXP:v1 rparen colon COS endif
 {:
+    print_this("Estas en IF_SENT sin else");
     if(!error_detectat){
         Simbol aux_v1 = (Simbol) v1;
         if(aux_v1.getTipus() == TipusDades.NULL){
@@ -221,6 +237,7 @@ IF_SENT ::= if_t lparen EXP:v1 rparen colon COS else_t colon COS endif
 
 WHILE_SENT ::= while_t lparen EXP:v1 rparen colon COS endwhile
 {:
+    print_this("Estas en WHILE_SENT");
     if(!error_detectat){
         Simbol aux_v1 = (Simbol) v1;
         if(aux_v1.getTipus() == TipusDades.NULL){
@@ -240,6 +257,7 @@ WHILE_SENT ::= while_t lparen EXP:v1 rparen colon COS endwhile
 
 FOR_SENT ::= for_t FORINIT:v1 to FORLIMIT:v2 colon COS endfor
 {:
+    print_this("Estas en FOR_SENT");
     if(!error_detectat){
         Simbol aux_v1 = (Simbol) v1;
         Simbol aux_v2 = (Simbol) v2;
@@ -256,32 +274,57 @@ FOR_SENT ::= for_t FORINIT:v1 to FORLIMIT:v2 colon COS endfor
 :}
 ;
 
-TUPLA_ASSIGN ::= TUPLA_ACCESS:v1 assign EXP:v2 semicolon
+FORINIT ::= PARAM:v1 assign EXP:v2
 {:
+    print_this("Estas en FORINIT");
     if(!error_detectat){
-        Tupla aux_v1 = (Tupla) v1;
+        VariableConstant aux_v1 = (VariableConstant) v1;
         Simbol aux_v2 = (Simbol) v2;
-        print_this("Asignando valor a Tupla: "+ aux_v1.getValue());
-        if(aux_v2.getTipus() == TipusDades.NULL){
-            print_this("Error semántico TUPLA_ASSIGN");
-            String e = ("Valor no asignado");
+        if(aux_v1.getTipus() != aux_v2.getTipus()){
+            print_this("Error semántico FORINIT");
+            String e = ("Estas asignando un tipo incorrecto al parámetro del bucle for");
             semantic_error(e, v2);
         }else{
-            if(aux_v1.getTipus() != aux_v2.getTipus()){
-                print_this("Error semántico TUPLA_ASSIGN");
-                String e = ("A la tupla " + aux_v1.getValue() + " se le esta asignando un tipo incorrecto.");
-                semantic_error(e, v1);
-            }
-            RESULT = v1;
+            RESULT = aux_v1;
+        }
+    }
+:}
+         | EXP:v1
+{:
+    print_this("Estas en FORINIT");
+    if(!error_detectat){
+        Simbol aux_v1 = (Simbol) v1;
+        if(aux_v1.getTipus() == TipusDades.NULL){
+            print_this("Error semántico FORINIT");
+            String e = ("Inicio del bucle for no especificado");
+            semantic_error(e, v1);
+        }else{
+            RESULT = aux_v1;
         }
     }
 :}
 ;
 
-ENTR_SENT ::= in lparen TIPO:v1 rparen semicolon {: RESULT = v1; :};
+FORLIMIT ::= PARAM:v1 {: RESULT = v1;:}
+           | EXP:v1
+{:
+    print_this("Estas en FORLIMIT");
+    if(!error_detectat){
+        Simbol aux_v1 = (Simbol) v1;
+        if(aux_v1.getTipus() == TipusDades.NULL){
+            print_this("Error semántico FORLIMIT");
+            String e = ("Límite del bucle for no especificado");
+            semantic_error(e, v1);
+        }else{
+            RESULT = aux_v1;
+        }
+    }
+:}
+;
 
 SAL_SENT ::= out lparen OUT_EXP:v1 rparen semicolon
 {:
+    print_this("Estas en SAL_SENT");
     Simbol aux_v1 = (Simbol) v1;
     if(aux_v1.getTipus() == TipusDades.NULL){
         print_this("Error semántico SAL_SENT");
@@ -293,8 +336,15 @@ SAL_SENT ::= out lparen OUT_EXP:v1 rparen semicolon
 :}
 ;
 
-CRID_FUNC ::= id:v1 lparen ARGS:v2 rparen
+OUT_EXP ::= CRID_SIMB:v1 {: print_this("Estas en OUT_EXP llamada a símbolo"); RESULT = v1; :}
+          | ARIT_TERM:v1 {: print_this("Estas en OUT_EXP llamada a término aritmético"); RESULT = v1; :}
+          | LOG_TERM:v1  {: print_this("Estas en OUT_EXP llamada a término lógico"); RESULT = v1; :}
+          | LIT:v1       {: print_this("Estas en OUT_EXP llamada a literal"); RESULT = v1; :}
+          ;
+
+CRID_FUNC_SENT ::= id:v1 lparen ARGS:v2 rparen semicolon
 {:
+    print_this("Estas en CRID_FUNC_SENT para argumentos");
     if(!error_detectat){
         print_this("Llamando a Función: "+ v1.getValue());
         Funcio aux_v1 = taulaSimbols.usarFuncio(v1.getValue());
@@ -305,7 +355,47 @@ CRID_FUNC ::= id:v1 lparen ARGS:v2 rparen
             }else{
                 print_this("Error semántico CRID_FUNC");
                 String e = ("A la funcion " + v1.getValue() + " no se le estan pasando los parámetros correctos");
-                semantic_error(e, aux_v2.get(0));
+                semantic_error(e, v1);
+            }
+        }else{
+            print_this("Error semántico CRID_FUNC");
+            String e = ("La funcion " + v1.getValue() + " no ha sido creada");
+            semantic_error(e, v1);
+        }
+    }
+:}
+            | id:v1 lparen rparen semicolon
+{:
+    print_this("Estas en CRID_FUNC_SENT sin argumentos");
+    if(!error_detectat){
+        print_this("Llamando a Función: "+ v1.getValue());
+        Funcio aux_v1 = taulaSimbols.usarFuncio(v1.getValue());
+        if(aux_v1.getValue() != ""){
+            RESULT = aux_v1;
+        }else{
+            print_this("Error semántico CRID_FUNC");
+            String e = ("La funcion " + v1.getValue() + " no ha sido creada");
+            semantic_error(e, v1);
+        }
+    }
+:}
+;
+
+CRID_FUNC ::= id:v1 lparen ARGS:v2 rparen
+{:
+
+    print_this("Estas en CRID_FUNC para argumentos");
+    if(!error_detectat){
+        print_this("Llamando a Función: "+ v1.getValue());
+        Funcio aux_v1 = taulaSimbols.usarFuncio(v1.getValue());
+        ArrayList<Simbol> aux_v2 = (ArrayList<Simbol>) v2;
+        if(aux_v1.getValue() != ""){
+            if(aux_v1.mateixosParametres(aux_v2)){
+                RESULT = aux_v1;
+            }else{
+                print_this("Error semántico CRID_FUNC");
+                String e = ("A la funcion " + v1.getValue() + " no se le estan pasando los parámetros correctos: "+aux_v2.toString());
+                semantic_error(e, v1);
             }
         }else{
             print_this("Error semántico CRID_FUNC");
@@ -316,6 +406,7 @@ CRID_FUNC ::= id:v1 lparen ARGS:v2 rparen
 :}
             | id:v1 lparen rparen
 {:
+    print_this("Estas en CRID_FUNC sin argumentos");
     if(!error_detectat){
         print_this("Llamando a Función: "+ v1.getValue());
         Funcio aux_v1 = taulaSimbols.usarFuncio(v1.getValue());
@@ -332,6 +423,8 @@ CRID_FUNC ::= id:v1 lparen ARGS:v2 rparen
 
 FUNC_DECL ::= fnct TIPO:v1 id:v2 lparen PARAM_LIST:v3 rparen colon COS FINAL_RTN:v4 endfnct
 {:
+
+    print_this("Estas en FUNC_DECL con cuerpo");
     if(!error_detectat){
         print_this("Declarando Función: "+ v2.getValue());
         Simbol aux_v1 = (Simbol) v1;
@@ -340,12 +433,6 @@ FUNC_DECL ::= fnct TIPO:v1 id:v2 lparen PARAM_LIST:v3 rparen colon COS FINAL_RTN
         Simbol aux_v4 = (Simbol) v4;
         for(int i = 0; i < aux_v3.size() && !error_detectat; i++){
             print_this(aux_v3.get(i).toString());
-            error_detectat = !taulaSimbols.declararVariableConstant(aux_v3.get(i));
-            if(error_detectat){
-                print_this("Error semántico FUNC_DECL");
-                String e = ("Ya existe una variable con el nombre "+ aux_v3.get(i).getValue());
-                semantic_error(e, aux_v3.get(i));
-            }
         }
         if(!error_detectat){
             if(aux_v4.getTipus() != aux_v1.getTipus()){
@@ -369,6 +456,7 @@ FUNC_DECL ::= fnct TIPO:v1 id:v2 lparen PARAM_LIST:v3 rparen colon COS FINAL_RTN
 :}
             | fnct TIPO:v1 id:v2 lparen PARAM_LIST:v3 rparen colon FINAL_RTN:v4 endfnct
 {:
+    print_this("Estas en FUNC_DECL sin cuerpo");
     if(!error_detectat){
         print_this("Declarando Función: "+ v2.getValue());
         Simbol aux_v1 = (Simbol) v1;
@@ -400,8 +488,13 @@ FUNC_DECL ::= fnct TIPO:v1 id:v2 lparen PARAM_LIST:v3 rparen colon COS FINAL_RTN
 :}
 ;
 
+COS ::= SENT COS
+      | SENT
+      ;
+
 FINAL_RTN ::= rtrn lparen EXP:v1 rparen semicolon
 {:
+    print_this("Estas en FINAL_RTN con cuerpo");
     Simbol aux_v1 = (Simbol) v1;
     if(aux_v1.getTipus() == TipusDades.NULL){
         print_this("Error semántico FINAL_RTN");
@@ -414,6 +507,7 @@ FINAL_RTN ::= rtrn lparen EXP:v1 rparen semicolon
 
 VAR_DECL ::= val id:v1 double_colon TIPO:v2 assign EXP:v3 semicolon
 {:
+    print_this("Estas en VAR_DECL");
     if(!error_detectat){
         print_this("Declarando Variable "+ v1.getValue());
         Simbol aux_v1 = (Simbol) v1;
@@ -440,6 +534,7 @@ VAR_DECL ::= val id:v1 double_colon TIPO:v2 assign EXP:v3 semicolon
 
 CONS_DECL ::= con id:v1 double_colon TIPO:v2 assign EXP:v3 semicolon
 {:
+    print_this("Estas en CONS_DECL");
     if(!error_detectat){
         print_this("Declarando Constante "+ v1.getValue());
         Simbol aux_v1 = (Simbol) v1;
@@ -466,6 +561,7 @@ CONS_DECL ::= con id:v1 double_colon TIPO:v2 assign EXP:v3 semicolon
 
 TUPLA_DECL ::= tuple id:v1 assign lbrace TIPO:v2 comma TIPO:v3 rbrace semicolon
 {:
+    print_this("Estas en TUPLA_DECL");
     if(!error_detectat){
         print_this("Declarando Tupla: "+ v1.getValue());
         Simbol aux_v1 = (Simbol) v1;
@@ -484,67 +580,30 @@ TUPLA_DECL ::= tuple id:v1 assign lbrace TIPO:v2 comma TIPO:v3 rbrace semicolon
 :}
 ;
 
-EXP ::= LOG_TERM:v1     {: RESULT = v1;:}
-      | ARIT_TERM:v1    {: RESULT = v1;:}
-      | CRID_FUNC:v1    {: RESULT = v1;:}
-      | id:v1
-{:
-    Simbol aux_v1 = taulaSimbols.usarSimbol(v1.getValue());
-    if(aux_v1.getValue() == ""){
-        print_this("Error semántico EXP");
-        String e = ("El símbolo llamado no ha sido declarado");
-        semantic_error(e, v1);
-    }
-    RESULT = aux_v1;
-:}
-      | TUPLA_ACCESS:v1 {: RESULT = v1;:}
-      | LIT:v1          {: RESULT = v1;:}
-      | ENTR_FUNC:v1    {: RESULT = v1;:}
-      | SAL_FUNC:v1     {: RESULT = v1;:}
+EXP ::= LOG_TERM:v1     {: print_this("Estas en EXP termino lógico"); RESULT = v1; :}
+      | ARIT_TERM:v1    {: print_this("Estas en EXP termino aritmético"); RESULT = v1; :}
+      | CRID_SIMB:v1    {: print_this("Estas en EXP llamada a símbolo"); RESULT = v1; :}
+      | LIT:v1          {: print_this("Estas en EXP llamada a literal"); RESULT = v1; :}
+      | ENTR_FUNC:v1    {: print_this("Estas en EXP entrada de sistema"); RESULT = v1; :}
       ;
 
-LIT ::= NEG_ENT_LIT:v1 {: RESULT = v1;:}
-     | BOL_LIT:v1 {: RESULT = v1;:}
-     ;
+LIT ::= ENT_LIT:v1 {: print_this("Estas en LIT integer"); RESULT = v1; :}
+      | BOL_LIT:v1 {: print_this("Estas en LIT booleano"); RESULT = v1; :}
+      ;
 
-NEG_ENT_LIT ::= minus integer_literal:v1 {: RESULT = v1; :};
+ENT_LIT ::= POS_ENT_LIT:v1 {: print_this("Estas en ENT_LIT positivo"); RESULT = v1; :}
+          | NEG_ENT_LIT:v1 {: print_this("Estas en ENT_LIT negativo"); RESULT = v1; :}
+          ;
 
-BOL_LIT ::= boolean_literal:v1 {: RESULT = v1;:};
+POS_ENT_LIT ::= integer_literal:v1 {: print_this("Positive integer"); RESULT = v1; :};
 
-FORINIT ::= VAR_DECL:v1 {: RESULT = v1;:}
-         | EXP:v1
-{:
-    if(!error_detectat){
-        Simbol aux_v1 = (Simbol) v1;
-        if(aux_v1.getTipus() == TipusDades.NULL){
-            print_this("Error semántico FORINIT");
-            String e = ("Inicio del bucle for no especificado");
-            semantic_error(e, v1);
-        }else{
-            RESULT = aux_v1;
-        }
-    }
-:}
-;
+NEG_ENT_LIT ::= minus integer_literal:v1 {: print_this("Negative integer"); RESULT = v1; :};
 
-FORLIMIT ::= CONS_DECL:v1 {: RESULT = v1;:}
-           | EXP:v1
-{:
-    if(!error_detectat){
-        Simbol aux_v1 = (Simbol) v1;
-        if(aux_v1.getTipus() == TipusDades.NULL){
-            print_this("Error semántico FORLIMIT");
-            String e = ("Límite del bucle for no especificado");
-            semantic_error(e, v1);
-        }else{
-            RESULT = aux_v1;
-        }
-    }
-:}
-;
+BOL_LIT ::= boolean_literal:v1 {: print_this("Boolean literal"); RESULT = v1; :};
 
 TUPLA_ACCESS ::= id:v1 lbracket integer_literal:v2 rbracket
 {:
+    print_this("Estas en TUPLA_ACCESS");
     if(!error_detectat){
         print_this("Accediendo a la Tupla: " + v1.getValue() + "(" + v2.getValue() + ")");
         Simbol aux_v1 = (Simbol) v1;
@@ -568,27 +627,13 @@ TUPLA_ACCESS ::= id:v1 lbracket integer_literal:v2 rbracket
 :}
 ;
 
-TIPO ::= integer {: RESULT = new Simbol("integer", TipusDades.INTEGER); :}
-       | logical {: RESULT = new Simbol("logical", TipusDades.BOOLEAN); :}
+TIPO ::= integer {: print_this("Tipo integer"); RESULT = new Simbol("integer", TipusDades.INTEGER); :}
+       | logical {: print_this("Tipo boolean"); RESULT = new Simbol("logical", TipusDades.BOOLEAN); :}
        ;
-
-OUT_EXP ::= id:v1
-{:
-    Simbol aux_v1 = taulaSimbols.usarSimbol(v1.getValue());
-    if(aux_v1.getValue() == ""){
-        print_this("Error semántico OUT_EXP");
-        String e = ("El símbolo llamado no ha sido declarado");
-        semantic_error(e, v1);
-    }
-    RESULT = aux_v1;
-:}
-          | CRID_FUNC:v1 {: RESULT = v1;:}
-          | ARIT_TERM:v1 {: RESULT = v1;:}
-          | LOG_TERM:v1  {: RESULT = v1;:}
-          ;
 
 ARGS ::= EXP:v1 ARGS_LIST:v2
 {:
+    print_this("Estas en ARGS");
     if(!error_detectat){
         Simbol aux_v1 = (Simbol) v1;
         if(aux_v1.getTipus() == TipusDades.NULL){
@@ -604,6 +649,7 @@ ARGS ::= EXP:v1 ARGS_LIST:v2
 
 ARGS_LIST ::= comma EXP:v1 ARGS_LIST:v2
 {:
+    print_this("Estas en ARGS_LIST");
     if(!error_detectat){
         Simbol aux_v1 = (Simbol) v1;
         if(aux_v1.getTipus() == TipusDades.NULL){
@@ -617,17 +663,19 @@ ARGS_LIST ::= comma EXP:v1 ARGS_LIST:v2
         }
     }
 :}
-            | /* epsilon */ {: RESULT = new ArrayList<Simbol>(); :}
+            | /* epsilon */ {: print_this("Estas en ARGS_LIST epsilon"); RESULT = new ArrayList<Simbol>(); :}
             ;
 
 PARAM_LIST ::= PARAM:v1
 {:
+    print_this("Estas en PARAM_LIST");
     if(!error_detectat){
         RESULT = new ArrayList<VariableConstant>(Arrays.asList((VariableConstant) v1));
     }
 :}
              | PARAM:v1 comma PARAM_LIST:v2
 {:
+    print_this("Estas en PARAM_LIST");
     if(!error_detectat){
         VariableConstant aux_v1 = (VariableConstant) v1;
         ArrayList<VariableConstant> aux_v2 = (ArrayList<VariableConstant>) v2;
@@ -635,11 +683,12 @@ PARAM_LIST ::= PARAM:v1
         RESULT = aux_v2;
     }
 :}
-             | /* epsilon */ {: RESULT = new ArrayList<VariableConstant>(); :}
+             | /* epsilon */ {: print_this("Estas en PARAM_LIST epsilon"); RESULT = new ArrayList<VariableConstant>(); :}
              ;
 
 PARAM ::= id:v1 double_colon TIPO:v2
 {:
+    print_this("Estas en PARAM");
     if(!error_detectat){
         print_this("Declarando Parámetro "+ v1.getValue());
         Simbol aux_v1 = (Simbol) v1;
@@ -659,6 +708,7 @@ PARAM ::= id:v1 double_colon TIPO:v2
 
 LOG_TERM ::= EXP:v1 equal EXP:v2
 {:
+    print_this("Estas en LOG_TERM equal");
     if(!error_detectat){
         Simbol aux_v1 = (Simbol) v1;
         Simbol aux_v2 = (Simbol) v2;
@@ -674,8 +724,7 @@ LOG_TERM ::= EXP:v1 equal EXP:v2
             }else{
                 if(aux_v1.getTipus() == aux_v2.getTipus()){
                     print_this(aux_v1.getValue() + " equal " + aux_v2.getValue());
-                    aux_v1.setTipus(TipusDades.BOOLEAN);
-                    RESULT = aux_v1;
+                    RESULT = new Simbol(aux_v1.getFila(), aux_v1.getColumna(), aux_v1.getValue(), TipusDades.BOOLEAN);
                 }else{
                     print_this("Error semántico LOG_TERM");
                     String e = (aux_v1.getValue() + " no es del mismo tipo que " + aux_v2.getValue());
@@ -687,6 +736,7 @@ LOG_TERM ::= EXP:v1 equal EXP:v2
 :}
            | EXP:v1 not_equal EXP:v2
 {:
+    print_this("Estas en LOG_TERM not equal");
     if(!error_detectat){
         Simbol aux_v1 = (Simbol) v1;
         Simbol aux_v2 = (Simbol) v2;
@@ -702,8 +752,7 @@ LOG_TERM ::= EXP:v1 equal EXP:v2
             }else{
                 if(aux_v1.getTipus() == aux_v2.getTipus()){
                     print_this(aux_v1.getValue() + " not_equal "+aux_v2.getValue());
-                    aux_v1.setTipus(TipusDades.BOOLEAN);
-                    RESULT = aux_v1;
+                    RESULT = new Simbol(aux_v1.getFila(), aux_v1.getColumna(), aux_v1.getValue(), TipusDades.BOOLEAN);
                 }else{
                     print_this("Error semántico LOG_TERM");
                     String e = (aux_v1.getValue() + " no es del mismo tipo que " + aux_v2.getValue());
@@ -715,6 +764,7 @@ LOG_TERM ::= EXP:v1 equal EXP:v2
 :}
            | EXP:v1 and EXP:v2
 {:
+    print_this("Estas en LOG_TERM and");
     if(!error_detectat){
         Simbol aux_v1 = (Simbol) v1;
         Simbol aux_v2 = (Simbol) v2;
@@ -729,14 +779,14 @@ LOG_TERM ::= EXP:v1 equal EXP:v2
                 semantic_error(e, v2);
             }else{
                 print_this(aux_v1.getValue() + " and " + aux_v2.getValue());
-                aux_v1.setTipus(TipusDades.BOOLEAN);
-                RESULT = aux_v1;
+                RESULT = new Simbol(aux_v1.getFila(), aux_v1.getColumna(), aux_v1.getValue(), TipusDades.BOOLEAN);
             }
         }
     }
 :}
            | EXP:v1 or EXP:v2
 {:
+    print_this("Estas en LOG_TERM or");
     if(!error_detectat){
         Simbol aux_v1 = (Simbol) v1;
         Simbol aux_v2 = (Simbol) v2;
@@ -751,16 +801,31 @@ LOG_TERM ::= EXP:v1 equal EXP:v2
                 semantic_error(e, v2);
             }else{
                 print_this(aux_v1.getValue() + " or " + aux_v2.getValue());
-                aux_v1.setTipus(TipusDades.BOOLEAN);
-                RESULT = aux_v1;
+                RESULT = new Simbol(aux_v1.getFila(), aux_v1.getColumna(), aux_v1.getValue(), TipusDades.BOOLEAN);
             }
         }
     }
 :}
 ;
 
-ARIT_TERM ::= ARIT_FACTOR:v1 ARIT_TERM_REST:v2
+ARIT_TERM ::= EXP:v1 plus EXP:v2
 {:
+    print_this("Estas en ARIT_TERM");
+    if(!error_detectat){
+        Simbol aux_v1 = (Simbol) v1;
+        Simbol aux_v2 = (Simbol) v2;
+        if(aux_v1.getTipus() == TipusDades.INTEGER || aux_v2.getTipus() ==  TipusDades.INTEGER){
+            RESULT = aux_v1;
+        }else{
+            print_this("Error semántico ARIT_TERM");
+            String e = ("El término aritmético solo puede sumar tipos integer");
+            semantic_error(e, aux_v1);
+        }
+    }
+:}
+           | EXP:v1 minus EXP:v2
+{:
+    print_this("Estas en ARIT_TERM");
     if(!error_detectat){
         Simbol aux_v1 = (Simbol) v1;
         Simbol aux_v2 = (Simbol) v2;
@@ -768,74 +833,27 @@ ARIT_TERM ::= ARIT_FACTOR:v1 ARIT_TERM_REST:v2
             RESULT = aux_v1;
         }else{
             print_this("Error semántico ARIT_TERM");
-            String e = (aux_v1.getValue() + " no es del mismo tipo que " + aux_v2.getValue());
+            String e = ("El término aritmético solo puede restar tipos integer");
             semantic_error(e, aux_v1);
         }
     }
 :}
 ;
 
-ARIT_TERM_REST ::= plus ARIT_FACTOR:v1 ARIT_TERM_REST:v2
+ENTR_FUNC ::= in lparen TIPO:v1 rparen {: print_this("Estas en ENTR_FUNC"); RESULT = v1; :};
+
+CRID_SIMB ::= id:v1
 {:
-    if(!error_detectat){
-        Simbol aux_v1 = (Simbol) v1;
-        Simbol aux_v2 = (Simbol) v2;
-        if(aux_v1.getTipus() == aux_v2.getTipus()){
-            RESULT = aux_v1;
-        }else{
-            print_this("Error semántico ARIT_TERM_REST");
-            String e = (aux_v1.getValue() + " no es del mismo tipo que " + aux_v2.getValue());
-            semantic_error(e, aux_v1);
-        }
+    print_this("Estas en CRID_SIMB id");
+    Simbol aux_v1 = taulaSimbols.usarSimbol(v1.getValue());
+    if(aux_v1.getValue() != ""){
+        RESULT = aux_v1;
+    }else{
+        print_this("Error semántico EXP");
+        String e = ("El símbolo llamado no ha sido declarado");
+        semantic_error(e, v1);
     }
 :}
-                 | minus ARIT_FACTOR:v1 ARIT_TERM_REST:v2
-{:
-    if(!error_detectat){
-        Simbol aux_v1 = (Simbol) v1;
-        Simbol aux_v2 = (Simbol) v2;
-        if(aux_v1.getTipus() == aux_v2.getTipus()){
-            RESULT = aux_v1;
-        }else{
-            print_this("Error semántico ARIT_TERM_REST");
-            String e = (aux_v1.getValue() + " no es del mismo tipo que " + aux_v2.getValue());
-            semantic_error(e, aux_v1);
-        }
-    }
-:}
-                 | /* epsilon */ {: RESULT = new Simbol(); :}
-                 ;
-
-ARIT_FACTOR ::= lparen EXP:v1 rparen
-{:
-    if(!error_detectat){
-        Simbol aux_v1 = (Simbol) v1;
-        if(aux_v1.getTipus() == TipusDades.NULL){
-            print_this("Error semántico ARIT_FACTOR");
-            String e = ("Factor aritmético vacío");
-            semantic_error(e, v1);
-        }else{
-            RESULT = aux_v1;
-        }
-    }
-:}
-              | POS_ENT_LIT:v1 {: RESULT = v1;:}
-              ;
-
-POS_ENT_LIT ::= integer_literal:v1 {: RESULT = v1;:};
-
-ENTR_FUNC ::= in lparen TIPO:v1 rparen {: RESULT = v1; :};
-
-SAL_FUNC ::= out lparen OUT_EXP:v1 rparen
-{:
-    if(!error_detectat){
-        Simbol aux_v1 = (Simbol) v1;
-        if(aux_v1.getTipus() == TipusDades.NULL){
-            print_this("Error semántico SAL_FUNC");
-            String e = ("La funcion de salida out esta vacía");
-            semantic_error(e, v1);
-        }else{
-            RESULT = aux_v1;
-        }
-    }
-:};
+            | CRID_FUNC:v1    {: print_this("Estas en CRID_SIMB funcion"); RESULT = v1; :}
+            | TUPLA_ACCESS:v1 {: print_this("Estas en CRID_SIMB tupla"); RESULT = v1; :}
+            ;

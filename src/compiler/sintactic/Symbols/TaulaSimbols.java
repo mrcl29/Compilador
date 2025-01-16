@@ -9,11 +9,11 @@ public class TaulaSimbols {
         taulaSimbols = new ArrayList<Simbol>();
     }
 
-    public boolean existeixSimbol(Object id) {
+    public boolean existeixSimbol(Simbol id) {
         Simbol simbol;
         for (int i = 0; i < taulaSimbols.size(); i++) {
             simbol = taulaSimbols.get(i);
-            if (simbol.getValue().equals(id)) {
+            if (simbol.getValue() == id.getValue()) {
                 return true;
             }
         }
@@ -21,32 +21,36 @@ public class TaulaSimbols {
     }
 
     public boolean declararVariableConstant(VariableConstant varcon) {
-        if (existeixSimbol(varcon.getValue())) {
-            return false;
+        Simbol simbol;
+        for (int i = 0; i < taulaSimbols.size(); i++) {
+            simbol = taulaSimbols.get(i);
+            if (simbol.getValue() == varcon.getValue() && simbol instanceof VariableConstant) {
+                return false;
+            }
         }
         taulaSimbols.add(varcon);
         return true;
     }
 
-    public boolean declararVariableConstant(VariableConstant varcon, String ambit) {
-        if (existeixSimbol(varcon.getValue())) {
-            return false;
-        }
-        taulaSimbols.add(new VariableConstant(varcon.getValue(), varcon.getTipus(), varcon.isEsConstant(), ambit));
-        return true;
-    }
-
     public boolean declararTupla(Tupla tup) {
-        if (existeixSimbol(tup.getValue())) {
-            return false;
+        Simbol simbol;
+        for (int i = 0; i < taulaSimbols.size(); i++) {
+            simbol = taulaSimbols.get(i);
+            if (simbol.getValue() == tup.getValue() && simbol instanceof Tupla) {
+                return false;
+            }
         }
         taulaSimbols.add(tup);
         return true;
     }
 
     public boolean declararFuncio(Funcio fun) {
-        if (existeixSimbol(fun.getValue())) {
-            return false;
+        Simbol simbol;
+        for (int i = 0; i < taulaSimbols.size(); i++) {
+            simbol = taulaSimbols.get(i);
+            if (simbol.getValue() == fun.getValue() && simbol instanceof Funcio) {
+                return false;
+            }
         }
         taulaSimbols.add(fun);
         return true;
