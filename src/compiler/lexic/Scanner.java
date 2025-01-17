@@ -828,7 +828,7 @@ public class Scanner implements java_cup.runtime.Scanner {
             zzDoEOF();
           {   try{
     escribirTokens();
-    System.exit(0);
+    return symbol(ParserSym.eof);
   }catch(IOException e){
     System.err.println(e);
   }

@@ -39,7 +39,8 @@ parser code {:
 
     GenerarCodi c3a = new GenerarCodi();
 
-    int nbytes = 2
+    int nbytes = 2;
+    int buid = -2;
 
     /**************************************************************
     ************************ GESTIÓ ERRORS ************************
@@ -107,6 +108,7 @@ terminal Simbol lparen, rparen, colon, double_colon, semicolon, comma, lbrace, r
 terminal Simbol integer_literal;
 terminal Simbol boolean_literal;
 terminal Simbol id;
+terminal Simbol eof;
 
 /* No terminales */
 non terminal S, P, BODY, DECL, VAR_DECL, CONS_DECL, TUPLA_DECL, FUNC_DECL, PARAM_LIST, PARAM, COS, FINAL_RTN, SENT;
@@ -130,7 +132,7 @@ P ::= BODY
 
 BODY ::= SENT BODY
       | FUNC_DECL BODY
-      ;
+      | eof {: done_parsing(); :};
 
 SENT ::= DECL
        | ASIG_SENT
@@ -597,10 +599,10 @@ LIT ::= ENT_LIT:v1
     print_this("Estas en LIT integer");
     Simbol aux_v1 = (Simbol) v1;
 
-    if(aux_v1.getD() == -2){
-        //aux_v1.setR(aux_v1.getR());
+    if(aux_v1.getD() == -3){
+        aux_v1.setR(aux_v1.getR());
     }else{
-        int t = c3a.novavar();
+        int t = c3a.novavar(aux_v1);
         c3a.genera("idx_val", aux_v1.getR(), aux_v1.getD(), t);
         aux_v1.setR(t);
     }
@@ -612,10 +614,10 @@ LIT ::= ENT_LIT:v1
     print_this("Estas en LIT booleano");
     Simbol aux_v1 = (Simbol) v1;
 
-    if(aux_v1.getD() == -2){
-        //aux_v1.setR(aux_v1.getR());
+    if(aux_v1.getD() == -3){
+        aux_v1.setR(aux_v1.getR());
     }else{
-        int t = c3a.novavar();
+        int t = c3a.novavar(aux_v1);
         c3a.genera("idx_val", aux_v1.getR(), aux_v1.getD(), t);
         aux_v1.setR(t);
     }
@@ -629,10 +631,10 @@ ENT_LIT ::= POS_ENT_LIT:v1
     print_this("Estas en ENT_LIT positivo");
     Simbol aux_v1 = (Simbol) v1;
 
-    if(aux_v1.getD() == -2){
-        //aux_v1.setR(aux_v1.getR());
+    if(aux_v1.getD() == -3){
+        aux_v1.setR(aux_v1.getR());
     }else{
-        int t = c3a.novavar();
+        int t = c3a.novavar(aux_v1);
         c3a.genera("idx_val", aux_v1.getR(), aux_v1.getD(), t);
         aux_v1.setR(t);
     }
@@ -643,11 +645,14 @@ ENT_LIT ::= POS_ENT_LIT:v1
 {:
     print_this("Estas en ENT_LIT negativo");
     Simbol aux_v1 = (Simbol) v1;
+    aux_v1.setValor(-1*(Integer) aux_v1.getValue());
 
-    t = c3a.novavar();
-    c3a.genera("neg", (Integer) aux_v1.getR(), -2, t);
+    int t = c3a.novavar(aux_v1);
+    c3a.genera("neg", (Integer) aux_v1.getR(), buid, t);
     aux_v1.setR(t);
 
+
+    aux_v1.setValor(-1*(Integer) aux_v1.getValue());
     RESULT = aux_v1;
 :}
 ;
@@ -656,9 +661,10 @@ POS_ENT_LIT ::= integer_literal:v1
 {:
     print_this("Positive integer");
     Simbol aux_v1 = (Simbol) v1;
+    aux_v1.setValor((Integer) aux_v1.getValue());
 
-    t = c3a.novavar();
-    c3a.genera("copy", (Integer) aux_v1.getValue(), -2, t);
+    int t = c3a.novavar(aux_v1);
+    c3a.genera("copy", (Integer) aux_v1.getValue(), buid, t);
     aux_v1.setR(t);
 
     RESULT = aux_v1;
@@ -669,15 +675,14 @@ BOL_LIT ::= boolean_literal:v1
 {:
     print_this("Boolean literal");
     Simbol aux_v1 = (Simbol) v1;
-    int val = -2;
     if((String) aux_v1.getValue() == "TRUE" || (String) aux_v1.getValue() == "true"){
-    val = -1;
+        aux_v1.setValor(0);
     }else{
-    val = 0;
+        aux_v1.setValor(-1);
     }
 
-    t = c3a.novavar();
-    c3a.genera("copy", val, -2, t);
+    int t = c3a.novavar(aux_v1);
+    c3a.genera("copy", val, buid, t);
     aux_v1.setR(t);
 
     RESULT = aux_v1;
@@ -695,9 +700,13 @@ TUPLA_ACCESS ::= id:v1 lbracket integer_literal:v2 rbracket
         if(aux_tupla.getValue() != ""){
             if(index == 0 || index == 1){
                 aux_tupla.setTipus(aux_tupla.getTipus(index));
+                aux_tupla.setFila(aux_v1.getFila());
+                aux_tupla.setColumna(aux_v1.getColumna());
 
-                int t1 = ((Integer) v2.getValue()) - 0;
-                int t2 = t1 * nbytes;
+                int t1 = c3a.novavar(new Simbol("t1", (Integer) v2.getValue()))
+                c3a.genera("copy", (Integer) v2.getValue(), t1)
+                int t2 = c3a.novavar(new Simbol("t2", (Integer) v2.getValue()) * nbytes)
+                c3a.genera("prod", t1, nbytes, t2);
                 aux_tupla.setD(t2);
 
                 RESULT = aux_tupla;
@@ -715,8 +724,8 @@ TUPLA_ACCESS ::= id:v1 lbracket integer_literal:v2 rbracket
 :}
 ;
 
-TIPO ::= integer {: print_this("Tipo integer"); RESULT = new Simbol("integer", TipusDades.INTEGER); :}
-       | logical {: print_this("Tipo boolean"); RESULT = new Simbol("logical", TipusDades.BOOLEAN); :}
+TIPO ::= integer {: print_this("Tipo integer"); RESULT = new Simbol("integer", TipusDades.INTEGER, 1);//1 valor per tipus integer :}
+       | logical {: print_this("Tipo boolean"); RESULT = new Simbol("logical", TipusDades.BOOLEAN, 2);//2 valor per tipus boolean :}
        ;
 
 ARGS ::= EXP:v1 ARGS_LIST:v2
@@ -813,15 +822,15 @@ LOG_TERM ::= EXP:v1 equal EXP:v2
                 if(aux_v1.getTipus() == aux_v2.getTipus()){
                     print_this(aux_v1.getValue() + " equal " + aux_v2.getValue());
 
-                    int t = c3a.novavar();
+                    int t = c3a.novavar(new Simbol("t", buid));
                     int e1 = c3a.novaetiqueta();
                     int e2 = c3a.novaetiqueta();
                     c3a.genera("ifNE", aux_v1.getR(), aux_v2.getR(), e1);
-                    c3a.genera("copy", 0, -2, t);
-                    c3a.genera("goto", -2, -2, e2);
-                    c3a.genera("skip", -2, -2, e1);
-                    c3a.genera("copy", -1, -2, t);
-                    c3a.genera("skip", -2, -2, e2);
+                    c3a.genera("copy", 0, buid, t);
+                    c3a.genera("goto", buid, buid, e2);
+                    c3a.genera("skip", buid, buid, e1);
+                    c3a.genera("copy", -1, buid, t);
+                    c3a.genera("skip", buid, buid, e2);
                     RESULT = new Simbol(aux_v1.getFila(), aux_v1.getColumna(), aux_v1.getValue(), TipusDades.BOOLEAN, t);
                 }else{
                     print_this("Error semántico LOG_TERM");
@@ -851,15 +860,15 @@ LOG_TERM ::= EXP:v1 equal EXP:v2
                 if(aux_v1.getTipus() == aux_v2.getTipus()){
                     print_this(aux_v1.getValue() + " not_equal "+aux_v2.getValue());
 
-                    int t = c3a.novavar();
+                    int t = c3a.novavar(new Simbol("t", buid));
                     int e1 = c3a.novaetiqueta();
                     int e2 = c3a.novaetiqueta();
                     c3a.genera("ifEQ", aux_v1.getR(), aux_v2.getR(), e1);
-                    c3a.genera("copy", 0, -2, t);
-                    c3a.genera("goto", -2, -2, e2);
-                    c3a.genera("skip", -2, -2, e1);
-                    c3a.genera("copy", -1, -2, t);
-                    c3a.genera("skip", -2, -2, e2);
+                    c3a.genera("copy", 0, buid, t);
+                    c3a.genera("goto", buid, buid, e2);
+                    c3a.genera("skip", buid, buid, e1);
+                    c3a.genera("copy", -1, buid, t);
+                    c3a.genera("skip", buid, buid, e2);
                     RESULT = new Simbol(aux_v1.getFila(), aux_v1.getColumna(), aux_v1.getValue(), TipusDades.BOOLEAN, t);
                 }else{
                     print_this("Error semántico LOG_TERM");
@@ -887,10 +896,10 @@ LOG_TERM ::= EXP:v1 equal EXP:v2
                 semantic_error(e, v2);
             }else{
                 print_this(aux_v1.getValue() + " and " + aux_v2.getValue());
-
-                int t = c3a.novavar();
+                int val = (aux_v1.getValor() == 0 ? 0 : (aux_v1.getValor() == 0 ? 0 : -1);
+                int t = c3a.novavar(new Simbol("t"), val));
                 c3a.genera("and", aux_v1.getR(), aux_v2.getR(), t);
-                RESULT = new Simbol(aux_v1.getFila(), aux_v1.getColumna(), aux_v1.getValue(), TipusDades.BOOLEAN, t);
+                RESULT = new Simbol(aux_v1.getFila(), aux_v1.getColumna(), aux_v1.getValue(), TipusDades.BOOLEAN, t, val);
             }
         }
     }
@@ -912,10 +921,10 @@ LOG_TERM ::= EXP:v1 equal EXP:v2
                 semantic_error(e, v2);
             }else{
                 print_this(aux_v1.getValue() + " or " + aux_v2.getValue());
-
-                int t = c3a.novavar();
+                int val = (aux_v1.getValor() == 0 ? 0 : (aux_v1.getValor() == 0 ? 0 : -1);
+                int t = c3a.novavar(new Simbol("t"), val));
                 c3a.genera("or", aux_v1.getR(), aux_v2.getR(), t);
-                RESULT = new Simbol(aux_v1.getFila(), aux_v1.getColumna(), aux_v1.getValue(), TipusDades.BOOLEAN, t);
+                RESULT = new Simbol(aux_v1.getFila(), aux_v1.getColumna(), aux_v1.getValue(), TipusDades.BOOLEAN, t, val);
             }
         }
     }
@@ -930,7 +939,7 @@ ARIT_TERM ::= EXP:v1 plus EXP:v2
         Simbol aux_v2 = (Simbol) v2;
         if(aux_v1.getTipus() == TipusDades.INTEGER || aux_v2.getTipus() ==  TipusDades.INTEGER){
 
-            int t = c3a.novavar();
+            int t = c3a.novavar(new Simbol("t"), aux_v1.getValor() + aux_v2.getValor()));
             c3a.genera("add", aux_v1.getR(), aux_v2.getR(), t);
             aux_v1.setR(t);
 
@@ -950,7 +959,7 @@ ARIT_TERM ::= EXP:v1 plus EXP:v2
         Simbol aux_v2 = (Simbol) v2;
         if(aux_v1.getTipus() == aux_v2.getTipus() || aux_v2.getTipus() ==  TipusDades.NULL){
 
-            int t = c3a.novavar();
+            int t = c3a.novavar(new Simbol("t"), aux_v1.getValor() - aux_v2.getValor()));
             c3a.genera("sub", aux_v1.getR(), aux_v2.getR(), t);
             aux_v1.setR(t);
 
@@ -964,23 +973,34 @@ ARIT_TERM ::= EXP:v1 plus EXP:v2
 :}
 ;
 
-ENTR_FUNC ::= in lparen TIPO:v1 rparen {: print_this("Estas en ENTR_FUNC"); RESULT = v1; :};
+ENTR_FUNC ::= in lparen TIPO:v1 rparen
+{:
+    print_this("Estas en ENTR_FUNC");
+    Simbol aux_v1 = (Simbol) v1;
+
+    int d0 = c3a.novavar(aux_v1);
+    c3a.genera("copy", aux_v1.getValor(), buid, d0);
+    int d1 = c3a.novavar(new Simbol("d1"), buid);
+    c3a.genera("in", d0, buid, d1);
+    aux_v1.setR(d1);
+
+    RESULT = aux_v1;
+:};
 
 CRID_SIMB ::= id:v1
 {:
     print_this("Estas en CRID_SIMB id");
-    Simbol aux_v1 = taulaSimbols.usarSimbol(v1.getValue());
+    Simbol aux_v1 = taulaSimbols.usarSimbol(v1.getValue()); //d = consulta(ts, id.id);
     if(aux_v1.getValue() != ""){
 
-        //d = consulta(ts, id.id);
-        //if d.td = dvar {
-        //R.r = d.nv; d.nv té el número de variable
-        //} else {
-        int t = c3a.novavar();
-        c3a.genera("copy", aux_v1.getValor(), -2, t)
-        aux_v1.setR(t);
-        //}
-        aux_v1.setD(-2);
+        if (aux_v1 instanceof VariableConstant) {
+            aux_v1.setR(aux_v1.getR()); //d.nv té el número de variable
+        } else {
+            int t = c3a.novavar(aux_v1);
+            c3a.genera("copy", aux_v1.getValor(), buid, t);
+            aux_v1.setR(t);
+        }
+        aux_v1.setD(-3);
 
         RESULT = aux_v1;
     }else{
@@ -994,10 +1014,10 @@ CRID_SIMB ::= id:v1
     print_this("Estas en CRID_SIMB funcion");
     Simbol aux_v1 = (Simbol) v1;
 
-    if(aux_v1.getD() == -2){
-        //aux_v1.setR(aux_v1.getR());
+    if(aux_v1.getD() == -3){
+        aux_v1.setR(aux_v1.getR());
     }else{
-        int t = c3a.novavar();
+        int t = c3a.novavar(aux_v1);
         c3a.genera("idx_val", aux_v1.getR(), aux_v1.getD(), t);
         aux_v1.setR(t);
     }
@@ -1010,10 +1030,10 @@ CRID_SIMB ::= id:v1
 
     Simbol aux_v1 = (Simbol) v1;
 
-    if(aux_v1.getD() == -2){
-        //aux_v1.setR(aux_v1.getR());
+    if(aux_v1.getD() == -3){
+        aux_v1.setR(aux_v1.getR());
     }else{
-        int t = c3a.novavar();
+        int t = c3a.novavar(aux_v1);
         c3a.genera("idx_val", aux_v1.getR(), aux_v1.getD(), t);
         aux_v1.setR(t);
     }

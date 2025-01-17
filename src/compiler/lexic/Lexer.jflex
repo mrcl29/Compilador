@@ -59,7 +59,7 @@ import compiler.sintactic.ParserSym;
 %eofval{
   try{
     escribirTokens();
-    System.exit(0);
+    return symbol(ParserSym.eof);
   }catch(IOException e){
     System.err.println(e);
   }

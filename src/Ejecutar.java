@@ -9,6 +9,7 @@ public class Ejecutar {
     private static final String JFLEX_PATH = "./lib/JFlex/jflex-full-1.8.2.jar";
     private static final String CUP_PATH = "./lib/JavaCUP/java-cup-11b.jar";
     private static final String UTILS_PATH = "./src/compiler/sintactic/Symbols/*.java";
+    private static final String C3A_PATH = "./src/compiler/c3a/*.java";
     private static final String LEXIC_PATH = "./src/compiler/lexic/";
     private static final String SINTACTIC_PATH = "./src/compiler/sintactic/";
     private static final String LEXER_FILE = LEXIC_PATH + "Lexer.jflex";
@@ -31,13 +32,13 @@ public class Ejecutar {
                 System.err.println("------------------------------------");
                 compileParser();
                 System.err.println("------------------------------------");
-                System.err.println("------------------ 4. Compilar archivos generados ------------------");
+                System.err.println("------------------ 5. Compilar archivos generados ------------------");
                 System.err.println("------------------------------------");
                 compileGeneratedFiles();
                 TimeUnit.SECONDS.sleep(1);
             }
             System.err.println("------------------------------------");
-            System.err.println("------------------ 5. Ejecutar Análisis ------------------");
+            System.err.println("------------------ 6. Ejecutar Análisis ------------------");
             System.err.println("------------------------------------");
             executeAnalysis();
         } catch (IOException | InterruptedException e) {
@@ -82,7 +83,7 @@ public class Ejecutar {
                 "20", "-cp", CUP_PATH, "-d", "./bin",
                 LEXIC_PATH + "Scanner.java", SINTACTIC_PATH + "Parser.java", SINTACTIC_PATH +
                         "ParserSym.java",
-                UTILS_PATH);
+                UTILS_PATH, C3A_PATH);
         processBuilder.inheritIO();
         Process process = processBuilder.start();
         process.waitFor();

@@ -9,61 +9,81 @@ import compiler.sintactic.Symbols.*;
 
 public class GenerarCodi {
     private static String fitxer = "codi3a.txt";
-    BufferedWriter buf;
-    int nv = -1;
-    int np = -1;
-    int ne = -1;
-    ArrayList<Integer> instruccions1 = new ArrayList<Integer>();
+    private static BufferedWriter buf;
+    private static int nv = -1;
+    private static int np = -1;
+    private static int ne = -1;
+    private static ArrayList<String> instruccions1 = new ArrayList<String>();
     ArrayList<Integer> instruccions2 = new ArrayList<Integer>();
     ArrayList<Integer> instruccions3 = new ArrayList<Integer>();
     ArrayList<Integer> instruccions4 = new ArrayList<Integer>();
-    ArrayList<Integer> tv = new ArrayList<Integer>();
+    ArrayList<Simbol> tv = new ArrayList<Simbol>();
     ArrayList<Funcio> tp = new ArrayList<Funcio>();
     ArrayList<Integer> te = new ArrayList<Integer>();
 
-    public GenerarCodi() throws IOException {
-        buf = new BufferedWriter(new FileWriter(fitxer));
+    public GenerarCodi() {
+        try {
+            buf = new BufferedWriter(new FileWriter(fitxer));
+        } catch (IOException e) {
+            System.err.println(e);
+        }
     }
 
-    private void escriure(String texte) throws IOException {
-        buf.write(texte);
+    public void escriure(String texte) {
+        try {
+            buf.write(texte);
+        } catch (IOException e) {
+            System.err.println(e);
+        }
     }
 
-    private void escriureLinia(String texte) throws IOException {
-        buf.write(texte + "\n");
+    public void escriureLinia(String texte) {
+        try {
+            buf.write(texte + "\n");
+        } catch (IOException e) {
+            System.err.println(e);
+        }
     }
 
-    private void novaLinia(String texte) throws IOException {
-        buf.write("\n");
+    public void novaLinia(String texte) {
+        try {
+            buf.write("\n");
+        } catch (IOException e) {
+            System.err.println(e);
+        }
     }
 
-    private void tancar() throws IOException {
-        buf.close();
+    public void tancar() {
+        try {
+            buf.close();
+        } catch (IOException e) {
+            System.err.println(e);
+        }
     }
 
-    private int novavar() throws IOException {
+    public int novavar(Simbol s) {
         nv = nv + 1;
-        tv.add(nv);
+        tv.add(s);
         return nv;
     }
 
-    private int nouproc(Funcio nouproc) throws IOException {
+    public int nouproc(Funcio nouproc) {
         np = np + 1;
         tp.add(nouproc);
         return np;
     }
 
-    private int novaetiqueta() throws IOException {
+    public int novaetiqueta() {
         ne = ne + 1;
         te.add(ne);
         return ne;
     }
 
-    private void genera(String d1, int d2, int d3, int d4) throws IOException {
-        // instruccions1.add(d1);
-        // instruccions2.add(d2);
-        // instruccions3.add(d3);
-        // instruccions4.add(d4);
+    public void genera(String d1, int d2, int d3, int d4) {
+        instruccions1.add(d1);
+        instruccions2.add(d2);
+        instruccions3.add(d3);
+        instruccions4.add(d4);
 
         escriureLinia(d1 + " " + d2 + " " + d3 + " " + d4);
     }
