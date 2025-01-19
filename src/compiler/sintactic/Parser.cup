@@ -166,6 +166,15 @@ ASIG_SENT ::= id:v1 assign EXP:v2 semicolon
                         String e = ("Se está intentando asignar un tipo incorrecto a la variable " + v1.getValue());
                         semantic_error(e, v1);
                     }else{
+                        aux_v1.setValor(aux_v2.getValor());
+                        //if(aux_v1.getD() != -3){
+                        //    t = c3a.novavar();
+                        //    c3a.genera("prod", aux_v1.getD(), nbytes, t);
+                        //    c3a.genera("ind_ass", aux_v2.getR(), t, aux_v1.getR());
+                        //}else{
+                            c3a.genera("copy", aux_v2.getR(), buid, aux_v1.getR()); //copy R.r = E.r
+                        //}
+
                         RESULT = aux_v1;
                     }
                 }else{
@@ -197,47 +206,74 @@ ASIG_SENT ::= id:v1 assign EXP:v2 semicolon
                 print_this("Error semántico ASIG_SENT");
                 String e = ("A la tupla " + aux_v1.getValue() + " se le esta asignando un tipo incorrecto.");
                 semantic_error(e, v1);
+            }else{
+                aux_v1.setValor(aux_v2.getValor());
+                if(aux_v1.getD() != -3){
+                    t = c3a.novavar(aux_v1);
+                    c3a.genera("prod", aux_v1.getD(), nbytes, t);           //t = i * nbytes
+                    c3a.genera("ind_ass", aux_v2.getR(), t, aux_v1.getR()); //R.r[t] = E.r
+                }else{
+                    c3a.genera("copy", aux_v2.getR(), buid, aux_v1.getR()); //copy R.r = E.r
+                }
+
+                RESULT = aux_v1;
             }
-            RESULT = v1;
         }
     }
 :}
 ;
 
-IF_SENT ::= if_t lparen EXP:v1 rparen colon COS else_t colon COS endif
+IF_SENT ::= IFINIT COS IFELSE COS endif
 {:
     print_this("Estas en IF_SENT con else");
     if(!error_detectat){
+        efi = c3a.getNe();                   //Obtenim la etiqueta creada a IFINIT o IFELSE que corerspon a efi
+        c3a.genera("skip", buid, buid, efi); //efi: skip
+    }
+:}
+          | IFINIT COS endif
+{:
+    print_this("Estas en IF_SENT sin else");
+    if(!error_detectat){
+        efi = c3a.getNe();                   //Obtenim la etiqueta creada a IFINIT que corerspon a efi
+        c3a.genera("skip", buid, buid, efi); //efi: skip
+    }
+:}
+;
+
+IFINIT ::= if_t lparen EXP:v1 rparen colon
+{:
+    print_this("Estas en IFINIT");
+    if(!error_detectat){
         Simbol aux_v1 = (Simbol) v1;
         if(aux_v1.getTipus() == TipusDades.NULL){
-            print_this("Error semántico IF_SENT");
+            print_this("Error semántico IFINIT");
             String e = ("Debes asignar una condición al if");
             semantic_error(e, v1);
         }else{
             if(aux_v1.getTipus() != TipusDades.BOOLEAN){
-                print_this("Error semántico IF_SENT");
+                print_this("Error semántico IFINIT");
                 String e = ("La condición de la sentencia 'if' no es correcta");
                 semantic_error(e, v1);
+            }else{
+                e = novaetiqueta();                       //Cream etiqueta que correspon a e o efi
+                c3a.genera("if_EQ", aux_v1.getR(), 0, e); //if E.r=0 goto e
+
+                RESULT = aux_v1;
             }
         }
     }
 :}
-          | if_t lparen EXP:v1 rparen colon COS endif
+;
+
+IFELSE ::= else_t colon
 {:
-    print_this("Estas en IF_SENT sin else");
+    print_this("Estas en IFELSE");
     if(!error_detectat){
-        Simbol aux_v1 = (Simbol) v1;
-        if(aux_v1.getTipus() == TipusDades.NULL){
-            print_this("Error semántico IF_SENT");
-            String e = ("Debes asignar una condición al if");
-            semantic_error(e, v1);
-        }else{
-            if(aux_v1.getTipus() != TipusDades.BOOLEAN){
-                print_this("Error semántico IF_SENT");
-                String e = ("La condición de la sentencia 'if' no es correcta");
-                semantic_error(e, v1);
-            }
-        }
+        e_else = c3a.getNe();                   //Obtenim la etiqueta creada a IFINIT que correspon a inici de else
+        e = c3a.novaetiqueta();                 //Etiqueta efi
+        c3a.genera("goto", buid, buid, e);      //goto efi
+        c3a.genera("skip", buid, buid, e_else); //e: skip
     }
 :}
 ;
