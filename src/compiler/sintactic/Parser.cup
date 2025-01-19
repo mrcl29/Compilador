@@ -111,8 +111,14 @@ terminal Simbol id;
 terminal Simbol eof;
 
 /* No terminales */
-non terminal S, P, BODY, DECL, VAR_DECL, CONS_DECL, TUPLA_DECL, FUNC_DECL, PARAM_LIST, PARAM, COS, FINAL_RTN, SENT;
-non terminal ASIG_SENT, IF_SENT, WHILE_SENT, FOR_SENT, FORINIT, FORLIMIT, SAL_SENT, CRID_FUNC_SENT, CRID_FUNC, ARGS, ARGS_LIST;
+non terminal S, P, BODY, DECL, VAR_DECL, CONS_DECL, TUPLA_DECL, SENT;
+non terminal FUNC_DECL, PARAM_LIST, PARAM, COS, FINAL_RTN;
+non terminal CRID_FUNC_SENT, CRID_FUNC, ARGS, ARGS_LIST;
+non terminal ASIG_SENT;
+non terminal IF_SENT, IFINIT, IFELSE;
+non terminal WHILE_SENT;
+non terminal FOR_SENT, FORINIT, FORLIMIT;
+non terminal SAL_SENT;
 non terminal TIPO, EXP, CRID_SIMB, ARIT_TERM, LOG_TERM, TUPLA_ACCESS, LIT, ENT_LIT, POS_ENT_LIT, BOL_LIT, OUT_EXP, ENTR_FUNC;
 
 /* Precedencia y asociatividad */
