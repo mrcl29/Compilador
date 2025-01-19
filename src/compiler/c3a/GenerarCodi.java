@@ -88,6 +88,10 @@ public class GenerarCodi {
         escriureLinia(d1 + " " + d2 + " " + d3 + " " + d4);
     }
 
+    public static int getNe() {
+        return ne;
+    }
+
     // private void operacioAritmetica(int t, int E1, int E2, String operacio)
     // throws IOException {
     // instruccions1.add(operacio);
@@ -130,4 +134,5 @@ public class GenerarCodi {
     // instruccions3.add(-2);
     // instruccions4.add(t);
     // }
+
 }
