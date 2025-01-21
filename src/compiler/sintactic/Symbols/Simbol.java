@@ -10,6 +10,8 @@ public class Simbol {
     private int d = -3;
     private int valor;
     private String ambit;
+    private int etiqueta = -1;
+    private int etiquetafi = -1;
 
     public Simbol() {
         this.value = "";
@@ -132,6 +134,22 @@ public class Simbol {
 
     public void setAmbit(String ambit) {
         this.ambit = ambit;
+    }
+
+    public int getEtiqueta() {
+        return etiqueta;
+    }
+
+    public void setEtiqueta(int etiqueta) {
+        this.etiqueta = etiqueta;
+    }
+
+    public int getEtiquetafi() {
+        return etiquetafi;
+    }
+
+    public void setEtiquetafi(int etiquetafi) {
+        this.etiquetafi = etiquetafi;
     }
 
 }

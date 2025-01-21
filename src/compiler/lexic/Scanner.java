@@ -826,12 +826,12 @@ public class Scanner implements java_cup.runtime.Scanner {
       if (zzInput == YYEOF && zzStartRead == zzCurrentPos) {
         zzAtEOF = true;
             zzDoEOF();
-          {   try{
-    escribirTokens();
-    return symbol(ParserSym.eof);
-  }catch(IOException e){
-    System.err.println(e);
-  }
+          {     try{
+        escribirTokens();
+        return symbol(ParserSym.EOF);
+    }catch(IOException e){
+        System.err.println(e);
+    }
  }
       }
       else {
@@ -872,7 +872,7 @@ public class Scanner implements java_cup.runtime.Scanner {
             // fall through
           case 48: break;
           case 8:
-            { tokens.add(new Simbol(this.yytext())); return symbol(ParserSym.integer_literal, new Simbol(Integer.parseInt(this.yytext()), TipusDades.INTEGER));
+            { tokens.add(new Simbol("integer_literal")); return symbol(ParserSym.integer_literal, new Simbol(Integer.parseInt(this.yytext()), TipusDades.INTEGER));
             }
             // fall through
           case 49: break;
@@ -892,7 +892,7 @@ public class Scanner implements java_cup.runtime.Scanner {
             // fall through
           case 52: break;
           case 12:
-            { tokens.add(new Simbol(this.yytext())); return symbol(ParserSym.id, new Simbol(this.yytext()));
+            { tokens.add(new Simbol("id")); return symbol(ParserSym.id, new Simbol(this.yytext()));
             }
             // fall through
           case 53: break;
@@ -982,7 +982,7 @@ public class Scanner implements java_cup.runtime.Scanner {
             // fall through
           case 70: break;
           case 30:
-            { tokens.add(new Simbol(this.yytext())); return symbol(ParserSym.boolean_literal, new Simbol(this.yytext(), TipusDades.BOOLEAN));
+            { tokens.add(new Simbol("boolean_literal")); return symbol(ParserSym.boolean_literal, new Simbol(this.yytext(), TipusDades.BOOLEAN));
             }
             // fall through
           case 71: break;

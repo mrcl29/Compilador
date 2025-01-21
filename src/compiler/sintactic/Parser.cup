@@ -108,15 +108,14 @@ terminal Simbol lparen, rparen, colon, double_colon, semicolon, comma, lbrace, r
 terminal Simbol integer_literal;
 terminal Simbol boolean_literal;
 terminal Simbol id;
-terminal Simbol eof;
 
 /* No terminales */
-non terminal S, P, BODY, DECL, VAR_DECL, CONS_DECL, TUPLA_DECL, SENT;
+non terminal S, P, DECL, VAR_DECL, CONS_DECL, TUPLA_DECL, SENT;
 non terminal FUNC_DECL, PARAM_LIST, PARAM, COS, FINAL_RTN;
 non terminal CRID_FUNC_SENT, CRID_FUNC, ARGS, ARGS_LIST;
 non terminal ASIG_SENT;
-non terminal IF_SENT, IFINIT, IFELSE;
-non terminal WHILE_SENT;
+non terminal IF_SENT, IF_ELSE, IF_INIT;
+non terminal WHILE_SENT, WHILE_REP, M;
 non terminal FOR_SENT, FORINIT, FORLIMIT;
 non terminal SAL_SENT;
 non terminal TIPO, EXP, CRID_SIMB, ARIT_TERM, LOG_TERM, TUPLA_ACCESS, LIT, ENT_LIT, POS_ENT_LIT, BOL_LIT, OUT_EXP, ENTR_FUNC;
@@ -131,14 +130,11 @@ start with S;
 
 /* Reglas de gramática */
 
-S ::= P ;
+S ::= P {: done_parsing(); :};
 
-P ::= BODY
+P ::= SENT P
+    | FUNC_DECL P
     | /* epsilon */;
-
-BODY ::= SENT BODY
-      | FUNC_DECL BODY
-      | eof {: done_parsing(); :};
 
 SENT ::= DECL
        | ASIG_SENT
@@ -154,153 +150,198 @@ DECL ::= VAR_DECL
        | TUPLA_DECL
        ;
 
-ASIG_SENT ::= id:v1 assign EXP:v2 semicolon
+ASIG_SENT ::= id:vid assign EXP:vE semicolon
 {:
     print_this("Estas en ASIG_SENT para símbolo");
     if(!error_detectat){
-        VariableConstant aux_v1 = taulaSimbols.usarVariableConstant(v1.getValue());
-        Simbol aux_v2 = (Simbol) v2;
-        if(aux_v2.getTipus() == TipusDades.NULL){
+        VariableConstant id = taulaSimbols.usarVariableConstant(vid.getValue());
+        Simbol E = (Simbol) vE;
+        if(E.getTipus() == TipusDades.NULL){
             print_this("Error semántico ASIG_SENT");
             String e = ("Valor no asignado");
-            semantic_error(e, v2);
+            semantic_error(e, vE);
         }else{
-            if(aux_v1.getValue() != ""){
-                if(!aux_v1.isEsConstant()){
-                    if(aux_v1.getTipus() != aux_v2.getTipus()){
+            if(id.getValue() != ""){
+                if(!id.isEsConstant()){
+                    if(id.getTipus() != E.getTipus()){
                         print_this("Error semántico ASIG_SENT");
-                        String e = ("Se está intentando asignar un tipo incorrecto a la variable " + v1.getValue());
-                        semantic_error(e, v1);
+                        String e = ("Se está intentando asignar un tipo incorrecto a la variable " + vid.getValue());
+                        semantic_error(e, vid);
                     }else{
-                        aux_v1.setValor(aux_v2.getValor());
-                        //if(aux_v1.getD() != -3){
+
+                        id.setValor(E.getValor());
+                        //if(id.getD() != -3){
                         //    t = c3a.novavar();
-                        //    c3a.genera("prod", aux_v1.getD(), nbytes, t);
-                        //    c3a.genera("ind_ass", aux_v2.getR(), t, aux_v1.getR());
+                        //    c3a.genera("prod", id.getD(), nbytes, t);
+                        //    c3a.genera("ind_ass", E.getR(), t, id.getR());
                         //}else{
-                            c3a.genera("copy", aux_v2.getR(), buid, aux_v1.getR()); //copy R.r = E.r
+                            c3a.genera("copy", E.getR(), buid, id.getR()); // copy R.r = E.r
                         //}
 
-                        RESULT = aux_v1;
+                        RESULT = id;
                     }
                 }else{
                     print_this("Error semántico ASIG_SENT");
-                    String e = ("Se esta intentando asignar un nuevo valor a la constante " + v1.getValue());
-                    semantic_error(e, v1);
+                    String e = ("Se esta intentando asignar un nuevo valor a la constante " + vid.getValue());
+                    semantic_error(e, vid);
                 }
             }else{
                 print_this("Error semántico ASIG_SENT");
-                String e = ("La variable " + v1.getValue() + " no ha sido declarada");
-                semantic_error(e, v1);
+                String e = ("La variable " + vid.getValue() + " no ha sido declarada");
+                semantic_error(e, vid);
             }
         }
     }
 :}
-            | TUPLA_ACCESS:v1 assign EXP:v2 semicolon
+            | TUPLA_ACCESS:vTUPLA_ACCESS assign EXP:vE semicolon
 {:
     print_this("Estas en ASIG_SENT para tupla");
     if(!error_detectat){
-        Tupla aux_v1 = (Tupla) v1;
-        Simbol aux_v2 = (Simbol) v2;
-        print_this("Asignando valor a Tupla: "+ aux_v1.getValue());
-        if(aux_v2.getTipus() == TipusDades.NULL){
+        Tupla TUPLA_ACCESS = (Tupla) vTUPLA_ACCESS;
+        Simbol E = (Simbol) vE;
+        print_this("Asignando valor a Tupla: "+ TUPLA_ACCESS.getValue());
+        if(E.getTipus() == TipusDades.NULL){
             print_this("Error semántico ASIG_SENT");
             String e = ("Valor no asignado");
-            semantic_error(e, v2);
+            semantic_error(e, vE);
         }else{
-            if(aux_v1.getTipus() != aux_v2.getTipus()){
+            if(TUPLA_ACCESS.getTipus() != E.getTipus()){
                 print_this("Error semántico ASIG_SENT");
-                String e = ("A la tupla " + aux_v1.getValue() + " se le esta asignando un tipo incorrecto.");
-                semantic_error(e, v1);
+                String e = ("A la tupla " + TUPLA_ACCESS.getValue() + " se le esta asignando un tipo incorrecto.");
+                semantic_error(e, vTUPLA_ACCESS);
             }else{
-                aux_v1.setValor(aux_v2.getValor());
-                if(aux_v1.getD() != -3){
-                    int t = c3a.novavar(aux_v1);
-                    c3a.genera("prod", aux_v1.getD(), nbytes, t);           //t = i * nbytes
-                    c3a.genera("ind_ass", aux_v2.getR(), t, aux_v1.getR()); //R.r[t] = E.r
+                TUPLA_ACCESS.setValor(E.getValor());
+                if(TUPLA_ACCESS.getD() != -3){
+
+                    int t = c3a.novavar(TUPLA_ACCESS);
+                    c3a.genera("prod", TUPLA_ACCESS.getD(), nbytes, t);           // t = i * nbytes
+                    c3a.genera("ind_ass", E.getR(), t, TUPLA_ACCESS.getR());      // R.r[t] = E.r
                 }else{
-                    c3a.genera("copy", aux_v2.getR(), buid, aux_v1.getR()); //copy R.r = E.r
+
+                    c3a.genera("copy", E.getR(), buid, TUPLA_ACCESS.getR()); // copy R.r = E.r
                 }
 
-                RESULT = aux_v1;
+                RESULT = TUPLA_ACCESS;
             }
         }
     }
 :}
 ;
 
-IF_SENT ::= IFINIT COS IFELSE COS endif
+IF_SENT ::= IF_ELSE:vIF_ELSE COS endif //if else
 {:
     print_this("Estas en IF_SENT con else");
     if(!error_detectat){
-        int efi = c3a.getNe();                   //Obtenim la etiqueta creada a IFINIT o IFELSE que corerspon a efi
-        c3a.genera("skip", buid, buid, efi); //efi: skip
+        Simbol IF_ELSE = (Simbol) vIF_ELSE;
+
+        c3a.genera("skip", buid, buid, IF_ELSE.getEtiqueta()); //efi: skip
     }
 :}
-          | IFINIT COS endif
+          | IF_INIT:vIF_INIT COS endif //if
 {:
     print_this("Estas en IF_SENT sin else");
     if(!error_detectat){
-        int efi = c3a.getNe();                   //Obtenim la etiqueta creada a IFINIT que corerspon a efi
-        c3a.genera("skip", buid, buid, efi); //efi: skip
+        Simbol IF_INIT = (Simbol) vIF_INIT;
+
+        c3a.genera("skip", buid, buid, IF_INIT.getEtiqueta()); //efi: skip
     }
 :}
 ;
 
-IFINIT ::= if_t lparen EXP:v1 rparen colon
+IF_ELSE ::= IF_INIT:vIF_INIT COS else_t colon
 {:
-    print_this("Estas en IFINIT");
+    print_this("Estas en IF_ELSE");
     if(!error_detectat){
-        Simbol aux_v1 = (Simbol) v1;
-        if(aux_v1.getTipus() == TipusDades.NULL){
-            print_this("Error semántico IFINIT");
-            String e = ("Debes asignar una condición al if");
-            semantic_error(e, v1);
-        }else{
-            if(aux_v1.getTipus() != TipusDades.BOOLEAN){
-                print_this("Error semántico IFINIT");
-                String e = ("La condición de la sentencia 'if' no es correcta");
-                semantic_error(e, v1);
-            }else{
-                int e = c3a.novaetiqueta();                       //Cream etiqueta que correspon a e o efi
-                c3a.genera("if_EQ", aux_v1.getR(), 0, e); //if E.r=0 goto e
+        Simbol IF_INIT = (Simbol) vIF_INIT;
 
-                RESULT = aux_v1;
+        int efi = c3a.novaetiqueta();
+        c3a.genera("goto", buid, buid, efi);                  //goto efi
+        c3a.genera("skip", buid, buid, IF_INIT.getEtiqueta()); //e: skip
+        IF_INIT.setEtiqueta(efi);
+
+        RESULT = IF_INIT;
+    }
+:}
+;
+
+IF_INIT ::= if_t lparen EXP:vE rparen colon
+{:
+    print_this("Estas en IF_INIT");
+    if(!error_detectat){
+        Simbol E = (Simbol) vE;
+        if(E.getTipus() == TipusDades.NULL){
+            print_this("Error semántico IF_INIT");
+            String e = ("Debes asignar una condición al if");
+            semantic_error(e, vE);
+        }else{
+            if(E.getTipus() != TipusDades.BOOLEAN){
+                print_this("Error semántico IF_INIT");
+                String e = ("La condición de la sentencia 'if' no es correcta");
+                semantic_error(e, vE);
+            }else{
+
+                int e = c3a.novaetiqueta();
+                c3a.genera("if_EQ", E.getR(), 0, e); // if E.r=0 goto e
+                E.setEtiqueta(e);
+
+                RESULT = E;
             }
         }
     }
 :}
 ;
 
-IFELSE ::= else_t colon
-{:
-    print_this("Estas en IFELSE");
-    if(!error_detectat){
-        int e_else = c3a.getNe();                   //Obtenim la etiqueta creada a IFINIT que correspon a inici de else
-        int e = c3a.novaetiqueta();                 //Etiqueta efi
-        c3a.genera("goto", buid, buid, e);      //goto efi
-        c3a.genera("skip", buid, buid, e_else); //e: skip
-    }
-:}
-;
-
-WHILE_SENT ::= while_t lparen EXP:v1 rparen colon COS endwhile
+WHILE_SENT ::= WHILE_REP:vWHILE_REP COS endwhile
 {:
     print_this("Estas en WHILE_SENT");
     if(!error_detectat){
-        Simbol aux_v1 = (Simbol) v1;
-        if(aux_v1.getTipus() == TipusDades.NULL){
+        Simbol WHILE_REP = (Simbol) vWHILE_REP;
+
+        c3a.genera("goto", buid, buid, WHILE_REP.getEtiqueta()); // goto WHILE_REP.ei
+        c3a.genera("skip", buid, buid, WHILE_REP.getEtiquetafi()); // WHILE_REP.efi: skip
+    }
+:}
+;
+
+WHILE_REP ::= while_t lparen M:vM EXP:vE rparen colon
+{:
+    print_this("Estas en WHILE_REP");
+    if(!error_detectat){
+        Simbol E = (Simbol) vE;
+        if(E.getTipus() == TipusDades.NULL){
             print_this("Error semántico WHILE_SENT");
             String e = ("Debes asignar una condición al bucle");
-            semantic_error(e, v1);
+            semantic_error(e, vE);
         }else{
-            if(aux_v1.getTipus() != TipusDades.BOOLEAN){
+            if(E.getTipus() != TipusDades.BOOLEAN){
                 print_this("Error semántico WHILE_SENT");
                 String e = ("La condición de la sentencia 'while' no es correcta");
-                semantic_error(e, v1);
+                semantic_error(e, vE);
+            }else{
+                Simbol WHILE_REP = new Simbol();
+                Simbol M = (Simbol) vM;
+
+                int efi = c3a.novaetiqueta();
+                c3a.genera("if_EQ", E.getR(), 0, efi); // if E.r = 0 goto efi
+                WHILE_REP.setEtiquetafi(efi);
+                WHILE_REP.setEtiqueta(M.getEtiqueta());
+
+                RESULT = WHILE_REP;
             }
         }
     }
+:}
+;
+
+M ::= /* epsilon */
+{:
+    Simbol M = new Simbol();
+
+    int ei = c3a.novaetiqueta();
+    c3a.genera("skip", buid, buid, ei); // ei: skip
+    M.setEtiqueta(ei);
+
+    RESULT = M;
 :}
 ;
 

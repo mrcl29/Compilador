@@ -8,7 +8,6 @@ package compiler.sintactic;
 /** CUP generated interface containing symbol constants. */
 public interface ParserSym {
   /* terminals */
-  public static final int eof = 40;
   public static final int rtrn = 4;
   public static final int tuple = 17;
   public static final int lbracket = 35;
@@ -89,8 +88,7 @@ public interface ParserSym {
   "rbracket",
   "integer_literal",
   "boolean_literal",
-  "id",
-  "eof"
+  "id"
   };
 }
 

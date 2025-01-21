@@ -57,13 +57,14 @@ import compiler.sintactic.ParserSym;
 %init}
 
 %eofval{
-  try{
-    escribirTokens();
-    return symbol(ParserSym.eof);
-  }catch(IOException e){
-    System.err.println(e);
-  }
+    try{
+        escribirTokens();
+        return symbol(ParserSym.EOF);
+    }catch(IOException e){
+        System.err.println(e);
+    }
 %eofval}
+%eofclose
 
 /* Paraules clau */
 fnct = "fnct"
@@ -194,9 +195,9 @@ comment = "///".*
 {rbracket}      { tokens.add(new Simbol("rbracket")); return symbol(ParserSym.rbracket); }
 
 /* Literals */
-{integer_literal}   { tokens.add(new Simbol(this.yytext())); return symbol(ParserSym.integer_literal, new Simbol(Integer.parseInt(this.yytext()), TipusDades.INTEGER)); }
-{boolean_literal}   { tokens.add(new Simbol(this.yytext())); return symbol(ParserSym.boolean_literal, new Simbol(this.yytext(), TipusDades.BOOLEAN)); }
-{id}                { tokens.add(new Simbol(this.yytext())); return symbol(ParserSym.id, new Simbol(this.yytext())); }
+{integer_literal}   { tokens.add(new Simbol("integer_literal")); return symbol(ParserSym.integer_literal, new Simbol(Integer.parseInt(this.yytext()), TipusDades.INTEGER)); }
+{boolean_literal}   { tokens.add(new Simbol("boolean_literal")); return symbol(ParserSym.boolean_literal, new Simbol(this.yytext(), TipusDades.BOOLEAN)); }
+{id}                { tokens.add(new Simbol("id")); return symbol(ParserSym.id, new Simbol(this.yytext())); }
 
 /* Espais en blanc i comentaris */
 {whitespace}        { /* Ignorar espais en blanc */ }

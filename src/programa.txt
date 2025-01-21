@@ -45,4 +45,4 @@ if(true && 1===2):  /// Error semántico: Condición no booleana
 endif
 
 /// Acceso incorrecto a una tupla
-x[1] = TRUE;  /// Error semántico: Índice fuera de rango
+x[1] = 1;  /// Error semántico: Índice fuera de rango
