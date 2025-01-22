@@ -1,6 +1,6 @@
 package compiler.sintactic.Symbols;
 
-public class Simbol {
+public class Simbol implements Cloneable {
 
     public Object value;
     private Integer fila;
@@ -12,6 +12,16 @@ public class Simbol {
     private String ambit;
     private int etiqueta = -1;
     private int etiquetafi = -1;
+
+    @Override
+    public Simbol clone() {
+        try {
+            return (Simbol) super.clone();
+        } catch (CloneNotSupportedException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 
     public Simbol() {
         this.value = "";

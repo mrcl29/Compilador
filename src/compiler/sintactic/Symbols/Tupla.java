@@ -3,6 +3,9 @@ package compiler.sintactic.Symbols;
 public class Tupla extends Simbol {
     private TipusDades valor1;
     private TipusDades valor2;
+    private int val1;
+    private int val2;
+    private int ref;
 
     public Tupla() {
         super("", TipusDades.NULL);
@@ -45,5 +48,30 @@ public class Tupla extends Simbol {
             return valor2;
         }
         return TipusDades.NULL;
+    }
+
+    public int getVal(int i) {
+        if (i == 0) {
+            return val1;
+        } else {
+            return val2;
+        }
+
+    }
+
+    public void setVal1(int val1) {
+        this.val1 = val1;
+    }
+
+    public void setVal2(int val2) {
+        this.val2 = val2;
+    }
+
+    public int getRef() {
+        return ref;
+    }
+
+    public void setRef(int ref) {
+        this.ref = ref;
     }
 }

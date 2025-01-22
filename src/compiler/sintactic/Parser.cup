@@ -166,17 +166,11 @@ ASIG_SENT ::= id:vid assign EXP:vE semicolon
                     if(id.getTipus() != E.getTipus()){
                         print_this("Error semántico ASIG_SENT");
                         String e = ("Se está intentando asignar un tipo incorrecto a la variable " + vid.getValue());
-                        semantic_error(e, vid);
+                        semantic_error(e, vE);
                     }else{
-
                         id.setValor(E.getValor());
-                        //if(id.getD() != -3){
-                        //    t = c3a.novavar();
-                        //    c3a.genera("prod", id.getD(), nbytes, t);
-                        //    c3a.genera("ind_ass", E.getR(), t, id.getR());
-                        //}else{
-                            c3a.genera("copy", E.getR(), buid, id.getR()); // copy R.r = E.r
-                        //}
+
+                        c3a.genera("copy", E.getR(), buid, id.getR()); // copy R.r = E.r
 
                         RESULT = id;
                     }
@@ -210,16 +204,13 @@ ASIG_SENT ::= id:vid assign EXP:vE semicolon
                 String e = ("A la tupla " + TUPLA_ACCESS.getValue() + " se le esta asignando un tipo incorrecto.");
                 semantic_error(e, vTUPLA_ACCESS);
             }else{
-                TUPLA_ACCESS.setValor(E.getValor());
-                if(TUPLA_ACCESS.getD() != -3){
-
-                    int t = c3a.novavar(TUPLA_ACCESS);
-                    c3a.genera("prod", TUPLA_ACCESS.getD(), nbytes, t);           // t = i * nbytes
-                    c3a.genera("ind_ass", E.getR(), t, TUPLA_ACCESS.getR());      // R.r[t] = E.r
+                if(TUPLA_ACCESS.getRef() == 0){
+                    TUPLA_ACCESS.setVal1(E.getValor());
                 }else{
-
-                    c3a.genera("copy", E.getR(), buid, TUPLA_ACCESS.getR()); // copy R.r = E.r
+                    TUPLA_ACCESS.setVal2(E.getValor());
                 }
+
+                c3a.genera("ind_ass", E.getR(), TUPLA_ACCESS.getD(), TUPLA_ACCESS.getR());
 
                 RESULT = TUPLA_ACCESS;
             }
@@ -421,6 +412,13 @@ SAL_SENT ::= out lparen OUT_EXP:v1 rparen semicolon
         String e = ("Salida vacía");
         semantic_error(e, v1);
     }else{
+        //if R.d = nul_val {
+        //    E.r = R.r;
+        //} else {
+        //    t = novavar;
+        //    genera( t = R.r[R.d]); idx_val R.r R.d t
+        //    E.r = t;
+        //}
         RESULT = aux_v1;
     }
 :}
@@ -578,6 +576,46 @@ FUNC_DECL ::= fnct TIPO:v1 id:v2 lparen PARAM_LIST:v3 rparen colon COS FINAL_RTN
 :}
 ;
 
+PARAM_LIST ::= PARAM:v1
+{:
+    print_this("Estas en PARAM_LIST");
+    if(!error_detectat){
+        RESULT = new ArrayList<VariableConstant>(Arrays.asList((VariableConstant) v1));
+    }
+:}
+             | PARAM:v1 comma PARAM_LIST:v2
+{:
+    print_this("Estas en PARAM_LIST");
+    if(!error_detectat){
+        VariableConstant aux_v1 = (VariableConstant) v1;
+        ArrayList<VariableConstant> aux_v2 = (ArrayList<VariableConstant>) v2;
+        aux_v2.add(0, aux_v1);
+        RESULT = aux_v2;
+    }
+:}
+             | /* epsilon */ {: print_this("Estas en PARAM_LIST epsilon"); RESULT = new ArrayList<VariableConstant>(); :}
+             ;
+
+PARAM ::= id:v1 double_colon TIPO:v2
+{:
+    print_this("Estas en PARAM");
+    if(!error_detectat){
+        print_this("Declarando Parámetro "+ v1.getValue());
+        Simbol aux_v1 = (Simbol) v1;
+        Simbol aux_v2 = (Simbol) v2;
+        error_detectat = !taulaSimbols.declararVariableConstant(new VariableConstant(v1.getValue(), aux_v2.getTipus(), false));
+        if(error_detectat){
+            print_this("Error semántico PARAM");
+            String e = ("Ya existe una variable o constante con el nombre '" + v1.getValue() + "'");
+            semantic_error(e, v1);
+        }else{
+            print_this("Parámetro '" + v1.getValue() + "' creado con éxito");
+            RESULT = new VariableConstant(v1.getValue(), aux_v2.getTipus(), false);
+        }
+    }
+:}
+;
+
 COS ::= SENT COS
       | SENT
       ;
@@ -595,76 +633,110 @@ FINAL_RTN ::= rtrn lparen EXP:v1 rparen semicolon
     }
 :};
 
-VAR_DECL ::= val id:v1 double_colon TIPO:v2 assign EXP:v3 semicolon
+VAR_DECL ::= val id:vid double_colon TIPO:vTIPO assign EXP:vE semicolon
 {:
     print_this("Estas en VAR_DECL");
     if(!error_detectat){
-        print_this("Declarando Variable "+ v1.getValue());
-        Simbol aux_v1 = (Simbol) v1;
-        Simbol aux_v2 = (Simbol) v2;
-        Simbol aux_v3 = (Simbol) v3;
-        if(aux_v3.getTipus() == TipusDades.NULL){
+        print_this("Declarando Variable "+ vid.getValue());
+        Simbol id = (Simbol) vid;
+        Simbol TIPO = (Simbol) vTIPO;
+        Simbol E = (Simbol) vE;
+        if(E.getTipus() == TipusDades.NULL){
             print_this("Error semántico VAR_DECL");
             String e = ("Valor no asignado");
-            semantic_error(e, v3);
+            semantic_error(e, vE);
         }else{
-            error_detectat = !taulaSimbols.declararVariableConstant(new VariableConstant(v1.getValue(), aux_v2.getTipus(), false));
-            if(error_detectat){
+            if(E.getTipus() != TIPO.getTipus()){
                 print_this("Error semántico VAR_DECL");
-                String e = ("Ya existe una variable o constante con el nombre '" + v1.getValue() + "'");
-                semantic_error(e, v1);
+                String e = ("A la variable " + id.getValue() + " de tipo " + TIPO.getTipus() + " no se le esta asignando un valor del tipo correcto: " + E.getTipus());
+                semantic_error(e, vE);
             }else{
-                print_this("Variable '" + v1.getValue() + "' creada con éxito");
-                RESULT = new VariableConstant(v1.getValue(), aux_v2.getTipus(), false);
+                VariableConstant varcon = new VariableConstant(id.getValue(), TIPO.getTipus(), false);
+                error_detectat = !taulaSimbols.declararVariableConstant(varcon);
+                if(error_detectat){
+                    print_this("Error semántico VAR_DECL");
+                    String e = ("Ya existe una variable o constante con el nombre '" + varcon.getValue() + "'");
+                    semantic_error(e, vid);
+                }else{
+                    print_this("Variable '" + varcon.getValue() + "' de tipo '" + varcon.getTipus() + "' creada con éxito");
+                    varcon.setValor(E.getValor());
+
+                    int t_id = c3a.novavar(varcon);
+                    c3a.genera("copy", E.getR(), buid, t_id); // id.r = E.r
+
+                    varcon.setR(t_id);
+                    RESULT = varcon;
+                }
             }
         }
     }
 :}
 ;
 
-CONS_DECL ::= con id:v1 double_colon TIPO:v2 assign EXP:v3 semicolon
+CONS_DECL ::= con id:vid double_colon TIPO:vTIPO assign EXP:vE semicolon
 {:
     print_this("Estas en CONS_DECL");
     if(!error_detectat){
-        print_this("Declarando Constante "+ v1.getValue());
-        Simbol aux_v1 = (Simbol) v1;
-        Simbol aux_v2 = (Simbol) v2;
-        Simbol aux_v3 = (Simbol) v3;
-        if(aux_v3.getTipus() == TipusDades.NULL){
+        print_this("Declarando Variable "+ vid.getValue());
+        Simbol id = (Simbol) vid;
+        Simbol TIPO = (Simbol) vTIPO;
+        Simbol E = (Simbol) vE;
+        if(E.getTipus() == TipusDades.NULL){
             print_this("Error semántico CONS_DECL");
             String e = ("Valor no asignado");
-            semantic_error(e, v3);
+            semantic_error(e, vE);
         }else{
-            error_detectat = !taulaSimbols.declararVariableConstant(new VariableConstant(v1.getValue(), aux_v2.getTipus(), true));
-            if(error_detectat){
-                print_this("Error semántico CONS_DECL");
-                String e = ("Ya existe una variable o constante con el nombre '" + v1.getValue() + "'");
-                semantic_error(e, v1);
+            if(E.getTipus() != TIPO.getTipus()){
+                print_this("Error semántico VAR_DECL");
+                String e = ("A la constante " + id.getValue() + " de tipo " + TIPO.getTipus() + " no se le esta asignando un valor del tipo correcto: " + E.getTipus());
+                semantic_error(e, vE);
             }else{
-                print_this("Constante '" + v1.getValue() + "' creada con éxito");
-                RESULT = new VariableConstant(v1.getValue(), aux_v2.getTipus(), true);
+                VariableConstant varcon = new VariableConstant(id.getValue(), TIPO.getTipus(), true);
+                error_detectat = !taulaSimbols.declararVariableConstant(varcon);
+                if(error_detectat){
+                    print_this("Error semántico VAR_DECL");
+                    String e = ("Ya existe una variable o constante con el nombre '" + varcon.getValue() + "'");
+                    semantic_error(e, vid);
+                }else{
+                    print_this("Constante '" + varcon.getValue() + "' creada con éxito");
+                    varcon.setValor(E.getValor());
+
+                    int t_id = c3a.novavar(varcon);
+                    c3a.genera("copy", E.getR(), buid, t_id); // id.r = E.r
+
+                    varcon.setR(t_id);
+                    RESULT = varcon;
+                }
             }
         }
     }
 :}
 ;
 
-TUPLA_DECL ::= tuple id:v1 assign lbrace TIPO:v2 comma TIPO:v3 rbrace semicolon
+TUPLA_DECL ::= tuple id:vid assign lbrace TIPO:vTIPO1 comma TIPO:vTIPO2 rbrace semicolon
 {:
     print_this("Estas en TUPLA_DECL");
     if(!error_detectat){
-        print_this("Declarando Tupla: "+ v1.getValue());
-        Simbol aux_v1 = (Simbol) v1;
-        Simbol aux_v2 = (Simbol) v2;
-        Simbol aux_v3 = (Simbol) v3;
-        error_detectat = !taulaSimbols.declararTupla(new Tupla(v1.getValue(), aux_v2.getTipus(), aux_v3.getTipus()));
+        print_this("Declarando Tupla: "+ vid.getValue());
+        Simbol id = (Simbol) vid;
+        Simbol TIPO1 = (Simbol) vTIPO1;
+        Simbol TIPO2 = (Simbol) vTIPO2;
+        Tupla tupla = new Tupla(id.getValue(), TIPO1.getTipus(), TIPO2.getTipus());
+        error_detectat = !taulaSimbols.declararTupla(new Tupla(id.getValue(), TIPO1.getTipus(), TIPO2.getTipus()));
         if(error_detectat){
             print_this("Error semántico TUPLA_DECL");
-            String e = ("Ya existe una tupla con el nombre '" + v1.getValue() + "'");
-            semantic_error(e, v1);
+            String e = ("Ya existe una tupla con el nombre '" + id.getValue() + "'");
+            semantic_error(e, vid);
         }else{
-            print_this("Tupla '" + v1.getValue() + "["+ aux_v2.getTipus().toString() +", "+ aux_v3.getTipus().toString() +"]' creada con éxito");
-            RESULT = new Tupla(v1.getValue(), aux_v2.getTipus(), aux_v3.getTipus());
+            print_this("Tupla '" + id.getValue() + "["+ TIPO1.getTipus().toString() +", "+ TIPO2.getTipus().toString() +"]' creada con éxito");
+
+            tupla.setD(1);
+            int t2 = c3a.novavar(tupla);
+            tupla.setD(0);
+            int t1 = c3a.novavar(tupla);
+            tupla.setR(t1);
+
+            RESULT = tupla;
         }
     }
 :}
@@ -677,65 +749,21 @@ EXP ::= LOG_TERM:v1     {: print_this("Estas en EXP termino lógico"); RESULT = 
       | ENTR_FUNC:v1    {: print_this("Estas en EXP entrada de sistema"); RESULT = v1; :}
       ;
 
-LIT ::= ENT_LIT:v1
-{:
-    print_this("Estas en LIT integer");
-    Simbol aux_v1 = (Simbol) v1;
+LIT ::= ENT_LIT:v1 {: print_this("Estas en LIT integer"); RESULT = v1; :}
+      | BOL_LIT:v1 {: print_this("Estas en LIT booleano"); RESULT = v1; :}
+      ;
 
-    if(aux_v1.getD() == -3){
-        aux_v1.setR(aux_v1.getR());
-    }else{
-        int t = c3a.novavar(aux_v1);
-        c3a.genera("idx_val", aux_v1.getR(), aux_v1.getD(), t);
-        aux_v1.setR(t);
-    }
-
-    RESULT = aux_v1;
-:}
-      | BOL_LIT:v1
-{:
-    print_this("Estas en LIT booleano");
-    Simbol aux_v1 = (Simbol) v1;
-
-    if(aux_v1.getD() == -3){
-        aux_v1.setR(aux_v1.getR());
-    }else{
-        int t = c3a.novavar(aux_v1);
-        c3a.genera("idx_val", aux_v1.getR(), aux_v1.getD(), t);
-        aux_v1.setR(t);
-    }
-
-    RESULT = aux_v1;
-:}
-;
-
-ENT_LIT ::= POS_ENT_LIT:v1
-{:
-    print_this("Estas en ENT_LIT positivo");
-    Simbol aux_v1 = (Simbol) v1;
-
-    if(aux_v1.getD() == -3){
-        aux_v1.setR(aux_v1.getR());
-    }else{
-        int t = c3a.novavar(aux_v1);
-        c3a.genera("idx_val", aux_v1.getR(), aux_v1.getD(), t);
-        aux_v1.setR(t);
-    }
-
-    RESULT = aux_v1;
-:}
+ENT_LIT ::= POS_ENT_LIT:v1 {: print_this("Estas en ENT_LIT positivo"); RESULT = v1; :}
           | minus POS_ENT_LIT:v1
 {:
     print_this("Estas en ENT_LIT negativo");
     Simbol aux_v1 = (Simbol) v1;
-    aux_v1.setValor(-1*(Integer) aux_v1.getValue());
+    aux_v1.setValor(-1*aux_v1.getValor());
 
     int t = c3a.novavar(aux_v1);
-    c3a.genera("neg", (Integer) aux_v1.getR(), buid, t);
+    c3a.genera("neg", aux_v1.getR(), buid, t);
     aux_v1.setR(t);
 
-
-    aux_v1.setValor(-1*(Integer) aux_v1.getValue());
     RESULT = aux_v1;
 :}
 ;
@@ -745,9 +773,10 @@ POS_ENT_LIT ::= integer_literal:v1
     print_this("Positive integer");
     Simbol aux_v1 = (Simbol) v1;
     aux_v1.setValor((Integer) aux_v1.getValue());
+    aux_v1.setValue("integer_literal");
 
     int t = c3a.novavar(aux_v1);
-    c3a.genera("copy", (Integer) aux_v1.getValue(), buid, t);
+    c3a.genera("copy", aux_v1.getValor(), buid, t);
     aux_v1.setR(t);
 
     RESULT = aux_v1;
@@ -759,10 +788,11 @@ BOL_LIT ::= boolean_literal:v1
     print_this("Boolean literal");
     Simbol aux_v1 = (Simbol) v1;
     if((String) aux_v1.getValue() == "TRUE" || (String) aux_v1.getValue() == "true"){
-        aux_v1.setValor(0);
-    }else{
         aux_v1.setValor(-1);
+    }else{
+        aux_v1.setValor(0);
     }
+    aux_v1.setValue("boolean_literal");
 
     int t = c3a.novavar(aux_v1);
     c3a.genera("copy", aux_v1.getValor(), buid, t);
@@ -772,36 +802,39 @@ BOL_LIT ::= boolean_literal:v1
 :}
 ;
 
-TUPLA_ACCESS ::= id:v1 lbracket integer_literal:v2 rbracket
+TUPLA_ACCESS ::= id:vid lbracket integer_literal:vindex rbracket
 {:
     print_this("Estas en TUPLA_ACCESS");
     if(!error_detectat){
-        print_this("Accediendo a la Tupla: " + v1.getValue() + "(" + v2.getValue() + ")");
-        Simbol aux_v1 = (Simbol) v1;
-        Integer index = (Integer) v2.getValue();
-        Tupla aux_tupla = taulaSimbols.usarTupla(v1.getValue());
-        if(aux_tupla.getValue() != ""){
-            if(index == 0 || index == 1){
-                aux_tupla.setTipus(aux_tupla.getTipus(index));
-                aux_tupla.setFila(aux_v1.getFila());
-                aux_tupla.setColumna(aux_v1.getColumna());
+        print_this("Accediendo a la Tupla: " + vid.getValue() + "(" + vindex.getValue() + ")");
+        Simbol id = (Simbol) vid;
+        Simbol index = (Simbol) vindex;
+        index.setValor((Integer) index.getValue());
+        index.setValue("integer_literal");
+        Tupla TUPLA = taulaSimbols.usarTupla(id.getValue());
+        if(TUPLA.getValue() != ""){
+            if(index.getValor() == 0 || index.getValor() == 1){
+                TUPLA.setRef(index.getValor());
+                TUPLA.setValor(TUPLA.getVal(TUPLA.getRef()));
+                TUPLA.setTipus(TUPLA.getTipus(index.getValor()));
+                TUPLA.setD(index.getValor());
 
-                int t1 = c3a.novavar(new Simbol("t1", (Integer) v2.getValue()));
-                c3a.genera("copy", (Integer) v2.getValue(), buid, t1);
-                int t2 = c3a.novavar(new Simbol("t2", (((Integer) v2.getValue()) * nbytes)));
+                int t1 = c3a.novavar(new Simbol("t1", index.getTipus(), (Integer) index.getValue()));
+                c3a.genera("copy", (Integer) index.getValue(), buid, t1);
+                int t2 = c3a.novavar(new Simbol("t2", (((Integer) index.getValue()) * nbytes)));
                 c3a.genera("prod", t1, nbytes, t2);
-                aux_tupla.setD(t2);
+                TUPLA.setD(t2);
 
-                RESULT = aux_tupla;
+                RESULT = TUPLA;
             }else{
                 print_this("Error semántico TUPLA_ACCESS");
-                String e = ("El índice '" + index + "' de la tupla " + v1.getValue() + " no es correcto. Los índices de tupla solo permíten 0 o 1.");
-                semantic_error(e, v2);
+                String e = ("El índice '" + index + "' de la tupla " + vid.getValue() + " no es correcto. Los índices de tupla solo permíten 0 o 1.");
+                semantic_error(e, vindex);
             }
         }else{
             print_this("Error semántico TUPLA_ACCESS");
-            String e = ("La tupla " + v1.getValue() + " no ha sido declarada.");
-            semantic_error(e, v1);
+            String e = ("La tupla " + vid.getValue() + " no ha sido declarada.");
+            semantic_error(e, vid);
         }
     }
 :}
@@ -846,281 +879,254 @@ ARGS_LIST ::= comma EXP:v1 ARGS_LIST:v2
             | /* epsilon */ {: print_this("Estas en ARGS_LIST epsilon"); RESULT = new ArrayList<Simbol>(); :}
             ;
 
-PARAM_LIST ::= PARAM:v1
-{:
-    print_this("Estas en PARAM_LIST");
-    if(!error_detectat){
-        RESULT = new ArrayList<VariableConstant>(Arrays.asList((VariableConstant) v1));
-    }
-:}
-             | PARAM:v1 comma PARAM_LIST:v2
-{:
-    print_this("Estas en PARAM_LIST");
-    if(!error_detectat){
-        VariableConstant aux_v1 = (VariableConstant) v1;
-        ArrayList<VariableConstant> aux_v2 = (ArrayList<VariableConstant>) v2;
-        aux_v2.add(0, aux_v1);
-        RESULT = aux_v2;
-    }
-:}
-             | /* epsilon */ {: print_this("Estas en PARAM_LIST epsilon"); RESULT = new ArrayList<VariableConstant>(); :}
-             ;
-
-PARAM ::= id:v1 double_colon TIPO:v2
-{:
-    print_this("Estas en PARAM");
-    if(!error_detectat){
-        print_this("Declarando Parámetro "+ v1.getValue());
-        Simbol aux_v1 = (Simbol) v1;
-        Simbol aux_v2 = (Simbol) v2;
-        error_detectat = !taulaSimbols.declararVariableConstant(new VariableConstant(v1.getValue(), aux_v2.getTipus(), false));
-        if(error_detectat){
-            print_this("Error semántico PARAM");
-            String e = ("Ya existe una variable o constante con el nombre '" + v1.getValue() + "'");
-            semantic_error(e, v1);
-        }else{
-            print_this("Parámetro '" + v1.getValue() + "' creado con éxito");
-            RESULT = new VariableConstant(v1.getValue(), aux_v2.getTipus(), false);
-        }
-    }
-:}
-;
-
-LOG_TERM ::= EXP:v1 equal EXP:v2
+LOG_TERM ::= EXP:vE1 equal EXP:vE2
 {:
     print_this("Estas en LOG_TERM equal");
     if(!error_detectat){
-        Simbol aux_v1 = (Simbol) v1;
-        Simbol aux_v2 = (Simbol) v2;
-                if(aux_v1.getTipus() == TipusDades.NULL){
+        Simbol E1 = (Simbol) vE1;
+        E1 = E1.clone();
+        Simbol E2 = (Simbol) vE2;
+        if(E1.getTipus() == TipusDades.NULL || E2.getTipus() == TipusDades.NULL){
             print_this("Error semántico LOG_TERM");
             String e = ("Factor lógico vacío");
-            semantic_error(e, v1);
-        }else{
-            if(aux_v2.getTipus() == TipusDades.NULL){
-                print_this("Error semántico LOG_TERM");
-                String e = ("Factor lógico vacío");
-                semantic_error(e, v2);
+            if (E1.getTipus() == TipusDades.NULL){
+                semantic_error(e, vE1);
             }else{
-                if(aux_v1.getTipus() == aux_v2.getTipus()){
-                    print_this(aux_v1.getValue() + " equal " + aux_v2.getValue());
+                semantic_error(e, vE2);
+            }
+        }else{
+            if(E1.getTipus() != E2.getTipus()){
+                print_this("Error semántico LOG_TERM");
+                String e = ("No se pueden comapar valores de diferente tipo");
+                semantic_error(e, vE1);
+            }else{
+                print_this(E1.getValue() + " not_equal "+E2.getValue());
 
-                    int t = c3a.novavar(new Simbol("t", buid));
-                    int e1 = c3a.novaetiqueta();
-                    int e2 = c3a.novaetiqueta();
-                    c3a.genera("ifNE", aux_v1.getR(), aux_v2.getR(), e1);
-                    c3a.genera("copy", 0, buid, t);
-                    c3a.genera("goto", buid, buid, e2);
-                    c3a.genera("skip", buid, buid, e1);
-                    c3a.genera("copy", -1, buid, t);
-                    c3a.genera("skip", buid, buid, e2);
-                    RESULT = new Simbol(aux_v1.getFila(), aux_v1.getColumna(), aux_v1.getValue(), TipusDades.BOOLEAN, t);
+                int val = -3;
+                if(E1.getValor() == E2.getValor()){
+                    val = -1;
                 }else{
-                    print_this("Error semántico LOG_TERM");
-                    String e = (aux_v1.getValue() + " no es del mismo tipo que " + aux_v2.getValue());
-                    semantic_error(e, v1);
+                    val = 0;
                 }
+                E1.setTipus(TipusDades.BOOLEAN);
+                E1.setValor(val);
+
+                int t = c3a.novavar(E1);
+                int e1 = c3a.novaetiqueta();
+                int e2 = c3a.novaetiqueta();
+                c3a.genera("if_EQ", E1.getR(), E2.getR(), e1);
+                c3a.genera("copy", 0, buid, t);
+                c3a.genera("goto", buid, buid, e2);
+                c3a.genera("skip", buid, buid, e1);
+                c3a.genera("copy", -1, buid, t);
+                c3a.genera("skip", buid, buid, e2);
+                E1.setR(t);
+
+                RESULT = E1;
             }
         }
     }
 :}
-           | EXP:v1 not_equal EXP:v2
+           | EXP:vE1 not_equal EXP:vE2
 {:
     print_this("Estas en LOG_TERM not equal");
     if(!error_detectat){
-        Simbol aux_v1 = (Simbol) v1;
-        Simbol aux_v2 = (Simbol) v2;
-        if(aux_v1.getTipus() == TipusDades.NULL){
+        Simbol E1 = (Simbol) vE1;
+        E1 = E1.clone();
+        Simbol E2 = (Simbol) vE2;
+        if(E1.getTipus() == TipusDades.NULL || E2.getTipus() == TipusDades.NULL){
             print_this("Error semántico LOG_TERM");
             String e = ("Factor lógico vacío");
-            semantic_error(e, v1);
-        }else{
-            if(aux_v2.getTipus() == TipusDades.NULL){
-                print_this("Error semántico LOG_TERM");
-                String e = ("Factor lógico vacío");
-                semantic_error(e, v2);
+            if (E1.getTipus() == TipusDades.NULL){
+                semantic_error(e, vE1);
             }else{
-                if(aux_v1.getTipus() == aux_v2.getTipus()){
-                    print_this(aux_v1.getValue() + " not_equal "+aux_v2.getValue());
+                semantic_error(e, vE2);
+            }
+        }else{
+            if(E1.getTipus() != E2.getTipus()){
+                print_this("Error semántico LOG_TERM");
+                String e = ("No se pueden comapar valores de diferente tipo");
+                semantic_error(e, vE1);
+            }else{
+                print_this(E1.getValue() + " not_equal "+E2.getValue());
 
-                    int t = c3a.novavar(new Simbol("t", buid));
-                    int e1 = c3a.novaetiqueta();
-                    int e2 = c3a.novaetiqueta();
-                    c3a.genera("ifEQ", aux_v1.getR(), aux_v2.getR(), e1);
-                    c3a.genera("copy", 0, buid, t);
-                    c3a.genera("goto", buid, buid, e2);
-                    c3a.genera("skip", buid, buid, e1);
-                    c3a.genera("copy", -1, buid, t);
-                    c3a.genera("skip", buid, buid, e2);
-                    RESULT = new Simbol(aux_v1.getFila(), aux_v1.getColumna(), aux_v1.getValue(), TipusDades.BOOLEAN, t);
+                int val = -3;
+                if(E1.getValor() != E2.getValor()){
+                    val = -1;
                 }else{
-                    print_this("Error semántico LOG_TERM");
-                    String e = (aux_v1.getValue() + " no es del mismo tipo que " + aux_v2.getValue());
-                    semantic_error(e, v1);
+                    val = 0;
                 }
+                E1.setTipus(TipusDades.BOOLEAN);
+                E1.setValor(val);
+
+                int t = c3a.novavar(E1);
+                int e1 = c3a.novaetiqueta();
+                int e2 = c3a.novaetiqueta();
+                c3a.genera("if_NE", E1.getR(), E2.getR(), e1);
+                c3a.genera("copy", 0, buid, t);
+                c3a.genera("goto", buid, buid, e2);
+                c3a.genera("skip", buid, buid, e1);
+                c3a.genera("copy", -1, buid, t);
+                c3a.genera("skip", buid, buid, e2);
+                E1.setR(t);
+
+                RESULT = E1;
             }
         }
     }
 :}
-           | EXP:v1 and EXP:v2
+           | EXP:vE1 and EXP:vE2
 {:
     print_this("Estas en LOG_TERM and");
     if(!error_detectat){
-        Simbol aux_v1 = (Simbol) v1;
-        Simbol aux_v2 = (Simbol) v2;
-        if(aux_v1.getTipus() == TipusDades.NULL){
+        Simbol E1 = (Simbol) vE1;
+        E1 = E1.clone();
+        Simbol E2 = (Simbol) vE2;
+        if(E1.getTipus() != TipusDades.BOOLEAN || E2.getTipus() != TipusDades.BOOLEAN){
             print_this("Error semántico LOG_TERM");
-            String e = ("Factor lógico vacío");
-            semantic_error(e, v1);
-        }else{
-            if(aux_v2.getTipus() == TipusDades.NULL){
-                print_this("Error semántico LOG_TERM");
-                String e = ("Factor lógico vacío");
-                semantic_error(e, v2);
+            String e = ("En los términos lógicos solo se permiten valores booleanos");
+            if (E1.getTipus() != TipusDades.BOOLEAN){
+                semantic_error(e, vE1);
             }else{
-                print_this(aux_v1.getValue() + " and " + aux_v2.getValue());
-                int val = (aux_v1.getValor() == 0 ? 0 : (aux_v1.getValor() == 0 ? 0 : -1));
-                int t = c3a.novavar(new Simbol("t", val));
-                c3a.genera("and", aux_v1.getR(), aux_v2.getR(), t);
-                RESULT = new Simbol(aux_v1.getFila(), aux_v1.getColumna(), aux_v1.getValue(), TipusDades.BOOLEAN, t, val);
+                semantic_error(e, vE2);
             }
+        }else{
+            print_this(E1.getValue() + " and " + E2.getValue());
+
+            int val = (E1.getValor() == 0 ? 0 : (E1.getValor() == 0 ? 0 : -1)); //Si E1 false entonces false, sino si E2 false entonces false, sino true
+            E1.setValor(val);
+            int t = c3a.novavar(E1);
+            c3a.genera("and", E1.getR(), E2.getR(), t); // t = E1.r and E2.r
+            E1.setR(t);
+
+            RESULT = E1;
         }
     }
 :}
-           | EXP:v1 or EXP:v2
+           | EXP:vE1 or EXP:vE2
 {:
     print_this("Estas en LOG_TERM or");
     if(!error_detectat){
-        Simbol aux_v1 = (Simbol) v1;
-        Simbol aux_v2 = (Simbol) v2;
-        if(aux_v1.getTipus() == TipusDades.NULL){
+        Simbol E1 = (Simbol) vE1;
+        E1 = E1.clone();
+        Simbol E2 = (Simbol) vE2;
+        if(E1.getTipus() != TipusDades.BOOLEAN || E2.getTipus() != TipusDades.BOOLEAN){
             print_this("Error semántico LOG_TERM");
-            String e = ("Factor lógico vacío");
-            semantic_error(e, v1);
-        }else{
-            if(aux_v2.getTipus() == TipusDades.NULL){
-                print_this("Error semántico LOG_TERM");
-                String e = ("Factor lógico vacío");
-                semantic_error(e, v2);
+            String e = ("En los términos lógicos solo se permiten valores booleanos");
+            if (E1.getTipus() != TipusDades.BOOLEAN){
+                semantic_error(e, vE1);
             }else{
-                print_this(aux_v1.getValue() + " or " + aux_v2.getValue());
-                int val = (aux_v1.getValor() == 0 ? 0 : (aux_v1.getValor() == 0 ? 0 : -1));
-                int t = c3a.novavar(new Simbol("t", val));
-                c3a.genera("or", aux_v1.getR(), aux_v2.getR(), t);
-                RESULT = new Simbol(aux_v1.getFila(), aux_v1.getColumna(), aux_v1.getValue(), TipusDades.BOOLEAN, t, val);
+                semantic_error(e, vE2);
+            }
+        }else{
+            print_this(E1.getValue() + " or " + E2.getValue());
+
+            int val = (E1.getValor() == -1 ? -1 : (E1.getValor() == -1 ? -1 : 0)); //Si E1 true entonces true, sino si E2 true entonces true, sino false
+            E1.setValor(val);
+            int t = c3a.novavar(E1);
+            c3a.genera("or", E1.getR(), E2.getR(), t); // t = E1.r or E2.r
+            E1.setR(t);
+
+            RESULT = E1;
+        }
+    }
+:}
+;
+
+ARIT_TERM ::= EXP:vE1 plus EXP:vE2
+{:
+    print_this("Estas en ARIT_TERM +");
+    if(!error_detectat){
+        Simbol E1 = (Simbol) vE1;
+        E1 = E1.clone();
+        Simbol E2 = (Simbol) vE2;
+        if(E1.getTipus() == E2.getTipus() && E1.getTipus() ==  TipusDades.INTEGER){
+            E1.setValor(E1.getValor()+E2.getValor());
+
+            int t = c3a.novavar(E1);
+            c3a.genera("add", E1.getR(), E2.getR(), t);
+            E1.setR(t);
+
+            RESULT = E1;
+        }else{
+            print_this("Error semántico ARIT_TERM");
+            String e = ("El término aritmético solo puede sumar tipos integer: "+E1.getTipus().toString()+" + " + E2.getTipus().toString());
+            if (E1.getTipus() != TipusDades.INTEGER){
+                semantic_error(e, vE1);
+            }else{
+                semantic_error(e, vE2);
+            }
+        }
+    }
+:}
+           | EXP:vE1 minus EXP:vE2
+{:
+    print_this("Estas en ARIT_TERM -");
+    if(!error_detectat){
+        Simbol E1 = (Simbol) vE1;
+        E1 = E1.clone();
+        Simbol E2 = (Simbol) vE2;
+        if(E1.getTipus() == E2.getTipus() && E1.getTipus() ==  TipusDades.INTEGER){
+            E1.setValor(E1.getValor()-E2.getValor());
+
+            int t = c3a.novavar(E1);
+            c3a.genera("sub", E1.getR(), E2.getR(), t);
+            E1.setR(t);
+
+            RESULT = E1;
+        }else{
+            print_this("Error semántico ARIT_TERM");
+            String e = ("El término aritmético solo puede restar tipos integer");
+            if (E1.getTipus() != TipusDades.INTEGER){
+                semantic_error(e, vE1);
+            }else{
+                semantic_error(e, vE2);
             }
         }
     }
 :}
 ;
 
-ARIT_TERM ::= EXP:v1 plus EXP:v2
-{:
-    print_this("Estas en ARIT_TERM");
-    if(!error_detectat){
-        Simbol aux_v1 = (Simbol) v1;
-        Simbol aux_v2 = (Simbol) v2;
-        if(aux_v1.getTipus() == TipusDades.INTEGER || aux_v2.getTipus() ==  TipusDades.INTEGER){
-
-            int t = c3a.novavar(new Simbol("t", aux_v1.getValor() + aux_v2.getValor()));
-            c3a.genera("add", aux_v1.getR(), aux_v2.getR(), t);
-            aux_v1.setR(t);
-
-            RESULT = aux_v1;
-        }else{
-            print_this("Error semántico ARIT_TERM");
-            String e = ("El término aritmético solo puede sumar tipos integer");
-            semantic_error(e, aux_v1);
-        }
-    }
-:}
-           | EXP:v1 minus EXP:v2
-{:
-    print_this("Estas en ARIT_TERM");
-    if(!error_detectat){
-        Simbol aux_v1 = (Simbol) v1;
-        Simbol aux_v2 = (Simbol) v2;
-        if(aux_v1.getTipus() == aux_v2.getTipus() || aux_v2.getTipus() ==  TipusDades.NULL){
-
-            int t = c3a.novavar(new Simbol("t", aux_v1.getValor() - aux_v2.getValor()));
-            c3a.genera("sub", aux_v1.getR(), aux_v2.getR(), t);
-            aux_v1.setR(t);
-
-            RESULT = aux_v1;
-        }else{
-            print_this("Error semántico ARIT_TERM");
-            String e = ("El término aritmético solo puede restar tipos integer");
-            semantic_error(e, aux_v1);
-        }
-    }
-:}
-;
-
-ENTR_FUNC ::= in lparen TIPO:v1 rparen
+ENTR_FUNC ::= in lparen TIPO:vTIPO rparen
 {:
     print_this("Estas en ENTR_FUNC");
-    Simbol aux_v1 = (Simbol) v1;
+    Simbol TIPO = (Simbol) vTIPO;
+    TIPO = TIPO.clone();
 
-    int d0 = c3a.novavar(aux_v1);
-    c3a.genera("copy", aux_v1.getValor(), buid, d0);
+    int d0 = c3a.novavar(TIPO);
+    c3a.genera("copy", TIPO.getValor(), buid, d0);
     int d1 = c3a.novavar(new Simbol("d1", buid));
     c3a.genera("in", d0, buid, d1);
-    aux_v1.setR(d1);
+    TIPO.setR(d1);
 
-    RESULT = aux_v1;
+    RESULT = TIPO;
 :};
 
-CRID_SIMB ::= id:v1
+CRID_SIMB ::= id:vid
 {:
     print_this("Estas en CRID_SIMB id");
-    Simbol aux_v1 = taulaSimbols.usarSimbol(v1.getValue()); //d = consulta(ts, id.id);
-    if(aux_v1.getValue() != ""){
-
-        if (aux_v1 instanceof VariableConstant) {
-            aux_v1.setR(aux_v1.getR()); //d.nv té el número de variable
-        } else {
-            int t = c3a.novavar(aux_v1);
-            c3a.genera("copy", aux_v1.getValor(), buid, t);
-            aux_v1.setR(t);
-        }
-        aux_v1.setD(-3);
-
-        RESULT = aux_v1;
+    VariableConstant id = taulaSimbols.usarVariableConstant(vid.getValue()); //d = consulta(ts, id.id);
+    if(id.getValue() != ""){
+        print_this("Se ha obtenido la variable o constante '" + id.getValue() + "' de tipo '" + id.getTipus() + "'");
+        RESULT = id;
     }else{
         print_this("Error semántico EXP");
         String e = ("El símbolo llamado no ha sido declarado");
-        semantic_error(e, v1);
+        semantic_error(e, vid);
     }
 :}
-            | CRID_FUNC:v1
-{:
-    print_this("Estas en CRID_SIMB funcion");
-    Simbol aux_v1 = (Simbol) v1;
-
-    if(aux_v1.getD() == -3){
-        aux_v1.setR(aux_v1.getR());
-    }else{
-        int t = c3a.novavar(aux_v1);
-        c3a.genera("idx_val", aux_v1.getR(), aux_v1.getD(), t);
-        aux_v1.setR(t);
-    }
-
-    RESULT = aux_v1;
-:}
-            | TUPLA_ACCESS:v1
+            | CRID_FUNC:vCRID_FUNC       {: print_this("Estas en CRID_SIMB funcion"); RESULT = vCRID_FUNC; :}
+            | TUPLA_ACCESS:vTUPLA_ACCESS
 {:
     print_this("Estas en CRID_SIMB tupla");
+    Simbol TUPLA_ACCESS = (Simbol) vTUPLA_ACCESS;
+    TUPLA_ACCESS = TUPLA_ACCESS.clone();
 
-    Simbol aux_v1 = (Simbol) v1;
+    int t = c3a.novavar(TUPLA_ACCESS);
+    c3a.genera("idx_val", TUPLA_ACCESS.getR(), TUPLA_ACCESS.getD(), t); // idx_val R.r R.d t
+    TUPLA_ACCESS.setR(t);
+    TUPLA_ACCESS.setD(-3);
 
-    if(aux_v1.getD() == -3){
-        aux_v1.setR(aux_v1.getR());
-    }else{
-        int t = c3a.novavar(aux_v1);
-        c3a.genera("idx_val", aux_v1.getR(), aux_v1.getD(), t);
-        aux_v1.setR(t);
-    }
-
-    RESULT = aux_v1;
+    RESULT = TUPLA_ACCESS;
 :}
 ;

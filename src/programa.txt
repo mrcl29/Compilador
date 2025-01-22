@@ -31,18 +31,3 @@ endif
 while(x /= 20):
     x = x + 1;
 endwhile
-
-/// Iteración con bucles for
-for i :: integer = 0 to 10:
-    out(i);
-endfor
-
-/// Ejemplo con errores
-val dsadaa :: logical = 5;  /// Error semántico: Asignación de tipo incorrecto
-val bgfasgsf :: integer = suma(x, true || false);  /// Error semántico: Argumento de tipo incorrecto
-if(true && 1===2):  /// Error semántico: Condición no booleana
-    out(true);
-endif
-
-/// Acceso incorrecto a una tupla
-x[1] = 1;  /// Error semántico: Índice fuera de rango

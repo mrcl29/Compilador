@@ -114,4 +114,40 @@ public class TaulaSimbols {
         }
         return new Funcio();
     }
+
+    public boolean actualitzarVariableConstant(VariableConstant id) {
+        Simbol simbol;
+        for (int i = 0; i < taulaSimbols.size(); i++) {
+            simbol = taulaSimbols.get(i);
+            if (simbol instanceof VariableConstant && simbol.getValue().equals(id.getValue())) {
+                taulaSimbols.set(i, id);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean actualitzarTupla(Tupla id) {
+        Simbol simbol;
+        for (int i = 0; i < taulaSimbols.size(); i++) {
+            simbol = taulaSimbols.get(i);
+            if (simbol instanceof Tupla && simbol.getValue().equals(id.getValue())) {
+                taulaSimbols.set(i, id);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean actualitzarFuncio(Funcio id) {
+        Simbol simbol;
+        for (int i = 0; i < taulaSimbols.size(); i++) {
+            simbol = taulaSimbols.get(i);
+            if (simbol instanceof Funcio && simbol.getValue().equals(id.getValue())) {
+                taulaSimbols.set(i, id);
+                return true;
+            }
+        }
+        return false;
+    }
 }
