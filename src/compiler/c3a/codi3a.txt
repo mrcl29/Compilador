@@ -1,0 +1,5 @@
+copy 5  t0
+copy t0  t1
+copy 10  t2
+copy t2  t3
+copy t3  t1

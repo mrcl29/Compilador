@@ -39,8 +39,8 @@ parser code {:
 
     GenerarCodi c3a = new GenerarCodi();
 
-    int nbytes = 2;
-    int buid = -2;
+    int nbytes = 4;
+    String buid = "";
 
     /**************************************************************
     ************************ GESTIÓ ERRORS ************************
@@ -111,8 +111,8 @@ terminal Simbol id;
 
 /* No terminales */
 non terminal S, P, DECL, VAR_DECL, CONS_DECL, TUPLA_DECL, SENT;
-non terminal FUNC_DECL, PARAM_LIST, PARAM, COS, FINAL_RTN;
-non terminal CRID_FUNC_SENT, CRID_FUNC, ARGS, ARGS_LIST;
+non terminal FUNC_DECL, FUNCINIT, PARAM_LIST, PARAM, COS, FINAL_RTN;
+non terminal CRID_FUNC, ARGS, ARGS_LIST;
 non terminal ASIG_SENT;
 non terminal IF_SENT, IF_ELSE, IF_INIT;
 non terminal WHILE_SENT, WHILE_REP, M;
@@ -130,7 +130,7 @@ start with S;
 
 /* Reglas de gramática */
 
-S ::= P {: done_parsing(); :};
+S ::= P {: c3a.tancar(); c3a.crearEnsamblador(); done_parsing(); :};
 
 P ::= SENT P
     | FUNC_DECL P
@@ -142,7 +142,7 @@ SENT ::= DECL
        | WHILE_SENT
        | FOR_SENT
        | SAL_SENT
-       | CRID_FUNC_SENT
+       | CRID_FUNC
        ;
 
 DECL ::= VAR_DECL
@@ -245,7 +245,7 @@ IF_ELSE ::= IF_INIT:vIF_INIT COS else_t colon
     if(!error_detectat){
         Simbol IF_INIT = (Simbol) vIF_INIT;
 
-        int efi = c3a.novaetiqueta();
+        String efi = c3a.novaetiqueta();
         c3a.genera("goto", buid, buid, efi);                  //goto efi
         c3a.genera("skip", buid, buid, IF_INIT.getEtiqueta()); //e: skip
         IF_INIT.setEtiqueta(efi);
@@ -271,8 +271,8 @@ IF_INIT ::= if_t lparen EXP:vE rparen colon
                 semantic_error(e, vE);
             }else{
 
-                int e = c3a.novaetiqueta();
-                c3a.genera("if_EQ", E.getR(), 0, e); // if E.r=0 goto e
+                String e = c3a.novaetiqueta();
+                c3a.genera("if_EQ", E.getR(), "0", e); // if E.r=0 goto e
                 E.setEtiqueta(e);
 
                 RESULT = E;
@@ -312,8 +312,8 @@ WHILE_REP ::= while_t lparen M:vM EXP:vE rparen colon
                 Simbol WHILE_REP = new Simbol();
                 Simbol M = (Simbol) vM;
 
-                int efi = c3a.novaetiqueta();
-                c3a.genera("if_EQ", E.getR(), 0, efi); // if E.r = 0 goto efi
+                String efi = c3a.novaetiqueta();
+                c3a.genera("if_EQ", E.getR(), "0", efi); // if E.r = 0 goto efi
                 WHILE_REP.setEtiquetafi(efi);
                 WHILE_REP.setEtiqueta(M.getEtiqueta());
 
@@ -328,7 +328,7 @@ M ::= /* epsilon */
 {:
     Simbol M = new Simbol();
 
-    int ei = c3a.novaetiqueta();
+    String ei = c3a.novaetiqueta();
     c3a.genera("skip", buid, buid, ei); // ei: skip
     M.setEtiqueta(ei);
 
@@ -403,23 +403,27 @@ FORLIMIT ::= PARAM:v1 {: RESULT = v1;:}
 :}
 ;
 
-SAL_SENT ::= out lparen OUT_EXP:v1 rparen semicolon
+SAL_SENT ::= out lparen OUT_EXP:vOUT rparen semicolon
 {:
     print_this("Estas en SAL_SENT");
-    Simbol aux_v1 = (Simbol) v1;
-    if(aux_v1.getTipus() == TipusDades.NULL){
+    Simbol OUT = (Simbol) vOUT;
+    if(OUT.getTipus() == TipusDades.NULL){
         print_this("Error semántico SAL_SENT");
         String e = ("Salida vacía");
-        semantic_error(e, v1);
+        semantic_error(e, vOUT);
     }else{
-        //if R.d = nul_val {
-        //    E.r = R.r;
-        //} else {
-        //    t = novavar;
-        //    genera( t = R.r[R.d]); idx_val R.r R.d t
-        //    E.r = t;
-        //}
-        RESULT = aux_v1;
+        String i;
+        if(OUT.getTipus() == TipusDades.INTEGER){
+            i = "1";
+        }else{
+            i = "2";
+        }
+
+        String d0 = c3a.novavar(OUT);
+        c3a.genera("copy", i, buid, d0);
+        String d1 = c3a.novavar(OUT);
+        c3a.genera("copy", OUT.getR(), buid, d1);
+        c3a.genera("out", d0, buid, d1);
     }
 :}
 ;
@@ -430,147 +434,161 @@ OUT_EXP ::= CRID_SIMB:v1 {: print_this("Estas en OUT_EXP llamada a símbolo"); R
           | LIT:v1       {: print_this("Estas en OUT_EXP llamada a literal"); RESULT = v1; :}
           ;
 
-CRID_FUNC_SENT ::= id:v1 lparen ARGS:v2 rparen semicolon
+CRID_FUNC ::= id:vid lparen ARGS:vARGS rparen
 {:
-    print_this("Estas en CRID_FUNC_SENT para argumentos");
-    if(!error_detectat){
-        print_this("Llamando a Función: "+ v1.getValue());
-        Funcio aux_v1 = taulaSimbols.usarFuncio(v1.getValue());
-        ArrayList<Simbol> aux_v2 = (ArrayList<Simbol>) v2;
-        if(aux_v1.getValue() != ""){
-            if(aux_v1.mateixosParametres(aux_v2)){
-                RESULT = aux_v1;
-            }else{
-                print_this("Error semántico CRID_FUNC");
-                String e = ("A la funcion " + v1.getValue() + " no se le estan pasando los parámetros correctos");
-                semantic_error(e, v1);
-            }
-        }else{
-            print_this("Error semántico CRID_FUNC");
-            String e = ("La funcion " + v1.getValue() + " no ha sido creada");
-            semantic_error(e, v1);
-        }
-    }
-:}
-            | id:v1 lparen rparen semicolon
-{:
-    print_this("Estas en CRID_FUNC_SENT sin argumentos");
-    if(!error_detectat){
-        print_this("Llamando a Función: "+ v1.getValue());
-        Funcio aux_v1 = taulaSimbols.usarFuncio(v1.getValue());
-        if(aux_v1.getValue() != ""){
-            RESULT = aux_v1;
-        }else{
-            print_this("Error semántico CRID_FUNC");
-            String e = ("La funcion " + v1.getValue() + " no ha sido creada");
-            semantic_error(e, v1);
-        }
-    }
-:}
-;
-
-CRID_FUNC ::= id:v1 lparen ARGS:v2 rparen
-{:
-
     print_this("Estas en CRID_FUNC para argumentos");
     if(!error_detectat){
-        print_this("Llamando a Función: "+ v1.getValue());
-        Funcio aux_v1 = taulaSimbols.usarFuncio(v1.getValue());
-        ArrayList<Simbol> aux_v2 = (ArrayList<Simbol>) v2;
-        if(aux_v1.getValue() != ""){
-            if(aux_v1.mateixosParametres(aux_v2)){
-                RESULT = aux_v1;
+        print_this("Llamando a Función: "+ vid.getValue());
+        Funcio id = taulaSimbols.usarFuncio(vid.getValue());
+        ArrayList<Simbol> ARGS = (ArrayList<Simbol>) vARGS;
+        if(id.getValue() != ""){
+            if(id.mateixosParametres(ARGS)){
+
+                c3a.genera("call", buid, buid, id.getR());
+
+                RESULT = id;
             }else{
                 print_this("Error semántico CRID_FUNC");
-                String e = ("A la funcion " + v1.getValue() + " no se le estan pasando los parámetros correctos: "+aux_v2.toString());
-                semantic_error(e, v1);
+                String e = ("A la funcion " + vid.getValue() + " no se le estan pasando los parámetros correctos: "+ARGS.toString());
+                semantic_error(e, vid);
             }
         }else{
             print_this("Error semántico CRID_FUNC");
-            String e = ("La funcion " + v1.getValue() + " no ha sido creada");
-            semantic_error(e, v1);
+            String e = ("La funcion " + vid.getValue() + " no ha sido creada");
+            semantic_error(e, vid);
         }
     }
 :}
-            | id:v1 lparen rparen
+            | id:vid lparen rparen
 {:
     print_this("Estas en CRID_FUNC sin argumentos");
     if(!error_detectat){
-        print_this("Llamando a Función: "+ v1.getValue());
-        Funcio aux_v1 = taulaSimbols.usarFuncio(v1.getValue());
-        if(aux_v1.getValue() != ""){
-            RESULT = aux_v1;
+        print_this("Llamando a Función: "+ vid.getValue());
+        Funcio id = taulaSimbols.usarFuncio(vid.getValue());
+        ArrayList<Simbol> aux_v2 = new ArrayList<Simbol>();
+        if(id.getValue() != ""){
+            if(id.mateixosParametres(aux_v2)){
+
+                c3a.genera("call", buid, buid, id.getR());
+
+                RESULT = id;
+            }else{
+                print_this("Error semántico CRID_FUNC");
+                String e = ("A la funcion " + vid.getValue() + " no se le estan pasando los parámetros correctos: "+aux_v2.toString());
+                semantic_error(e, vid);
+            }
         }else{
             print_this("Error semántico CRID_FUNC");
-            String e = ("La funcion " + v1.getValue() + " no ha sido creada");
-            semantic_error(e, v1);
+            String e = ("La funcion " + vid.getValue() + " no ha sido creada");
+            semantic_error(e, vid);
         }
     }
 :}
 ;
 
-FUNC_DECL ::= fnct TIPO:v1 id:v2 lparen PARAM_LIST:v3 rparen colon COS FINAL_RTN:v4 endfnct
+ARGS ::= EXP:vE ARGS_LIST:vARGS_LIST
 {:
-
-    print_this("Estas en FUNC_DECL con cuerpo");
+    print_this("Estas en ARGS");
     if(!error_detectat){
-        print_this("Declarando Función: "+ v2.getValue());
-        Simbol aux_v1 = (Simbol) v1;
-        Simbol aux_v2 = (Simbol) v2;
-        ArrayList<VariableConstant> aux_v3 = (ArrayList<VariableConstant>) v3;
-        Simbol aux_v4 = (Simbol) v4;
-        for(int i = 0; i < aux_v3.size() && !error_detectat; i++){
-            print_this(aux_v3.get(i).toString());
-        }
-        if(!error_detectat){
-            if(aux_v4.getTipus() != aux_v1.getTipus()){
-                print_this("Error semántico FUNC_DECL");
-                String e = ("El valor devuelto no corresponde con el tipo de la función.");
-                semantic_error(e, v4);
-            }
-        }
-        if(!error_detectat){
-            error_detectat = !taulaSimbols.declararFuncio(new Funcio(v2.getValue(), aux_v3, aux_v1.getTipus()));
-            if(error_detectat){
-                print_this("Error semántico FUNC_DECL");
-                String e = ("Ya existe una función con el nombre '" + v2.getValue() + "'");
-                semantic_error(e, v2);
-            }else{
-                print_this("Función '" + v2.getValue() + " de tipo " + aux_v1.getTipus().toString() + " creada con éxito");
-                RESULT = new Funcio(v2.getValue(), aux_v3, aux_v1.getTipus());
-            }
+        Simbol E = (Simbol) vE;
+        if(E.getTipus() == TipusDades.NULL){
+            print_this("Error semántico ARGS");
+            String e = ("Argumento vacío");
+            semantic_error(e, vE);
+        }else{
+            ArrayList<Simbol> ARGS_LIST = (ArrayList<Simbol>) vARGS_LIST;
+            ARGS_LIST.add(0, E);
+
+            c3a.genera("param_s", buid, buid, E.getR());
+
+            RESULT = ARGS_LIST;
         }
     }
 :}
-            | fnct TIPO:v1 id:v2 lparen PARAM_LIST:v3 rparen colon FINAL_RTN:v4 endfnct
+;
+
+ARGS_LIST ::= comma EXP:vE ARGS_LIST:vARGS_LIST
+{:
+    print_this("Estas en ARGS_LIST");
+    if(!error_detectat){
+        Simbol E = (Simbol) vE;
+        if(E.getTipus() == TipusDades.NULL){
+            print_this("Error semántico ARGS_LIST");
+            String e = ("Argumento vacío");
+            semantic_error(e, vE);
+        }else{
+            ArrayList<Simbol> ARGS_LIST = (ArrayList<Simbol>) vARGS_LIST;
+            ARGS_LIST.add(0, E);
+
+            c3a.genera("param_s", buid, buid, E.getR());
+
+            RESULT = ARGS_LIST;
+        }
+    }
+:}
+            | /* epsilon */ {: print_this("Estas en ARGS_LIST epsilon"); RESULT = new ArrayList<Simbol>(); :}
+;
+
+FUNC_DECL ::= FUNCINIT:vFUNCINIT COS FINAL_RTN:vRTN endfnct
+{:
+    print_this("Estas en FUNC_DECL con cuerpo");
+    if(!error_detectat){
+        Simbol FUNCINIT = (Simbol) vFUNCINIT;
+        Simbol RTN = (Simbol) vRTN;
+        if(RTN.getTipus() != FUNCINIT.getTipus()){
+            print_this("Error semántico FUNC_DECL");
+            String e = ("El valor devuelto no corresponde con el tipo de la función.");
+            semantic_error(e, vRTN);
+        }else{
+
+            c3a.genera("rtn", buid, buid, FUNCINIT.getR());
+        }
+    }
+:}
+            | FUNCINIT:vFUNCINIT FINAL_RTN:vRTN endfnct
 {:
     print_this("Estas en FUNC_DECL sin cuerpo");
     if(!error_detectat){
-        print_this("Declarando Función: "+ v2.getValue());
-        Simbol aux_v1 = (Simbol) v1;
-        Simbol aux_v2 = (Simbol) v2;
-        ArrayList<VariableConstant> aux_v3 = (ArrayList<VariableConstant>) v3;
-        Simbol aux_v4 = (Simbol) v4;
-        for(int i = 0; i < aux_v3.size() && !error_detectat; i++){
-            print_this(aux_v3.get(i).toString());
+        Simbol FUNCINIT = (Simbol) vFUNCINIT;
+        Simbol RTN = (Simbol) vRTN;
+        if(RTN.getTipus() != FUNCINIT.getTipus()){
+            print_this("Error semántico FUNC_DECL");
+            String e = ("El valor devuelto no corresponde con el tipo de la función.");
+            semantic_error(e, vRTN);
+        }else{
+
+            c3a.genera("rtn", buid, buid, FUNCINIT.getR());
         }
-        if(!error_detectat){
-            if(aux_v4.getTipus() != aux_v1.getTipus()){
-                print_this("Error semántico FUNC_DECL");
-                String e = ("El valor devuelto no corresponde con el tipo de la función.");
-                semantic_error(e, v4);
-            }
-        }
-        if(!error_detectat){
-            error_detectat = !taulaSimbols.declararFuncio(new Funcio(v2.getValue(), aux_v3, aux_v1.getTipus()));
-            if(error_detectat){
-                print_this("Error semántico FUNC_DECL");
-                String e = ("Ya existe una función con el nombre '" + v2.getValue() + "'");
-                semantic_error(e, v2);
-            }else{
-                print_this("Función '" + v2.getValue() + " de tipo " + aux_v1.getTipus().toString() + " creada con éxito");
-                RESULT = new Funcio(v2.getValue(), aux_v3, aux_v1.getTipus());
-            }
+    }
+:}
+;
+
+FUNCINIT ::= fnct TIPO:vTIPO id:vid lparen PARAM_LIST:vPARAM_LIST rparen colon
+{:
+    print_this("Estas en FUNCINIT con cuerpo");
+    if(!error_detectat){
+        print_this("Declarando Función: "+ vid.getValue());
+        Simbol TIPO = (Simbol) vTIPO;
+        Simbol id = (Simbol) vid;
+        ArrayList<VariableConstant> PARAM_LIST = (ArrayList<VariableConstant>) vPARAM_LIST;
+
+        Funcio funcio = new Funcio(id.getValue(), PARAM_LIST, TIPO.getTipus());
+        error_detectat = !taulaSimbols.declararFuncio(funcio);
+        if(error_detectat){
+            print_this("Error semántico FUNCINIT");
+            String e = ("Ya existe una función con el nombre '" + vid.getValue() + "'");
+            semantic_error(e, vid);
+        }else{
+            print_this("Función '" + id.getValue() + " de tipo " + TIPO.getTipus().toString() + " creada con éxito");
+
+            String e = c3a.novaetiqueta();
+            funcio.setEtiqueta(e);
+            String np = c3a.nouproc(funcio);
+            c3a.genera("skip", buid, buid, e);
+            c3a.genera("pmb", buid, buid, np);
+            funcio.setR(np);
+
+            RESULT = funcio;
         }
     }
 :}
@@ -661,7 +679,7 @@ VAR_DECL ::= val id:vid double_colon TIPO:vTIPO assign EXP:vE semicolon
                     print_this("Variable '" + varcon.getValue() + "' de tipo '" + varcon.getTipus() + "' creada con éxito");
                     varcon.setValor(E.getValor());
 
-                    int t_id = c3a.novavar(varcon);
+                    String t_id = c3a.novavar(varcon);
                     c3a.genera("copy", E.getR(), buid, t_id); // id.r = E.r
 
                     varcon.setR(t_id);
@@ -701,7 +719,7 @@ CONS_DECL ::= con id:vid double_colon TIPO:vTIPO assign EXP:vE semicolon
                     print_this("Constante '" + varcon.getValue() + "' creada con éxito");
                     varcon.setValor(E.getValor());
 
-                    int t_id = c3a.novavar(varcon);
+                    String t_id = c3a.novavar(varcon);
                     c3a.genera("copy", E.getR(), buid, t_id); // id.r = E.r
 
                     varcon.setR(t_id);
@@ -722,7 +740,7 @@ TUPLA_DECL ::= tuple id:vid assign lbrace TIPO:vTIPO1 comma TIPO:vTIPO2 rbrace s
         Simbol TIPO1 = (Simbol) vTIPO1;
         Simbol TIPO2 = (Simbol) vTIPO2;
         Tupla tupla = new Tupla(id.getValue(), TIPO1.getTipus(), TIPO2.getTipus());
-        error_detectat = !taulaSimbols.declararTupla(new Tupla(id.getValue(), TIPO1.getTipus(), TIPO2.getTipus()));
+        error_detectat = !taulaSimbols.declararTupla(tupla);
         if(error_detectat){
             print_this("Error semántico TUPLA_DECL");
             String e = ("Ya existe una tupla con el nombre '" + id.getValue() + "'");
@@ -730,10 +748,9 @@ TUPLA_DECL ::= tuple id:vid assign lbrace TIPO:vTIPO1 comma TIPO:vTIPO2 rbrace s
         }else{
             print_this("Tupla '" + id.getValue() + "["+ TIPO1.getTipus().toString() +", "+ TIPO2.getTipus().toString() +"]' creada con éxito");
 
-            tupla.setD(1);
-            int t2 = c3a.novavar(tupla);
-            tupla.setD(0);
-            int t1 = c3a.novavar(tupla);
+            String t1 = c3a.novavar(tupla);
+            tupla.setD("0");
+            String t2 = c3a.novavar(tupla);
             tupla.setR(t1);
 
             RESULT = tupla;
@@ -760,7 +777,7 @@ ENT_LIT ::= POS_ENT_LIT:v1 {: print_this("Estas en ENT_LIT positivo"); RESULT = 
     Simbol aux_v1 = (Simbol) v1;
     aux_v1.setValor(-1*aux_v1.getValor());
 
-    int t = c3a.novavar(aux_v1);
+    String t = c3a.novavar(aux_v1);
     c3a.genera("neg", aux_v1.getR(), buid, t);
     aux_v1.setR(t);
 
@@ -775,8 +792,8 @@ POS_ENT_LIT ::= integer_literal:v1
     aux_v1.setValor((Integer) aux_v1.getValue());
     aux_v1.setValue("integer_literal");
 
-    int t = c3a.novavar(aux_v1);
-    c3a.genera("copy", aux_v1.getValor(), buid, t);
+    String t = c3a.novavar(aux_v1);
+    c3a.genera("copy", String.valueOf(aux_v1.getValor()), buid, t);
     aux_v1.setR(t);
 
     RESULT = aux_v1;
@@ -794,8 +811,8 @@ BOL_LIT ::= boolean_literal:v1
     }
     aux_v1.setValue("boolean_literal");
 
-    int t = c3a.novavar(aux_v1);
-    c3a.genera("copy", aux_v1.getValor(), buid, t);
+    String t = c3a.novavar(aux_v1);
+    c3a.genera("copy", String.valueOf(aux_v1.getValor()), buid, t);
     aux_v1.setR(t);
 
     RESULT = aux_v1;
@@ -817,12 +834,12 @@ TUPLA_ACCESS ::= id:vid lbracket integer_literal:vindex rbracket
                 TUPLA.setRef(index.getValor());
                 TUPLA.setValor(TUPLA.getVal(TUPLA.getRef()));
                 TUPLA.setTipus(TUPLA.getTipus(index.getValor()));
-                TUPLA.setD(index.getValor());
+                TUPLA.setD(String.valueOf(index.getValor()));
 
-                int t1 = c3a.novavar(new Simbol("t1", index.getTipus(), (Integer) index.getValue()));
-                c3a.genera("copy", (Integer) index.getValue(), buid, t1);
-                int t2 = c3a.novavar(new Simbol("t2", (((Integer) index.getValue()) * nbytes)));
-                c3a.genera("prod", t1, nbytes, t2);
+                String t1 = c3a.novavar(new Simbol("t1", index.getTipus(), (Integer) index.getValue()));
+                c3a.genera("copy", index.getValue().toString(), buid, t1);
+                String t2 = c3a.novavar(new Simbol("t2", (((Integer) index.getValue()) * nbytes)));
+                c3a.genera("prod", t1, String.valueOf(nbytes), t2);
                 TUPLA.setD(t2);
 
                 RESULT = TUPLA;
@@ -843,41 +860,6 @@ TUPLA_ACCESS ::= id:vid lbracket integer_literal:vindex rbracket
 TIPO ::= integer {: print_this("Tipo integer"); RESULT = new Simbol("integer", TipusDades.INTEGER, 1);//1 valor per tipus integer :}
        | logical {: print_this("Tipo boolean"); RESULT = new Simbol("logical", TipusDades.BOOLEAN, 2);//2 valor per tipus boolean :}
        ;
-
-ARGS ::= EXP:v1 ARGS_LIST:v2
-{:
-    print_this("Estas en ARGS");
-    if(!error_detectat){
-        Simbol aux_v1 = (Simbol) v1;
-        if(aux_v1.getTipus() == TipusDades.NULL){
-            RESULT = new ArrayList<Simbol>();
-        }else{
-            ArrayList<Simbol> aux_v2 = (ArrayList<Simbol>) v2;
-            aux_v2.add(0, aux_v1);
-            RESULT = aux_v2;
-        }
-    }
-:}
-;
-
-ARGS_LIST ::= comma EXP:v1 ARGS_LIST:v2
-{:
-    print_this("Estas en ARGS_LIST");
-    if(!error_detectat){
-        Simbol aux_v1 = (Simbol) v1;
-        if(aux_v1.getTipus() == TipusDades.NULL){
-            print_this("Error semántico ARGS_LIST");
-            String e = ("Argumento vacío");
-            semantic_error(e, v1);
-        }else{
-            ArrayList<Simbol> aux_v2 = (ArrayList<Simbol>) v2;
-            aux_v2.add(0, aux_v1);
-            RESULT = aux_v2;
-        }
-    }
-:}
-            | /* epsilon */ {: print_this("Estas en ARGS_LIST epsilon"); RESULT = new ArrayList<Simbol>(); :}
-            ;
 
 LOG_TERM ::= EXP:vE1 equal EXP:vE2
 {:
@@ -911,14 +893,14 @@ LOG_TERM ::= EXP:vE1 equal EXP:vE2
                 E1.setTipus(TipusDades.BOOLEAN);
                 E1.setValor(val);
 
-                int t = c3a.novavar(E1);
-                int e1 = c3a.novaetiqueta();
-                int e2 = c3a.novaetiqueta();
+                String t = c3a.novavar(E1);
+                String e1 = c3a.novaetiqueta();
+                String e2 = c3a.novaetiqueta();
                 c3a.genera("if_EQ", E1.getR(), E2.getR(), e1);
-                c3a.genera("copy", 0, buid, t);
+                c3a.genera("copy", "0", buid, t);
                 c3a.genera("goto", buid, buid, e2);
                 c3a.genera("skip", buid, buid, e1);
-                c3a.genera("copy", -1, buid, t);
+                c3a.genera("copy", "-1", buid, t);
                 c3a.genera("skip", buid, buid, e2);
                 E1.setR(t);
 
@@ -959,14 +941,14 @@ LOG_TERM ::= EXP:vE1 equal EXP:vE2
                 E1.setTipus(TipusDades.BOOLEAN);
                 E1.setValor(val);
 
-                int t = c3a.novavar(E1);
-                int e1 = c3a.novaetiqueta();
-                int e2 = c3a.novaetiqueta();
+                String t = c3a.novavar(E1);
+                String e1 = c3a.novaetiqueta();
+                String e2 = c3a.novaetiqueta();
                 c3a.genera("if_NE", E1.getR(), E2.getR(), e1);
-                c3a.genera("copy", 0, buid, t);
+                c3a.genera("copy", "0", buid, t);
                 c3a.genera("goto", buid, buid, e2);
                 c3a.genera("skip", buid, buid, e1);
-                c3a.genera("copy", -1, buid, t);
+                c3a.genera("copy", "-1", buid, t);
                 c3a.genera("skip", buid, buid, e2);
                 E1.setR(t);
 
@@ -995,9 +977,26 @@ LOG_TERM ::= EXP:vE1 equal EXP:vE2
 
             int val = (E1.getValor() == 0 ? 0 : (E1.getValor() == 0 ? 0 : -1)); //Si E1 false entonces false, sino si E2 false entonces false, sino true
             E1.setValor(val);
-            int t = c3a.novavar(E1);
-            c3a.genera("and", E1.getR(), E2.getR(), t); // t = E1.r and E2.r
-            E1.setR(t);
+
+            String t1 = c3a.novavar(E1);
+            String t2 = c3a.novavar(E1);
+            String t3 = c3a.novavar(E2);
+            String e1 = c3a.novaetiqueta();
+            String e2 = c3a.novaetiqueta();
+            String e3 = c3a.novaetiqueta();
+            c3a.genera("copy", E1.getR(), buid, t1);
+            c3a.genera("if_EQ", t1, "-1", e1);
+            c3a.genera("copy", "0", buid, t2);
+            c3a.genera("goto", buid, buid, e2);
+            c3a.genera("skip", buid, buid, e1);
+            c3a.genera("copy", E2.getR(), buid, t3);
+            c3a.genera("if_EQ", t3, "-1", e3);
+            c3a.genera("copy", "0", buid, t2);
+            c3a.genera("goto", buid, buid, e2);
+            c3a.genera("skip", buid, buid, e3);
+            c3a.genera("copy", "-1", buid, t2);
+            c3a.genera("skip", buid, buid, e2);
+            E1.setR(t2);
 
             RESULT = E1;
         }
@@ -1020,12 +1019,28 @@ LOG_TERM ::= EXP:vE1 equal EXP:vE2
             }
         }else{
             print_this(E1.getValue() + " or " + E2.getValue());
-
             int val = (E1.getValor() == -1 ? -1 : (E1.getValor() == -1 ? -1 : 0)); //Si E1 true entonces true, sino si E2 true entonces true, sino false
             E1.setValor(val);
-            int t = c3a.novavar(E1);
-            c3a.genera("or", E1.getR(), E2.getR(), t); // t = E1.r or E2.r
-            E1.setR(t);
+
+            String t1 = c3a.novavar(E1);
+            String t2 = c3a.novavar(E1);
+            String t3 = c3a.novavar(E2);
+            String e1 = c3a.novaetiqueta();
+            String e2 = c3a.novaetiqueta();
+            String e3 = c3a.novaetiqueta();
+            c3a.genera("copy", E1.getR(), buid, t1);
+            c3a.genera("if_EQ", t1, "0", e1);
+            c3a.genera("copy", "-1", buid, t2);
+            c3a.genera("goto", buid, buid, e2);
+            c3a.genera("skip", buid, buid, e1);
+            c3a.genera("copy", E2.getR(), buid, t3);
+            c3a.genera("if_EQ", t3, "0", e3);
+            c3a.genera("copy", "-1", buid, t2);
+            c3a.genera("goto", buid, buid, e2);
+            c3a.genera("skip", buid, buid, e3);
+            c3a.genera("copy", "0", buid, t2);
+            c3a.genera("skip", buid, buid, e2);
+            E1.setR(t2);
 
             RESULT = E1;
         }
@@ -1043,7 +1058,7 @@ ARIT_TERM ::= EXP:vE1 plus EXP:vE2
         if(E1.getTipus() == E2.getTipus() && E1.getTipus() ==  TipusDades.INTEGER){
             E1.setValor(E1.getValor()+E2.getValor());
 
-            int t = c3a.novavar(E1);
+            String t = c3a.novavar(E1);
             c3a.genera("add", E1.getR(), E2.getR(), t);
             E1.setR(t);
 
@@ -1069,7 +1084,7 @@ ARIT_TERM ::= EXP:vE1 plus EXP:vE2
         if(E1.getTipus() == E2.getTipus() && E1.getTipus() ==  TipusDades.INTEGER){
             E1.setValor(E1.getValor()-E2.getValor());
 
-            int t = c3a.novavar(E1);
+            String t = c3a.novavar(E1);
             c3a.genera("sub", E1.getR(), E2.getR(), t);
             E1.setR(t);
 
@@ -1093,9 +1108,9 @@ ENTR_FUNC ::= in lparen TIPO:vTIPO rparen
     Simbol TIPO = (Simbol) vTIPO;
     TIPO = TIPO.clone();
 
-    int d0 = c3a.novavar(TIPO);
-    c3a.genera("copy", TIPO.getValor(), buid, d0);
-    int d1 = c3a.novavar(new Simbol("d1", buid));
+    String d0 = c3a.novavar(TIPO);
+    c3a.genera("copy", String.valueOf(TIPO.getValor()), buid, d0);
+    String d1 = c3a.novavar(new Simbol());
     c3a.genera("in", d0, buid, d1);
     TIPO.setR(d1);
 
@@ -1122,10 +1137,10 @@ CRID_SIMB ::= id:vid
     Simbol TUPLA_ACCESS = (Simbol) vTUPLA_ACCESS;
     TUPLA_ACCESS = TUPLA_ACCESS.clone();
 
-    int t = c3a.novavar(TUPLA_ACCESS);
+    String t = c3a.novavar(TUPLA_ACCESS);
     c3a.genera("idx_val", TUPLA_ACCESS.getR(), TUPLA_ACCESS.getD(), t); // idx_val R.r R.d t
     TUPLA_ACCESS.setR(t);
-    TUPLA_ACCESS.setD(-3);
+    TUPLA_ACCESS.setD("");
 
     RESULT = TUPLA_ACCESS;
 :}

@@ -2,32 +2,5 @@
 
 //// Declaración de variables y constantes
 val x :: integer = 5;
-val y :: integer = 10;
-con z :: integer = 15;
-
-/// Declaración de tuplas
-tuple x = {integer, logical};
-
-/// Declaración de funciones
-fnct integer suma(zzzz::integer, dadfga::logical):
-    val a :: integer = 1;
-    val b :: integer = 2;
-    val res :: integer = a - b;
-
-    rtrn(res);
-endfnct
-
-/// Uso de funciones
-val result :: integer = suma();
-out(result);
-
-/// Estructuras de control
-if(TRUE):
-    out(1 === 21);
-else:
-    out(1);
-endif
-
-while(x /= 20):
-    x = x + 1;
-endwhile
+val y::integer = 10;
+x = y;

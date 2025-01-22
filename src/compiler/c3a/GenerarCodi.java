@@ -1,6 +1,8 @@
 package compiler.c3a;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
@@ -8,46 +10,92 @@ import java.util.*;
 import compiler.sintactic.Symbols.*;
 
 public class GenerarCodi {
-    private static String fitxer = "codi3a.txt";
-    private static BufferedWriter buf;
+    private final String fitxerC3a = "./src/compiler/c3a/codi3a.txt";
+    private final String fitxerEnsamblador = "./src/compiler/c3a/ensamblador.txt";
+    private final int nbytes = 4;
+    private BufferedWriter bufw;
+    private BufferedReader bufr;
     private static int nv = -1;
     private static int np = -1;
     private static int ne = -1;
-    private static ArrayList<String> instruccions1 = new ArrayList<String>();
-    ArrayList<Integer> instruccions2 = new ArrayList<Integer>();
-    ArrayList<Integer> instruccions3 = new ArrayList<Integer>();
-    ArrayList<Integer> instruccions4 = new ArrayList<Integer>();
+    ArrayList<String> instruccions1 = new ArrayList<String>();
+    ArrayList<String> instruccions2 = new ArrayList<String>();
+    ArrayList<String> instruccions3 = new ArrayList<String>();
+    ArrayList<String> instruccions4 = new ArrayList<String>();
     ArrayList<Simbol> tv = new ArrayList<Simbol>();
     ArrayList<Funcio> tp = new ArrayList<Funcio>();
     ArrayList<Integer> te = new ArrayList<Integer>();
 
     public GenerarCodi() {
         try {
-            buf = new BufferedWriter(new FileWriter(fitxer));
+            this.bufw = new BufferedWriter(new FileWriter(fitxerC3a));
         } catch (IOException e) {
             System.err.println(e);
         }
     }
 
-    public void escriure(String texte) {
+    public void crearEnsamblador() {
         try {
-            buf.write(texte);
+            bufr = new BufferedReader(new FileReader(fitxerC3a));
+            bufw = new BufferedWriter(new FileWriter(fitxerEnsamblador));
+            for (int i = 0; i < instruccions1.size(); i++) {
+                switch (instruccions1.get(i)) {
+                    case "copy":
+                        bufw.write(crearAsignacio(instruccions4.get(i), instruccions2.get(i)));
+                        break;
+                    default:
+                        break;
+                }
+            }
         } catch (IOException e) {
             System.err.println(e);
+        } finally {
+            try {
+                bufr.close();
+                bufw.close();
+            } catch (IOException e) {
+                System.err.println(e);
+            }
         }
+    }
+
+    // a = b
+    private String crearAsignacio(String a, String b) {
+        String ai = pasaANumero(a);
+        if (isToE(b)) {
+            b = pasaANumero(b);
+            return "    MOVE.L    " + b + "(A7), D0\n    MOVE.L    D0, " + ai + "(A7) \n";
+        } else {
+            return "    MOVE.L    # " + b + ", D0\n    MOVE.L    D0, " + ai + "(A7) \n";
+        }
+    }
+
+    private String pasaANumero(String x) {
+        if (x.length() > 1) {
+            if (x.charAt(0) == 't' || x.charAt(0) == 'e') {
+                String aux = x.substring(1);
+                if (aux == "0") {
+                    return "";
+                }
+                aux = String.valueOf(Integer.parseInt(aux) * nbytes);
+                return aux;
+            }
+        }
+        return x;
+    }
+
+    private boolean isToE(String x) {
+        if (x.length() > 1) {
+            if (x.charAt(0) == 't' || x.charAt(0) == 'e') {
+                return true;
+            }
+        }
+        return false;
     }
 
     public void escriureLinia(String texte) {
         try {
-            buf.write(texte + "\n");
-        } catch (IOException e) {
-            System.err.println(e);
-        }
-    }
-
-    public void novaLinia(String texte) {
-        try {
-            buf.write("\n");
+            bufw.write(texte + "\n");
         } catch (IOException e) {
             System.err.println(e);
         }
@@ -55,84 +103,42 @@ public class GenerarCodi {
 
     public void tancar() {
         try {
-            buf.close();
+            bufw.close();
         } catch (IOException e) {
             System.err.println(e);
         }
     }
 
-    public int novavar(Simbol s) {
+    public String novavar(Simbol s) {
         nv = nv + 1;
         tv.add(s);
-        return nv;
+        return "t" + nv;
     }
 
-    public int nouproc(Funcio nouproc) {
+    public String nouproc(Funcio nouproc) {
         np = np + 1;
         tp.add(nouproc);
-        return np;
+        return "n" + np;
     }
 
-    public int novaetiqueta() {
+    public String novaetiqueta() {
         ne = ne + 1;
         te.add(ne);
-        return ne;
+        return "e" + ne;
     }
 
-    public void genera(String d1, int d2, int d3, int d4) {
+    public void genera(String d1, String d2, String d3, String d4) {
         instruccions1.add(d1);
         instruccions2.add(d2);
         instruccions3.add(d3);
         instruccions4.add(d4);
 
+        System.out.println(d1 + " " + d2 + " " + d3 + " " + d4);
         escriureLinia(d1 + " " + d2 + " " + d3 + " " + d4);
     }
 
     public static int getNe() {
         return ne;
     }
-
-    // private void operacioAritmetica(int t, int E1, int E2, String operacio)
-    // throws IOException {
-    // instruccions1.add(operacio);
-    // instruccions2.add(E1);
-    // instruccions3.add(E2);
-    // instruccions4.add(t);
-    // }
-
-    // private void operacioNegacio(int t, int E1) throws IOException {
-    // instruccions1.add("neg");
-    // instruccions2.add(E1);
-    // instruccions3.add(-2);
-    // instruccions4.add(t);
-    // }
-
-    // private void operacioLiteral(int t, int lit) throws IOException {
-    // instruccions1.add("copy");
-    // instruccions2.add(lit);
-    // instruccions3.add(-2);
-    // instruccions4.add(t);
-    // }
-
-    // private void operacioIndireccio(int t, int Rr, int Rd) throws IOException {
-    // instruccions1.add("indx_val");
-    // instruccions2.add(Rr);
-    // instruccions3.add(Rd);
-    // instruccions4.add(t);
-    // }
-
-    // private void operacioId(int t, int dvalor) throws IOException {
-    // instruccions1.add("indx_val");
-    // instruccions2.add(dvalor);
-    // instruccions3.add(-2);
-    // instruccions4.add(t);
-    // }
-
-    // private void expresioRelacional(int t, int dvalor) throws IOException {
-    // instruccions1.add("indx_val");
-    // instruccions2.add(dvalor);
-    // instruccions3.add(-2);
-    // instruccions4.add(t);
-    // }
 
 }

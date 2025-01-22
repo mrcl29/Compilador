@@ -6,12 +6,12 @@ public class Simbol implements Cloneable {
     private Integer fila;
     private Integer columna;
     private TipusDades tipus = TipusDades.NULL;
-    private int r = -3;
-    private int d = -3;
+    private String r = "-3";
+    private String d = "-3";
     private int valor;
     private String ambit;
-    private int etiqueta = -1;
-    private int etiquetafi = -1;
+    private String etiqueta = "-3";
+    private String etiquetafi = "-3";
 
     @Override
     public Simbol clone() {
@@ -60,7 +60,7 @@ public class Simbol implements Cloneable {
         this.tipus = tipus;
     }
 
-    public Simbol(Integer fila, Integer columna, Object value, TipusDades tipus, int r) {
+    public Simbol(Integer fila, Integer columna, Object value, TipusDades tipus, String r) {
         this.fila = fila;
         this.columna = columna;
         this.value = value;
@@ -68,7 +68,7 @@ public class Simbol implements Cloneable {
         this.r = r;
     }
 
-    public Simbol(Integer fila, Integer columna, Object value, TipusDades tipus, int r, int valor) {
+    public Simbol(Integer fila, Integer columna, Object value, TipusDades tipus, String r, int valor) {
         this.fila = fila;
         this.columna = columna;
         this.value = value;
@@ -114,19 +114,19 @@ public class Simbol implements Cloneable {
         return getValue().toString();
     }
 
-    public int getR() {
+    public String getR() {
         return r;
     }
 
-    public void setR(int r) {
+    public void setR(String r) {
         this.r = r;
     }
 
-    public int getD() {
+    public String getD() {
         return d;
     }
 
-    public void setD(int d) {
+    public void setD(String d) {
         this.d = d;
     }
 
@@ -146,19 +146,19 @@ public class Simbol implements Cloneable {
         this.ambit = ambit;
     }
 
-    public int getEtiqueta() {
+    public String getEtiqueta() {
         return etiqueta;
     }
 
-    public void setEtiqueta(int etiqueta) {
+    public void setEtiqueta(String etiqueta) {
         this.etiqueta = etiqueta;
     }
 
-    public int getEtiquetafi() {
+    public String getEtiquetafi() {
         return etiquetafi;
     }
 
-    public void setEtiquetafi(int etiquetafi) {
+    public void setEtiquetafi(String etiquetafi) {
         this.etiquetafi = etiquetafi;
     }
 
