@@ -41,10 +41,10 @@ public class Tupla extends Simbol {
         this.valor2 = valor2;
     }
 
-    public TipusDades getTipus(int i) {
-        if (i == 1) {
+    public TipusDades getTipusTupla(int i) {
+        if (i == 0) {
             return valor1;
-        } else if (i == 2) {
+        } else if (i == 1) {
             return valor2;
         }
         return TipusDades.NULL;

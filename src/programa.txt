@@ -1,6 +1,9 @@
-//// Programa de prueba para el lenguaje definido
 
-//// Declaración de variables y constantes
-val x :: integer = 5;
-val y::integer = 10;
-x = y;
+val x::logical = false;
+
+while(TRUE):
+    x = in(logical);
+    if(x === TRUE):
+        out(x);
+    endif
+endwhile

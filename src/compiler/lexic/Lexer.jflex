@@ -111,7 +111,7 @@ rbracket = "]"
 
 /* Literals */
 integer_literal = [0-9]+
-boolean_literal = "TRUE" | "FALSE" | "true" | "false"
+boolean_literal = [T][R][U][E] | [F][A][L][S][E] | [t][r][u][e] | [f][a][l][s][e]
 id = [a-zA-Z][a-zA-Z0-9]*
 
 /* Espais en blanc i comentaris */
