@@ -9,7 +9,7 @@ public class Simbol implements Cloneable {
     private String r = "-3";
     private String d = "-3";
     private int valor;
-    private String ambit;
+    private String ambit = "Global";
     private String etiqueta = "-3";
     private String etiquetafi = "-3";
 

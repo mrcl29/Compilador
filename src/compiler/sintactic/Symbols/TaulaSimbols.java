@@ -9,11 +9,11 @@ public class TaulaSimbols {
         taulaSimbols = new ArrayList<Simbol>();
     }
 
-    public boolean existeixSimbol(Simbol id) {
+    public boolean existeixSimbol(Simbol id, String ambit) {
         Simbol simbol;
         for (int i = 0; i < taulaSimbols.size(); i++) {
             simbol = taulaSimbols.get(i);
-            if (simbol.getValue() == id.getValue()) {
+            if (simbol.getValue() == id.getValue() && (simbol.getAmbit() == "Global" || simbol.getAmbit() == ambit)) {
                 return true;
             }
         }
@@ -24,7 +24,9 @@ public class TaulaSimbols {
         Simbol simbol;
         for (int i = 0; i < taulaSimbols.size(); i++) {
             simbol = taulaSimbols.get(i);
-            if (simbol.getValue() == varcon.getValue() && simbol instanceof VariableConstant) {
+            if (simbol.getValue().equals(varcon.getValue()) && simbol instanceof VariableConstant
+                    && (simbol.getAmbit() == "Global" || varcon.getAmbit() == "Global"
+                            || simbol.getAmbit() == varcon.getAmbit())) {
                 return false;
             }
         }
@@ -36,7 +38,9 @@ public class TaulaSimbols {
         Simbol simbol;
         for (int i = 0; i < taulaSimbols.size(); i++) {
             simbol = taulaSimbols.get(i);
-            if (simbol.getValue() == tup.getValue() && simbol instanceof Tupla) {
+            if (simbol.getValue().equals(tup.getValue()) && simbol instanceof Tupla
+                    && (simbol.getAmbit() == "Global" || tup.getAmbit() == "Global"
+                            || simbol.getAmbit() == tup.getAmbit())) {
                 return false;
             }
         }
@@ -48,7 +52,7 @@ public class TaulaSimbols {
         Simbol simbol;
         for (int i = 0; i < taulaSimbols.size(); i++) {
             simbol = taulaSimbols.get(i);
-            if (simbol.getValue() == fun.getValue() && simbol instanceof Funcio) {
+            if (simbol.getValue().equals(fun.getValue()) && simbol instanceof Funcio) {
                 return false;
             }
         }
@@ -56,11 +60,11 @@ public class TaulaSimbols {
         return true;
     }
 
-    public Simbol usarSimbol(Object id) {
+    public Simbol usarSimbol(Object id, String ambit) {
         Simbol simbol;
         for (int i = 0; i < taulaSimbols.size(); i++) {
             simbol = taulaSimbols.get(i);
-            if (simbol.getValue().equals(id)) {
+            if (simbol.getValue().equals(id) && simbol.getAmbit() == ambit) {
                 if (simbol instanceof VariableConstant) {
                     VariableConstant aux = (VariableConstant) simbol;
                     return aux;
@@ -79,11 +83,12 @@ public class TaulaSimbols {
         return new Simbol();
     }
 
-    public VariableConstant usarVariableConstant(Object id) {
+    public VariableConstant usarVariableConstant(Object id, String ambit) {
         Simbol simbol;
         for (int i = 0; i < taulaSimbols.size(); i++) {
             simbol = taulaSimbols.get(i);
-            if (simbol instanceof VariableConstant && simbol.getValue().equals(id)) {
+            if (simbol instanceof VariableConstant && simbol.getValue().equals(id)
+                    && (simbol.getAmbit() == ambit || simbol.getAmbit() == "Global")) {
                 VariableConstant aux = (VariableConstant) simbol;
                 return aux;
             }
@@ -91,11 +96,12 @@ public class TaulaSimbols {
         return new VariableConstant();
     }
 
-    public Tupla usarTupla(Object id) {
+    public Tupla usarTupla(Object id, String ambit) {
         Simbol simbol;
         for (int i = 0; i < taulaSimbols.size(); i++) {
             simbol = taulaSimbols.get(i);
-            if (simbol instanceof Tupla && simbol.getValue().equals(id)) {
+            if (simbol instanceof Tupla && simbol.getValue().equals(id)
+                    && (simbol.getAmbit() == ambit || simbol.getAmbit() == "Global")) {
                 Tupla aux = (Tupla) simbol;
                 return aux;
             }
@@ -113,41 +119,5 @@ public class TaulaSimbols {
             }
         }
         return new Funcio();
-    }
-
-    public boolean actualitzarVariableConstant(VariableConstant id) {
-        Simbol simbol;
-        for (int i = 0; i < taulaSimbols.size(); i++) {
-            simbol = taulaSimbols.get(i);
-            if (simbol instanceof VariableConstant && simbol.getValue().equals(id.getValue())) {
-                taulaSimbols.set(i, id);
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public boolean actualitzarTupla(Tupla id) {
-        Simbol simbol;
-        for (int i = 0; i < taulaSimbols.size(); i++) {
-            simbol = taulaSimbols.get(i);
-            if (simbol instanceof Tupla && simbol.getValue().equals(id.getValue())) {
-                taulaSimbols.set(i, id);
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public boolean actualitzarFuncio(Funcio id) {
-        Simbol simbol;
-        for (int i = 0; i < taulaSimbols.size(); i++) {
-            simbol = taulaSimbols.get(i);
-            if (simbol instanceof Funcio && simbol.getValue().equals(id.getValue())) {
-                taulaSimbols.set(i, id);
-                return true;
-            }
-        }
-        return false;
     }
 }

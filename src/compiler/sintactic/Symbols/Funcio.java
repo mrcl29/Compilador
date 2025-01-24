@@ -23,18 +23,19 @@ public class Funcio extends Simbol {
         this.parametres = parametres;
     }
 
-    public boolean mateixosParametres(ArrayList<Simbol> tipus) {
+    public boolean mateixosParametres(ArrayList<Simbol> param) {
         int i = 0;
-        int f = tipus.size();
-        if (tipus != null && parametres != null) {
+        int f = param.size();
+        if (param != null && parametres != null) {
             if (f == parametres.size()) {
                 for (VariableConstant s : parametres) {
                     if (i > f - 1) {
                         return false;
                     }
-                    if (s.getTipus() != tipus.get(i).getTipus()) {
+                    if (s.getTipus() != param.get(i).getTipus()) {
                         return false;
                     }
+                    s.setR(param.get(i).getR());
                     i++;
                 }
                 return true;

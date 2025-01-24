@@ -80,16 +80,10 @@ public class GenerarCodi {
                         bufw.write(siMajorIgual(ins2.get(i), ins3.get(i), ins4.get(i)));
                         break;
                     case "call":
-                        // bufw.write(crida(ins4.get(i)));
-                        break;
-                    case "param_s":
-                        // bufw.write(imprimir(ins3.get(i), ins2.get(i), ins4.get(i)));
+                        bufw.write(crida(ins2.get(i), ins4.get(i)));
                         break;
                     case "rtn":
-                        // bufw.write(imprimir(ins3.get(i), ins2.get(i), ins4.get(i)));
-                        break;
-                    case "pmb":
-                        // bufw.write(imprimir(ins3.get(i), ins2.get(i), ins4.get(i)));
+                        bufw.write(retorn(ins4.get(i)));
                         break;
                     case "in":
                         bufw.write(entrada(ins4.get(i), ins2.get(i)));
@@ -281,44 +275,25 @@ public class GenerarCodi {
         return ins;
     }
 
-    ////////////////////////////////////////////////////////////////
-
-    // e()
-    private String crida(String e) {
-        String ins = "\n    ; " + e + "() \n";
+    // a = e()
+    private String crida(String a, String e) {
+        String ins = "\n    ; " + a + " = " + e + "() \n";
+        a = pasaANumero(a);
         e = pasaANumero(e);
 
         ins += "    JSR       E" + e + " \n";
+        ins += "    MOVE.L    D0, " + a + " \n";
 
         return ins;
     }
 
-    // param_s a
-    private String parametre(String a) {
-        String ins = "\n    ; param_s " + a + " \n";
+    // rtrn a
+    private String retorn(String a) {
+        String ins = "\n    ; rtrn " + a + " \n";
         a = pasaANumero(a);
 
-        ins += "\n";
-
-        return ins;
-    }
-
-    // rtn
-    private String retorn(String e) {
-        String ins = "\n    ; rtn n" + e + "() \n";
-        e = pasaANumero(e);
-
+        ins += "    MOVE.L    " + a + ", D0\n";
         ins += "    RTS \n";
-
-        return ins;
-    }
-
-    // pmb
-    private String preamble(String e) {
-        String ins = "\n    ; pmb n" + e + " \n";
-        e = pasaANumero(e);
-
-        ins += "\n";
 
         return ins;
     }
@@ -335,8 +310,6 @@ public class GenerarCodi {
 
         return ins;
     }
-
-    ////////////////////////////////////////////////////////////////
 
     // out(a::b) cuando acaba salto a c
     private String imprimir(String a, String b, String c) {

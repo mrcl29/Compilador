@@ -14,11 +14,11 @@ public class Ejecutar {
     private static final String SINTACTIC_PATH = "./src/compiler/sintactic/";
     private static final String LEXER_FILE = LEXIC_PATH + "Lexer.jflex";
     private static final String CUP_FILE = SINTACTIC_PATH + "Parser.cup";
-    private static final Boolean noCompilar = false;
+    private static final Boolean compilar = false;
 
     public static void main(String[] args) {
         try {
-            if (!noCompilar) {
+            if (compilar) {
                 System.err.println("------------------------------------");
                 System.err.println("------------------ 1. Limpieza ------------------");
                 System.err.println("------------------------------------");

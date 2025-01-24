@@ -30,12 +30,15 @@ parser code {:
 
     public boolean error_detectat = false;
 
-    public boolean DEBUG = false;
+    public boolean DEBUG = true;
     public void print_this(Object msg){
         if(DEBUG){
             System.out.println(msg);
         }
     }
+
+    String global = "Global";
+    String ambit = global;
 
     GenerarCodi c3a = new GenerarCodi();
 
@@ -111,7 +114,7 @@ terminal Simbol id;
 
 /* No terminales */
 non terminal S, P, DECL, VAR_DECL, CONS_DECL, TUPLA_DECL, SENT;
-non terminal FUNC_DECL, FUNCINIT, PARAM_LIST, PARAM, COS, FINAL_RTN;
+non terminal FUNC_DECL, FUNCINIT, MF, PARAM_LIST, PARAM, COS, FINAL_RTN;
 non terminal CRID_FUNC, ARGS, ARGS_LIST;
 non terminal ASIG_SENT;
 non terminal IF_SENT, IF_ELSE, IF_INIT;
@@ -158,7 +161,11 @@ ASIG_SENT ::= id:vid assign EXP:vE semicolon
 {:
     print_this("Estas en ASIG_SENT para símbolo");
     if(!error_detectat){
-        VariableConstant id = taulaSimbols.usarVariableConstant(vid.getValue());
+        Simbol aux = (Simbol) vid;
+        VariableConstant id = taulaSimbols.usarVariableConstant(vid.getValue(), ambit);
+        id.setFila(aux.getFila());
+        id.setColumna(aux.getColumna());
+        print_this("Usanto variable/constante "+id.getValue().toString()+" con el ámbito "+ ambit);
         Simbol E = (Simbol) vE;
         if(E.getTipus() == TipusDades.NULL){
             print_this("Error semántico ASIG_SENT");
@@ -410,7 +417,11 @@ FUNC_DECL ::= FUNCINIT:vFUNCINIT COS FINAL_RTN:vRTN endfnct
             semantic_error(e, vRTN);
         }else{
 
-            c3a.genera("rtn", buid, buid, FUNCINIT.getR());
+            c3a.genera("rtn", buid, buid, RTN.getR());
+            c3a.genera("skip", buid, buid, FUNCINIT.getEtiquetafi());
+            ambit = global;
+            print_this("Nuevo ámbito: " + ambit);
+
         }
     }
 :}
@@ -426,13 +437,16 @@ FUNC_DECL ::= FUNCINIT:vFUNCINIT COS FINAL_RTN:vRTN endfnct
             semantic_error(e, vRTN);
         }else{
 
-            c3a.genera("rtn", buid, buid, FUNCINIT.getR());
+            c3a.genera("rtn", buid, buid, RTN.getR());
+            c3a.genera("skip", buid, buid, FUNCINIT.getEtiquetafi());
+            ambit = global;
+            print_this("Nuevo ámbito: " + ambit);
         }
     }
 :}
 ;
 
-FUNCINIT ::= fnct TIPO:vTIPO id:vid lparen PARAM_LIST:vPARAM_LIST rparen colon
+FUNCINIT ::= MF:mf fnct TIPO:vTIPO id:vid lparen PARAM_LIST:vPARAM_LIST rparen colon
 {:
     print_this("Estas en FUNCINIT con cuerpo");
     if(!error_detectat){
@@ -440,6 +454,8 @@ FUNCINIT ::= fnct TIPO:vTIPO id:vid lparen PARAM_LIST:vPARAM_LIST rparen colon
         Simbol TIPO = (Simbol) vTIPO;
         Simbol id = (Simbol) vid;
         ArrayList<VariableConstant> PARAM_LIST = (ArrayList<VariableConstant>) vPARAM_LIST;
+
+        Simbol MF = (Simbol) mf;
 
         Funcio funcio = new Funcio(id.getValue(), PARAM_LIST, TIPO.getTipus());
         error_detectat = !taulaSimbols.declararFuncio(funcio);
@@ -450,16 +466,33 @@ FUNCINIT ::= fnct TIPO:vTIPO id:vid lparen PARAM_LIST:vPARAM_LIST rparen colon
         }else{
             print_this("Función '" + id.getValue() + " de tipo " + TIPO.getTipus().toString() + " creada con éxito");
 
-            String e = c3a.novaetiqueta();
-            funcio.setEtiqueta(e);
-            String np = c3a.nouproc(funcio);
-            c3a.genera("skip", buid, buid, e);
-            c3a.genera("pmb", buid, buid, np);
-            funcio.setR(np);
+            funcio.setEtiqueta(MF.getEtiqueta());
+            funcio.setEtiquetafi(MF.getEtiquetafi());
+            funcio.setR(MF.getR());
 
             RESULT = funcio;
         }
     }
+:}
+;
+
+MF ::= /* epsilon */
+{:
+    Funcio MF = new Funcio();
+
+    String e = c3a.novaetiqueta();
+    MF.setEtiqueta(e);
+    String np = c3a.nouproc(MF);
+    ambit = np;
+    print_this("Nuevo ámbito: " + ambit);
+    String efi = c3a.novaetiqueta();
+    c3a.genera("goto", buid, buid, efi);
+    MF.setEtiquetafi(efi);
+    c3a.genera("skip", buid, buid, e);
+    MF.setR(np);
+
+    RESULT = MF;
+
 :}
 ;
 
@@ -490,14 +523,17 @@ PARAM ::= id:v1 double_colon TIPO:v2
         print_this("Declarando Parámetro "+ v1.getValue());
         Simbol aux_v1 = (Simbol) v1;
         Simbol aux_v2 = (Simbol) v2;
-        error_detectat = !taulaSimbols.declararVariableConstant(new VariableConstant(v1.getValue(), aux_v2.getTipus(), false));
+        VariableConstant varcon = new VariableConstant(v1.getValue(), aux_v2.getTipus(), false);
+        varcon.setAmbit(ambit);
+        print_this("Asignado el ámbito "+ ambit+ " al parámetro "+varcon.getValue().toString());
+        error_detectat = !taulaSimbols.declararVariableConstant(varcon);
         if(error_detectat){
             print_this("Error semántico PARAM");
             String e = ("Ya existe una variable o constante con el nombre '" + v1.getValue() + "'");
             semantic_error(e, v1);
         }else{
             print_this("Parámetro '" + v1.getValue() + "' creado con éxito");
-            RESULT = new VariableConstant(v1.getValue(), aux_v2.getTipus(), false);
+            RESULT = varcon;
         }
     }
 :}
@@ -555,12 +591,18 @@ CRID_FUNC ::= id:vid lparen ARGS:vARGS rparen
     print_this("Estas en CRID_FUNC para argumentos");
     if(!error_detectat){
         print_this("Llamando a Función: "+ vid.getValue());
+        Simbol aux = (Simbol) vid;
         Funcio id = taulaSimbols.usarFuncio(vid.getValue());
+        id = (Funcio) id.clone();
+        id.setFila(aux.getFila());
+        id.setColumna(aux.getColumna());
         ArrayList<Simbol> ARGS = (ArrayList<Simbol>) vARGS;
         if(id.getValue() != ""){
             if(id.mateixosParametres(ARGS)){
 
-                c3a.genera("call", buid, buid, id.getR());
+                String t = c3a.novavar(id);
+                c3a.genera("call", t, buid, id.getEtiqueta());
+                id.setR(t);
 
                 RESULT = id;
             }else{
@@ -580,12 +622,18 @@ CRID_FUNC ::= id:vid lparen ARGS:vARGS rparen
     print_this("Estas en CRID_FUNC sin argumentos");
     if(!error_detectat){
         print_this("Llamando a Función: "+ vid.getValue());
+        Simbol aux = (Simbol) vid;
         Funcio id = taulaSimbols.usarFuncio(vid.getValue());
+        id = (Funcio) id.clone();
+        id.setFila(aux.getFila());
+        id.setColumna(aux.getColumna());
         ArrayList<Simbol> aux_v2 = new ArrayList<Simbol>();
         if(id.getValue() != ""){
             if(id.mateixosParametres(aux_v2)){
 
-                c3a.genera("call", buid, buid, id.getR());
+                String t = c3a.novavar(id);
+                c3a.genera("call", t, buid, id.getEtiqueta());
+                id.setR(t);
 
                 RESULT = id;
             }else{
@@ -607,15 +655,18 @@ ARGS ::= EXP:vE ARGS_LIST:vARGS_LIST
     print_this("Estas en ARGS");
     if(!error_detectat){
         Simbol E = (Simbol) vE;
+        E = E.clone();
         if(E.getTipus() == TipusDades.NULL){
             print_this("Error semántico ARGS");
             String e = ("Argumento vacío");
             semantic_error(e, vE);
         }else{
+            String t = c3a.novavar(E);
+            c3a.genera("copy", E.getR(), buid, t);
+            E.setR(t);
+
             ArrayList<Simbol> ARGS_LIST = (ArrayList<Simbol>) vARGS_LIST;
             ARGS_LIST.add(0, E);
-
-            c3a.genera("param_s", buid, buid, E.getR());
 
             RESULT = ARGS_LIST;
         }
@@ -628,11 +679,16 @@ ARGS_LIST ::= comma EXP:vE ARGS_LIST:vARGS_LIST
     print_this("Estas en ARGS_LIST");
     if(!error_detectat){
         Simbol E = (Simbol) vE;
+        E = E.clone();
         if(E.getTipus() == TipusDades.NULL){
             print_this("Error semántico ARGS_LIST");
             String e = ("Argumento vacío");
             semantic_error(e, vE);
         }else{
+            String t = c3a.novavar(E);
+            c3a.genera("copy", E.getR(), buid, t);
+            E.setR(t);
+
             ArrayList<Simbol> ARGS_LIST = (ArrayList<Simbol>) vARGS_LIST;
             ARGS_LIST.add(0, E);
 
@@ -664,6 +720,8 @@ VAR_DECL ::= val id:vid double_colon TIPO:vTIPO assign EXP:vE semicolon
                 semantic_error(e, vE);
             }else{
                 VariableConstant varcon = new VariableConstant(id.getValue(), TIPO.getTipus(), false);
+                varcon.setAmbit(ambit);
+                print_this("Asignado el ámbito "+ ambit+ " a la variable "+varcon.getValue().toString());
                 error_detectat = !taulaSimbols.declararVariableConstant(varcon);
                 if(error_detectat){
                     print_this("Error semántico VAR_DECL");
@@ -704,6 +762,8 @@ CONS_DECL ::= con id:vid double_colon TIPO:vTIPO assign EXP:vE semicolon
                 semantic_error(e, vE);
             }else{
                 VariableConstant varcon = new VariableConstant(id.getValue(), TIPO.getTipus(), true);
+                varcon.setAmbit(ambit);
+                print_this("Asignado el ámbito "+ ambit+ " a la constante "+varcon.getValue().toString());
                 error_detectat = !taulaSimbols.declararVariableConstant(varcon);
                 if(error_detectat){
                     print_this("Error semántico VAR_DECL");
@@ -734,6 +794,8 @@ TUPLA_DECL ::= tuple id:vid assign lbrace TIPO:vTIPO1 comma TIPO:vTIPO2 rbrace s
         Simbol TIPO1 = (Simbol) vTIPO1;
         Simbol TIPO2 = (Simbol) vTIPO2;
         Tupla tupla = new Tupla(id.getValue(), TIPO1.getTipus(), TIPO2.getTipus());
+        tupla.setAmbit(ambit);
+        print_this("Asignado el ámbito "+ ambit+ " a la tupla "+tupla.getValue().toString());
         error_detectat = !taulaSimbols.declararTupla(tupla);
         if(error_detectat){
             print_this("Error semántico TUPLA_DECL");
@@ -821,8 +883,11 @@ TUPLA_ACCESS ::= id:vid lbracket integer_literal:vindex rbracket
         Simbol index = (Simbol) vindex;
         index.setValor((Integer) index.getValue());
         index.setValue("integer_literal");
-        Tupla TUPLA = taulaSimbols.usarTupla(id.getValue());
+        Tupla TUPLA = taulaSimbols.usarTupla(id.getValue(), ambit);
+        print_this("Usanto tupla "+TUPLA.getValue().toString()+" con el ámbito "+ ambit);
         Tupla aux_TUPLA = new Tupla();
+        aux_TUPLA.setFila(id.getFila());
+        aux_TUPLA.setColumna(id.getColumna());
         if(TUPLA.getValue() != ""){
             if(index.getValor() == 0 || index.getValor() == 1){
                 aux_TUPLA.setRef(index.getValor());
@@ -1119,13 +1184,17 @@ ENTR_FUNC ::= in lparen TIPO:vTIPO rparen
 CRID_SIMB ::= id:vid
 {:
     print_this("Estas en CRID_SIMB id");
-    VariableConstant id = taulaSimbols.usarVariableConstant(vid.getValue()); //d = consulta(ts, id.id);
+    Simbol aux = (Simbol) vid;
+    VariableConstant id = taulaSimbols.usarVariableConstant(vid.getValue(), ambit); //d = consulta(ts, id.id);
+    id.setFila(aux.getFila());
+    id.setColumna(aux.getColumna());
+    print_this("Usanto variable/constante "+id.getValue().toString()+" con el ámbito "+ ambit);
     if(id.getValue() != ""){
         print_this("Se ha obtenido la variable o constante '" + id.getValue() + "' de tipo '" + id.getTipus() + "'");
         RESULT = id;
     }else{
         print_this("Error semántico EXP");
-        String e = ("El símbolo llamado no ha sido declarado");
+        String e = ("El símbolo '"+vid.getValue().toString()+"' no ha sido declarado");
         semantic_error(e, vid);
     }
 :}
