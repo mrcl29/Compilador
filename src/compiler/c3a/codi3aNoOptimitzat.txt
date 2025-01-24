@@ -1,0 +1,31 @@
+copy 10  t0
+copy t0  t1
+copy 10  t2
+copy t2  t3
+goto   e1
+skip   e0
+copy 1  t6
+copy 4  t7
+prod t6 t7 t8
+copy 10  t9
+ind_ass t9 t8 t4
+copy -1  t10
+copy t10  t11
+copy -1  t12
+copy t12  t13
+rtn   t1
+skip   e1
+goto   e3
+skip   e2
+copy 0  t16
+copy t16  t17
+copy 1  t18
+in t18  t19
+rtn   t19
+skip   e3
+copy -1  t20
+copy t20  t21
+call t22  e2
+copy 1  t23
+copy t22  t24
+out t23 t24 e4

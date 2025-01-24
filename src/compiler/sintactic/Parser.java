@@ -559,7 +559,7 @@ class CUP$Parser$actions {
           case 1: // S ::= P 
             {
               Object RESULT =null;
-		 c3a.tancar(); c3a.crearEnsamblador(); done_parsing(); 
+		 c3a.tancar(); c3a.generarCodi(); done_parsing(); 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("S",0, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;

@@ -133,7 +133,7 @@ start with S;
 
 /* Reglas de gramática */
 
-S ::= P {: c3a.tancar(); c3a.crearEnsamblador(); done_parsing(); :};
+S ::= P {: c3a.tancar(); c3a.generarCodi(); done_parsing(); :};
 
 P ::= SENT P
     | FUNC_DECL P
