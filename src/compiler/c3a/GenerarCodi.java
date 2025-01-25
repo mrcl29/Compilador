@@ -92,8 +92,34 @@ public class GenerarCodi {
                 for (int i = 0; i < ins1x.size(); i++) {
                     switch (ins1x.get(i)) {
                         case "skip":
-                            if (ins1x.get(i + 1) == "goto") { // Si la següent instrucció es goto
-                                optimitzacioBrancamentSobreBrancament(i);
+                            try {
+                                if (ins1x.get(i + 1) == "goto") { // Si la següent instrucció es goto
+                                    optimitzacioBrancamentSobreBrancament(i);
+                                }
+                            } catch (IndexOutOfBoundsException e) {
+                            }
+                            break;
+                        default:
+                            break;
+                    }
+                }
+
+                // Operacions constants
+                System.out.println("Operacions Constants");
+                for (int i = 0; i < ins1x.size(); i++) {
+                    switch (ins1x.get(i)) {
+                        case "add":
+                        case "sub":
+                        case "prod":
+                        case "if_LT":
+                        case "if_EQ":
+                        case "if_NE":
+                        case "if_GE":
+                            String a = pasaANumero(ins2x.get(i));
+                            String b = pasaANumero(ins3x.get(i));
+                            if (a.contains("#") && b.contains("#")) {
+                                optimitzacioOperacioConstant(i, Integer.parseInt(a.replace("#", "")),
+                                        Integer.parseInt(b.replace("#", "")));
                             }
                             break;
                         default:
@@ -114,10 +140,18 @@ public class GenerarCodi {
                 }
 
                 // Assignacions Diferides
-                System.out.println("Assignacions diferides");
+                System.out.println("Assignacions Diferides");
+                for (int i = 0; i < ins1x.size(); i++) {
+                    switch (ins1x.get(i)) {
+                        case "copy":
+                            optimitzacioAssignacioDiferida(i);
+                            break;
+                        default:
+                            break;
+                    }
+                }
 
-                // Etiquetes No Usades
-                System.out.println("Etiquetes No Usades");
+                // ¡¡¡ MIRAR ENSAMBLADOR PER IMPRIMIR INTEGER CARACTER A CARACTER !!!
 
             } while (repetirIteracio);
 
@@ -205,6 +239,93 @@ public class GenerarCodi {
     }
 
     /*
+     * x = 7 * 3
+     * if 0 = -1 goto e1
+     * if -1 = -1 goto e1
+     *
+     * ==>
+     *
+     * x = 21
+     * -
+     * goto e1
+     *
+     */
+    private void optimitzacioOperacioConstant(int i, int a, int b) {
+        repetirIteracio = true;
+        String result;
+        switch (ins1x.get(i)) {
+            case "add":
+                result = String.valueOf(a + b);
+                ins1x.set(i, "copy");
+                ins2x.set(i, result);
+                ins3x.set(i, "");
+                break;
+            case "sub":
+                result = String.valueOf(a - b);
+                ins1x.set(i, "copy");
+                ins2x.set(i, result);
+                ins3x.set(i, "");
+                break;
+            case "prod":
+                result = String.valueOf(a * b);
+                ins1x.set(i, "copy");
+                ins2x.set(i, result);
+                ins3x.set(i, "");
+                break;
+            case "if_LT":
+                if (a < b) {
+                    ins1x.set(i, "goto");
+                    ins2x.set(i, "");
+                    ins3x.set(i, "");
+                } else {
+                    ins1x.remove(i);
+                    ins2x.remove(i);
+                    ins3x.remove(i);
+                    ins4x.remove(i);
+                }
+                break;
+            case "if_EQ":
+                if (a == b) {
+                    ins1x.set(i, "goto");
+                    ins2x.set(i, "");
+                    ins3x.set(i, "");
+                } else {
+                    ins1x.remove(i);
+                    ins2x.remove(i);
+                    ins3x.remove(i);
+                    ins4x.remove(i);
+                }
+                break;
+            case "if_NE":
+                if (a != b) {
+                    ins1x.set(i, "goto");
+                    ins2x.set(i, "");
+                    ins3x.set(i, "");
+                } else {
+                    ins1x.remove(i);
+                    ins2x.remove(i);
+                    ins3x.remove(i);
+                    ins4x.remove(i);
+                }
+                break;
+            case "if_GE":
+                if (a >= b) {
+                    ins1x.set(i, "goto");
+                    ins2x.set(i, "");
+                    ins3x.set(i, "");
+                } else {
+                    ins1x.remove(i);
+                    ins2x.remove(i);
+                    ins3x.remove(i);
+                    ins4x.remove(i);
+                }
+                break;
+            default:
+                break;
+        }
+    }
+
+    /*
      * eliminat -> [if 0 = -1] goto e1
      * goto e2
      * e1: skip
@@ -254,6 +375,39 @@ public class GenerarCodi {
                 }
             }
         } catch (IndexOutOfBoundsException e) {
+        }
+    }
+
+    /*
+     * t = ...
+     * x = t
+     *
+     * ==>
+     *
+     * x = ...
+     */
+    private void optimitzacioAssignacioDiferida(int i) {
+        int index = -1;
+        boolean trobat = false;
+        for (int x = 0; x < ins1x.size(); x++) {
+            if (x != i) {
+                if (ins4x.get(x) == ins4x.get(i)) {
+                    trobat = false;
+                    break;
+                } else if (ins2x.get(x) == ins4x.get(i)) {
+                    if (trobat) {
+                        trobat = false;
+                        break;
+                    } else {
+                        trobat = true;
+                        index = x;
+                    }
+                }
+            }
+        }
+        if (trobat) {
+            ins2x.set(index, ins2x.get(i));
+            repetirIteracio = true;
         }
     }
 

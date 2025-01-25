@@ -1,18 +1,4 @@
-con x::integer = 10;
-val y::integer = 10;
 
-fnct integer aaa(yy :: logical):
-tuple x = {integer, integer};
-x[1] = 10;
-val yyy::logical = true;
-val prueba::logical = true;
-rtrn (x);
-endfnct
-
-fnct integer bbb(yy :: logical):
-tuple y = {integer, integer};
-val yyy::logical = false;
-rtrn (in(integer));
-endfnct
-
-out(bbb(TRUE));
+for x::integer = 1 to 100:
+out(x);
+endfor
