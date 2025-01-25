@@ -25,8 +25,8 @@ START:                  ; first instruction of program
     MOVE.L    8(A7), D0 
     MOVE.L    D0, 12(A7) 
 
-    ; goto e1
-    BRA       E1 
+    ; goto e3
+    BRA       E3 
 
     ; e0
 E0: 
@@ -133,15 +133,15 @@ E3:
     MOVE.L    92(A7), D0 
     MOVE.L    96(A7), D1 
     CMP.L     #1, D0 
-    BNE       E9   
+    BNE       E7   
     JSR       PRINT_INTEGER   
     BRA       E4   
-E9:   
+E7:   
     CMP.L     #2, D0 
-    BNE       E10   
+    BNE       E8   
     JSR       PRINT_BOOLEAN   
     BRA       E4   
-E10:   
+E8:   
     LEA       ERROR_MSG, A1 
     MOVE.W  #14, D0 
     TRAP    #15 

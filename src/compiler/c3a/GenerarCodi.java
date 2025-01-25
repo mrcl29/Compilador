@@ -1,8 +1,6 @@
 package compiler.c3a;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
@@ -16,7 +14,8 @@ public class GenerarCodi {
     private final String noOpt = "NoOptimitzat.txt";
     private final int nbytes = 4;
     private BufferedWriter bufw;
-    private BufferedReader bufr;
+    // ------------------------------------------------
+    // VARIABLES PER A LA CREACIÓ DEL CODI INTERMIG
     private static int nv = -1;
     private static int np = -1;
     private static int ne = -1;
@@ -28,6 +27,14 @@ public class GenerarCodi {
     ArrayList<Simbol> tv = new ArrayList<Simbol>();
     ArrayList<Funcio> tp = new ArrayList<Funcio>();
     ArrayList<Integer> te = new ArrayList<Integer>();
+    // ------------------------------------------------
+    // VARIABLES PER A L'OPTIMITZACIO DEL CODI INTERMIG
+    ArrayList<String> ins1x;
+    ArrayList<String> ins2x;
+    ArrayList<String> ins3x;
+    ArrayList<String> ins4x;
+    boolean repetirIteracio;
+    // ------------------------------------------------
 
     public GenerarCodi() {
         try {
@@ -43,135 +50,86 @@ public class GenerarCodi {
         crearEnsamblador(opt);
     }
 
+    // ----- FUNCIONS D'OPTIMITZACIÓ ----- //
+
     public void optimitzarCodi() {
         try {
-            bufw = new BufferedWriter(new FileWriter(fitxerC3a + opt));
+            ins1x = ins1;
+            ins2x = ins2;
+            ins3x = ins3;
+            ins4x = ins4;
+            ins1 = new ArrayList<>();
+            ins2 = new ArrayList<>();
+            ins3 = new ArrayList<>();
+            ins4 = new ArrayList<>();
 
-            for (int i = 0; i < ins1.size(); i++) {
-                switch (ins1.get(i)) {
-                    case "copy":
-                        bufw.write(asignacio(ins4.get(i), ins2.get(i)));
-                        break;
-                    case "add":
-                        bufw.write(suma(ins4.get(i), ins2.get(i), ins3.get(i)));
-                        break;
-                    case "sub":
-                        bufw.write(resta(ins4.get(i), ins2.get(i), ins3.get(i)));
-                        break;
-                    case "neg":
-                        bufw.write(negacio(ins4.get(i), ins2.get(i)));
-                        break;
-                    case "prod":
-                        bufw.write(producte(ins4.get(i), ins2.get(i), ins3.get(i)));
-                        break;
-                    case "ind_ass":
-                        bufw.write(indexAssignat(ins4.get(i), ins3.get(i), ins2.get(i)));
-                        break;
-                    case "ind_val":
-                        bufw.write(valorIndexat(ins4.get(i), ins2.get(i), ins3.get(i)));
-                        break;
-                    case "skip":
-                        bufw.write(etiqueta(ins4.get(i)));
-                        break;
-                    case "goto":
-                        bufw.write(botar(ins4.get(i)));
-                        break;
-                    case "if_LT":
-                        try {
-                            // Brancaments adjacents
-                            if (ins1.get(i + 1) == "goto" && ins1.get(i + 2) == "skip"
-                                    && ins4.get(i + 2) == ins4.get(i)) {
-                                ins1.set(i, "if_GE"); // invertim condició
-                                ins4.set(i, ins4.get(i + 1)); // bot a final
+            do {
+                repetirIteracio = false;
 
-                                // eliminam goto
-                                ins1.remove(i + 1);
-                                ins2.remove(i + 1);
-                                ins3.remove(i + 1);
-                                ins4.remove(i + 1);
-                                i--;
-                                break;
-                            }
-                        } catch (IndexOutOfBoundsException e) {
-                        }
-                        bufw.write(siMenor(ins2.get(i), ins3.get(i), ins4.get(i)));
-                        break;
-                    case "if_EQ":
-                        try {
-                            // Brancaments adjacents
-                            if (ins1.get(i + 1) == "goto" && ins1.get(i + 2) == "skip"
-                                    && ins4.get(i + 2) == ins4.get(i)) {
-                                ins1.set(i, "if_NE"); // invertim condició
-                                ins4.set(i, ins4.get(i + 1)); // bot a final
-
-                                // eliminam goto
-                                ins1.remove(i + 1);
-                                ins2.remove(i + 1);
-                                ins3.remove(i + 1);
-                                ins4.remove(i + 1);
-                                i--;
-                                break;
-                            }
-                        } catch (IndexOutOfBoundsException e) {
-                        }
-                        bufw.write(siIguals(ins2.get(i), ins3.get(i), ins4.get(i)));
-                        break;
-                    case "if_NE":
-                        try {
-                            // Brancaments adjacents
-                            if (ins1.get(i + 1) == "goto" && ins1.get(i + 2) == "skip"
-                                    && ins4.get(i + 2) == ins4.get(i)) {
-                                ins1.set(i, "if_EQ"); // invertim condició
-                                ins4.set(i, ins4.get(i + 1)); // bot a final
-
-                                // eliminam goto
-                                ins1.remove(i + 1);
-                                ins2.remove(i + 1);
-                                ins3.remove(i + 1);
-                                ins4.remove(i + 1);
-                                i--;
-                                break;
-                            }
-                        } catch (IndexOutOfBoundsException e) {
-                        }
-                        bufw.write(siNoIguals(ins2.get(i), ins3.get(i), ins4.get(i)));
-                        break;
-                    case "if_GE":
-                        try {
-                            // Brancaments adjacents
-                            if (ins1.get(i + 1) == "goto" && ins1.get(i + 2) == "skip"
-                                    && ins4.get(i + 2) == ins4.get(i)) {
-                                ins1.set(i, "if_LT"); // invertim condició
-                                ins4.set(i, ins4.get(i + 1)); // bot a final
-
-                                // eliminam goto
-                                ins1.remove(i + 1);
-                                ins2.remove(i + 1);
-                                ins3.remove(i + 1);
-                                ins4.remove(i + 1);
-                                i--;
-                                break;
-                            }
-                        } catch (IndexOutOfBoundsException e) {
-                        }
-                        bufw.write(siMajorIgual(ins2.get(i), ins3.get(i), ins4.get(i)));
-                        break;
-                    case "call":
-                        bufw.write(crida(ins2.get(i), ins4.get(i)));
-                        break;
-                    case "rtn":
-                        bufw.write(retorn(ins4.get(i)));
-                        break;
-                    case "in":
-                        bufw.write(entrada(ins4.get(i), ins2.get(i)));
-                        break;
-                    case "out":
-                        bufw.write(imprimir(ins3.get(i), ins2.get(i), ins4.get(i)));
-                        break;
-                    default:
-                        break;
+                // Brancaments Adjacents
+                System.out.println("Brancaments Adjacents");
+                for (int i = 0; i < ins1x.size(); i++) {
+                    switch (ins1x.get(i)) {
+                        case "if_LT":
+                            optimitzacioBrancamentAdjacent(i, "if_GE");
+                            break;
+                        case "if_EQ":
+                            optimitzacioBrancamentAdjacent(i, "if_NE");
+                            break;
+                        case "if_NE":
+                            optimitzacioBrancamentAdjacent(i, "if_EQ");
+                            break;
+                        case "if_GE":
+                            optimitzacioBrancamentAdjacent(i, "if_LT");
+                            break;
+                        default:
+                            break;
+                    }
                 }
+
+                // Brancaments Sobre Brancaments
+                System.out.println("Brancaments Sobre Brancaments");
+                for (int i = 0; i < ins1x.size(); i++) {
+                    switch (ins1x.get(i)) {
+                        case "skip":
+                            if (ins1x.get(i + 1) == "goto") { // Si la següent instrucció es goto
+                                optimitzacioBrancamentSobreBrancament(i);
+                            }
+                            break;
+                        default:
+                            break;
+                    }
+                }
+
+                // Codi Inaccessible
+                System.out.println("Codi Inaccessible");
+                for (int i = 0; i < ins1x.size(); i++) {
+                    switch (ins1x.get(i)) {
+                        case "goto":
+                            optimitzacioCodiInaccessible(i);
+                            break;
+                        default:
+                            break;
+                    }
+                }
+
+                // Assignacions Diferides
+                System.out.println("Assignacions diferides");
+
+                // Etiquetes No Usades
+                System.out.println("Etiquetes No Usades");
+
+            } while (repetirIteracio);
+
+            ins1 = ins1x;
+            ins2 = ins2x;
+            ins3 = ins3x;
+            ins4 = ins4x;
+            bufw = new BufferedWriter(new FileWriter(fitxerC3a + opt));
+            for (int i = 0; i < ins1.size(); i++) {
+                escriureLinia(ins1.get(i) + " " + ins2.get(i) + " " + ins3.get(i) + " " + ins4.get(i));
             }
+
         } catch (IOException e) {
             System.err.println(e);
         } finally {
@@ -183,9 +141,128 @@ public class GenerarCodi {
         }
     }
 
+    /*
+     * if condició goto e1
+     * goto e2
+     * e1: skip
+     * ...
+     * e2: skip
+     *
+     * ==>
+     *
+     * if not condició goto e2
+     * e1: skip
+     * ...
+     * e2: skip
+     */
+    private void optimitzacioBrancamentAdjacent(int i, String condicioInvertida) {
+        try {
+            if (ins1x.get(i + 1) == "goto" && ins1x.get(i + 2) == "skip"
+                    && ins4x.get(i + 2) == ins4x.get(i)) {
+                ins1x.set(i, condicioInvertida); // invertim condició
+                ins4x.set(i, ins4.get(i + 1)); // bot a final
+
+                // eliminam goto
+                ins1x.remove(i + 1);
+                ins2x.remove(i + 1);
+                ins3x.remove(i + 1);
+                ins4x.remove(i + 1);
+                System.out.println("BA: " + String.valueOf(i));
+                repetirIteracio = true;
+            }
+        } catch (IndexOutOfBoundsException e) {
+        }
+    }
+
+    /*
+     * if condició goto e1
+     * .
+     * .
+     * .
+     * e1: skip
+     * goto e2
+     *
+     * ==>
+     *
+     * if condició goto e2
+     * .
+     * .
+     * .
+     * e1: skip
+     * goto e2
+     */
+    private void optimitzacioBrancamentSobreBrancament(int i) {
+        try {
+            for (int x = 0; x < ins1x.size(); x++) { // Recorrem totes les instrucions
+                if (ins4x.get(x) == ins4x.get(i) && x != i) { // Si hi ha algun bot a l'etiqueta identificada
+                    ins4x.set(x, ins4x.get(i + 1)); // Cambiam la etiqueta del bot per l'etiqueta del goto
+                    System.out.println("BSB: " + String.valueOf(i));
+                    repetirIteracio = true;
+                }
+            }
+        } catch (IndexOutOfBoundsException e) {
+        }
+    }
+
+    /*
+     * eliminat -> [if 0 = -1] goto e1
+     * goto e2
+     * e1: skip
+     * .
+     * .
+     * .
+     * e2: skip
+     *
+     * ==>
+     *
+     * goto e2
+     * e2: skip
+     */
+    private void optimitzacioCodiInaccessible(int i) {
+        try {
+            int index = -1;
+            for (int x = i + 1; x < ins1x.size(); x++) {
+                if (ins1x.get(x) == "skip") {
+                    if (ins4x.get(x) != ins4x.get(i)) {
+
+                        for (int j = 0; j < ins1x.size(); j++) {
+                            if (ins4x.get(j) == ins4x.get(x) && j != x) {
+                                index = -2;
+                                break;
+                            }
+                        }
+                        if (index == -2) {
+                            break;
+                        }
+                        index = x;
+                    } else {
+                        break;
+                    }
+                } else {
+                    index = x;
+                }
+            }
+
+            if (index > i) {
+                for (int j = i + 1; j < index; j++) {
+                    ins1x.remove(j);
+                    ins2x.remove(j);
+                    ins3x.remove(j);
+                    ins4x.remove(j);
+                    System.out.println("CI: " + String.valueOf(i));
+                    repetirIteracio = true;
+                }
+            }
+        } catch (IndexOutOfBoundsException e) {
+        }
+    }
+
+    /////////////////////////////////////////////////////
+
+    // ----- FUNCIONS PER CREAR CODI ENSAMBLADOR ----- //
+
     public void crearEnsamblador(String fitxer) {
         try {
-            bufr = new BufferedReader(new FileReader(fitxerC3a + fitxer));
             bufw = new BufferedWriter(new FileWriter(fitxerEnsamblador + fitxer));
 
             bufw.write(instruccionsInicials());
@@ -218,6 +295,9 @@ public class GenerarCodi {
                     case "goto":
                         bufw.write(botar(ins4.get(i)));
                         break;
+                    case "if_LT":
+                        bufw.write(siMenor(ins2.get(i), ins3.get(i), ins4.get(i)));
+                        break;
                     case "if_EQ":
                         bufw.write(siIguals(ins2.get(i), ins3.get(i), ins4.get(i)));
                         break;
@@ -248,7 +328,6 @@ public class GenerarCodi {
             System.err.println(e);
         } finally {
             try {
-                bufr.close();
                 bufw.close();
             } catch (IOException e) {
                 System.err.println(e);
@@ -775,21 +854,9 @@ public class GenerarCodi {
         return ins;
     }
 
-    public void escriureLinia(String texte) {
-        try {
-            bufw.write(texte + "\n");
-        } catch (IOException e) {
-            System.err.println(e);
-        }
-    }
+    /////////////////////////////////////////////////////
 
-    public void tancar() {
-        try {
-            bufw.close();
-        } catch (IOException e) {
-            System.err.println(e);
-        }
-    }
+    // ----- FUNCIONS PER CREAR CODI INTERMIG ----- //
 
     public String novavar(Simbol s) {
         nv = nv + 1;
@@ -821,12 +888,34 @@ public class GenerarCodi {
         ins3.add(d3);
         ins4.add(d4);
 
-        System.out.println(d1 + " " + d2 + " " + d3 + " " + d4);
+        // System.out.println(d1 + " " + d2 + " " + d3 + " " + d4);
         escriureLinia(d1 + " " + d2 + " " + d3 + " " + d4);
     }
 
     public static int getNe() {
         return ne;
     }
+
+    //////////////////////////////////////////////////
+
+    // ----- FUNCIONS GENÈRIQUES PER ESCRIURE ----- //
+
+    public void escriureLinia(String texte) {
+        try {
+            bufw.write(texte + "\n");
+        } catch (IOException e) {
+            System.err.println(e);
+        }
+    }
+
+    public void tancar() {
+        try {
+            bufw.close();
+        } catch (IOException e) {
+            System.err.println(e);
+        }
+    }
+
+    //////////////////////////////////////////////////
 
 }

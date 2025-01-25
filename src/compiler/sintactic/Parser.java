@@ -1985,12 +1985,15 @@ class CUP$Parser$actions {
                 String t = c3a.novavar(E1);
                 String e1 = c3a.novaetiqueta();
                 String e2 = c3a.novaetiqueta();
+                String e3 = c3a.novaetiqueta();
                 c3a.genera("if_EQ", E1.getR(), E2.getR(), e1);
-                c3a.genera("copy", "0", buid, t);
                 c3a.genera("goto", buid, buid, e2);
                 c3a.genera("skip", buid, buid, e1);
                 c3a.genera("copy", "-1", buid, t);
+                c3a.genera("goto", buid, buid, e3);
                 c3a.genera("skip", buid, buid, e2);
+                c3a.genera("copy", "0", buid, t);
+                c3a.genera("skip", buid, buid, e3);
                 E1.setR(t);
 
                 RESULT = E1;
@@ -2046,12 +2049,15 @@ class CUP$Parser$actions {
                 String t = c3a.novavar(E1);
                 String e1 = c3a.novaetiqueta();
                 String e2 = c3a.novaetiqueta();
+                String e3 = c3a.novaetiqueta();
                 c3a.genera("if_NE", E1.getR(), E2.getR(), e1);
-                c3a.genera("copy", "0", buid, t);
                 c3a.genera("goto", buid, buid, e2);
                 c3a.genera("skip", buid, buid, e1);
                 c3a.genera("copy", "-1", buid, t);
+                c3a.genera("goto", buid, buid, e3);
                 c3a.genera("skip", buid, buid, e2);
+                c3a.genera("copy", "0", buid, t);
+                c3a.genera("skip", buid, buid, e3);
                 E1.setR(t);
 
                 RESULT = E1;
