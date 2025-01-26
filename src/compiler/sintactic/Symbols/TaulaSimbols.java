@@ -3,10 +3,33 @@ package compiler.sintactic.Symbols;
 import java.util.ArrayList;
 
 public class TaulaSimbols {
-    private ArrayList<Simbol> taulaSimbols;
+    private ArrayList<Simbol> taulaSimbols = new ArrayList<Simbol>();
 
     public TaulaSimbols() {
         taulaSimbols = new ArrayList<Simbol>();
+    }
+
+    @Override
+    public String toString() {
+        String text = "";
+        for (int i = 0; i < taulaSimbols.size(); i++) {
+            Simbol s = taulaSimbols.get(i);
+            text += s.getValue().toString();
+            if (s instanceof VariableConstant) {
+                VariableConstant v = (VariableConstant) s;
+                if (v.isEsConstant()) {
+                    text += " [Constant]";
+                } else {
+                    text += " [Variable]";
+                }
+            } else if (s instanceof Tupla) {
+                text += " [Tupla]";
+            } else if (s instanceof Funcio) {
+                text += " [Funcio]";
+            }
+            text += "\n";
+        }
+        return text + "\n";
     }
 
     public boolean existeixSimbol(Simbol id, String ambit) {

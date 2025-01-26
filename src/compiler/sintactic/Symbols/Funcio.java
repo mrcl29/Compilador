@@ -28,14 +28,13 @@ public class Funcio extends Simbol {
         int f = param.size();
         if (param != null && parametres != null) {
             if (f == parametres.size()) {
-                for (VariableConstant s : parametres) {
+                for (int j = 0; j < parametres.size(); j++) {
                     if (i > f - 1) {
                         return false;
                     }
-                    if (s.getTipus() != param.get(i).getTipus()) {
+                    if (parametres.get(j).getTipus() != param.get(i).getTipus()) {
                         return false;
                     }
-                    s.setR(param.get(i).getR());
                     i++;
                 }
                 return true;

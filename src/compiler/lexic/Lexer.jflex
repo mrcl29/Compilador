@@ -44,7 +44,7 @@ import compiler.sintactic.ParserSym;
 %{
     private ArrayList<Simbol> tokens;
     private void escribirTokens() throws IOException{
-        BufferedWriter buf = new BufferedWriter(new FileWriter("src/tokens.txt"));
+        BufferedWriter buf = new BufferedWriter(new FileWriter("./src/compiler/lexic/Tokens.txt"));
         for(Simbol s : tokens){
             buf.write(s.toString() + "\n");
         }
@@ -72,12 +72,12 @@ endfnct = "endfnct"
 rtrn = "rtrn"
 val = "val"
 con = "con"
-if = "if"
-else = "else"
+if_t = "if"
+else_t = "else"
 endif = "endif"
-while = "while"
+while_t = "while"
 endwhile = "endwhile"
-for = "for"
+for_t = "for"
 to = "to"
 endfor = "endfor"
 in = "in"
@@ -157,12 +157,12 @@ comment = "///".*
 {rtrn}          { tokens.add(new Simbol("rtrn")); return symbol(ParserSym.rtrn); }
 {val}           { tokens.add(new Simbol("val")); return symbol(ParserSym.val); }
 {con}           { tokens.add(new Simbol("con")); return symbol(ParserSym.con); }
-{if}            { tokens.add(new Simbol("if")); return symbol(ParserSym.if_t, new Simbol(this.yytext())); }
-{else}          { tokens.add(new Simbol("else")); return symbol(ParserSym.else_t); }
+{if_t}            { tokens.add(new Simbol("if")); return symbol(ParserSym.if_t, new Simbol(this.yytext())); }
+{else_t}          { tokens.add(new Simbol("else")); return symbol(ParserSym.else_t); }
 {endif}         { tokens.add(new Simbol("endif")); return symbol(ParserSym.endif); }
-{while}         { tokens.add(new Simbol("while")); return symbol(ParserSym.while_t, new Simbol(this.yytext())); }
+{while_t}         { tokens.add(new Simbol("while")); return symbol(ParserSym.while_t, new Simbol(this.yytext())); }
 {endwhile}      { tokens.add(new Simbol("endwhile")); return symbol(ParserSym.endwhile); }
-{for}           { tokens.add(new Simbol("for")); return symbol(ParserSym.for_t, new Simbol(this.yytext())); }
+{for_t}           { tokens.add(new Simbol("for")); return symbol(ParserSym.for_t, new Simbol(this.yytext())); }
 {to}            { tokens.add(new Simbol("to")); return symbol(ParserSym.to); }
 {endfor}        { tokens.add(new Simbol("endfor")); return symbol(ParserSym.endfor); }
 {in}            { tokens.add(new Simbol("in")); return symbol(ParserSym.in); }
@@ -203,4 +203,4 @@ comment = "///".*
 {whitespace}        { /* Ignorar espais en blanc */ }
 {comment}           { /* Ignorar comentaris */ }
 
-[^]                 { return symbol(ParserSym.error);  }
+[^]                 { System.out.println("Error léxico --> No se ha reconocido el símbolo en la fila "+String.valueOf(yyline+1)+" columna "+String.valueOf(yycolumn+1)); return symbol(ParserSym.error);  }

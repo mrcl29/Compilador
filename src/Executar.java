@@ -1,10 +1,10 @@
 import java.io.*;
-import java.util.concurrent.TimeUnit;
 
 import compiler.lexic.Scanner;
 import compiler.sintactic.Parser;
 
-public class Ejecutar {
+public class Executar {
+    private static final Boolean compilar = true;
 
     private static final String JFLEX_PATH = "./lib/JFlex/jflex-full-1.8.2.jar";
     private static final String CUP_PATH = "./lib/JavaCUP/java-cup-11b.jar";
@@ -14,50 +14,29 @@ public class Ejecutar {
     private static final String SINTACTIC_PATH = "./src/compiler/sintactic/";
     private static final String LEXER_FILE = LEXIC_PATH + "Lexer.jflex";
     private static final String CUP_FILE = SINTACTIC_PATH + "Parser.cup";
-    private static final Boolean compilar = false;
 
     public static void main(String[] args) {
         try {
             if (compilar) {
-                System.err.println("------------------------------------");
-                System.err.println("------------------ 1. Limpieza ------------------");
-                System.err.println("------------------------------------");
-                cleanGeneratedFiles();
-                System.err.println("------------------------------------");
-                System.err.println("------------------ 2. Compilar Léxico ------------------");
+                System.err.println("\n------------------------------------");
+                System.err.println("------------------ Compilar Léxico ------------------");
                 System.err.println("------------------------------------");
                 compileLexer();
                 System.err.println("------------------------------------");
-                System.err.println("------------------ 3. Compilar Sintáctico ------------------");
+                System.err.println("------------------ Compilar Sintáctico ------------------");
                 System.err.println("------------------------------------");
                 compileParser();
-                System.err.println("------------------------------------");
-                System.err.println("------------------ 5. Compilar archivos generados ------------------");
+                System.err.println("\n------------------------------------");
+                System.err.println("Compilando archivos generados...");
                 System.err.println("------------------------------------");
                 compileGeneratedFiles();
-                TimeUnit.SECONDS.sleep(1);
             }
-            System.err.println("------------------------------------");
-            System.err.println("------------------ 6. Ejecutar Análisis ------------------");
-            System.err.println("------------------------------------");
+            System.err.println("\n------------------------------------");
+            System.err.println("Ejecutando análisis...");
+            System.err.println("------------------------------------\n");
             executeAnalysis();
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
-        }
-    }
-
-    private static void cleanGeneratedFiles() throws IOException {
-        String[] filesToDelete = {
-                LEXIC_PATH + "Scanner.java",
-                LEXIC_PATH + "Scanner~.java",
-                SINTACTIC_PATH + "Parser.java",
-                SINTACTIC_PATH + "ParserSym.java"
-        };
-        for (String filePath : filesToDelete) {
-            File file = new File(filePath);
-            if (file.exists() && file.delete()) {
-                System.out.println("Archivo eliminado: " + filePath);
-            }
         }
     }
 

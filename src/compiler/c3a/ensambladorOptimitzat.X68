@@ -9,78 +9,265 @@
 START:                  ; first instruction of program 
 
 
-    ; t0 = 1
-    MOVE.L    #1, D0 
-    MOVE.L    D0, 0(A7) 
-
-    ; t1 = 100
-    MOVE.L    #100, D0 
-    MOVE.L    D0, 4(A7) 
-
-    ; t2 = 1
-    MOVE.L    #1, D0 
-    MOVE.L    D0, 8(A7) 
-
-    ; goto e1
-    BRA       E1 
-
-    ; e0
-E0: 
-
-    ; t3 = 100
-    MOVE.L    #100, D0 
-    MOVE.L    D0, 12(A7) 
-
-    ; t4 = 1
-    MOVE.L    #1, D0 
-    MOVE.L    D0, 16(A7) 
-
-    ; t2 = t2 + t4
-    MOVE.L    8(A7), D0 
-    MOVE.L    16(A7), D1 
-    ADD.L     D1, D0 
-    MOVE.L    D0, 8(A7) 
-
-    ; if t2 >= t3 then goto e2 
-    MOVE.L    8(A7), D0 
-    MOVE.L    12(A7), D1 
-    CMP.L     D1, D0 
-    BGE       E2 
+    ; goto e2
+    BRA       E2 
 
     ; e1
 E1: 
 
-    ; t5 = 1
-    MOVE.L    #1, D0 
-    MOVE.L    D0, 20(A7) 
+    ; t4 = 0
+    MOVE.L    #0, D0 
+    MOVE.L    D0, 16(A6) 
 
-    ; t6 = t2
-    MOVE.L    8(A7), D0 
-    MOVE.L    D0, 24(A7) 
+    ; t5 = 0
+    MOVE.L    #0, D0 
+    MOVE.L    D0, 20(A6) 
 
-    ; out(t6 :: 1) 
-    MOVE.L    #1, D0 
-    MOVE.L    24(A7), D1 
-    CMP.L     #1, D0 
-    BNE       E6   
-    JSR       PRINT_INTEGER   
-    BRA       E3   
-E6:   
-    CMP.L     #2, D0 
-    BNE       E7   
-    JSR       PRINT_BOOLEAN   
-    BRA       E3   
-E7:   
-    LEA       ERROR_MSG, A1 
-    MOVE.W  #14, D0 
-    TRAP    #15 
+    ; t6 = 0
+    MOVE.L    #0, D0 
+    MOVE.L    D0, 24(A6) 
+
+    ; if t29 != t6 then goto e3 
+    MOVE.L    116(A6), D0 
+    MOVE.L    24(A6), D1 
+    CMP.L     D1, D0 
+    BNE       E3 
+
+    ; goto e4
+    BRA       E4 
+
+    ; e3
 E3: 
 
-    ; goto e0
-    BRA       E0 
+    ; t7 = -1
+    MOVE.L    #-1, D0 
+    MOVE.L    D0, 28(A6) 
+
+    ; goto e5
+    BRA       E5 
+
+    ; e4
+E4: 
+
+    ; t7 = 0
+    MOVE.L    #0, D0 
+    MOVE.L    D0, 28(A6) 
+
+    ; e5
+E5: 
+
+    ; if t7 == 0 then goto e6 
+    MOVE.L    28(A6), D0 
+    MOVE.L    #0, D1 
+    CMP.L     D1, D0 
+    BEQ       E6 
+
+    ; t8 = t1 + t3
+    MOVE.L    4(A6), D0 
+    MOVE.L    12(A6), D1 
+    ADD.L     D1, D0 
+    MOVE.L    D0, 32(A6) 
+
+    ; t9 = 10
+    MOVE.L    #10, D0 
+    MOVE.L    D0, 36(A6) 
+
+    ; t10 = t8 - t9
+    MOVE.L    32(A6), D0 
+    MOVE.L    36(A6), D1 
+    SUB.L     D1, D0 
+    MOVE.L    D0, 40(A6) 
+
+    ; t5 = t10
+    MOVE.L    40(A6), D0 
+    MOVE.L    D0, 20(A6) 
+
+    ; goto e7
+    BRA       E7 
+
+    ; e6
+E6: 
+
+    ; t11 = t1 + t3
+    MOVE.L    4(A6), D0 
+    MOVE.L    12(A6), D1 
+    ADD.L     D1, D0 
+    MOVE.L    D0, 44(A6) 
+
+    ; t12 = 10
+    MOVE.L    #10, D0 
+    MOVE.L    D0, 48(A6) 
+
+    ; t13 = t11 + t12
+    MOVE.L    44(A6), D0 
+    MOVE.L    48(A6), D1 
+    ADD.L     D1, D0 
+    MOVE.L    D0, 52(A6) 
+
+    ; t5 = t13
+    MOVE.L    52(A6), D0 
+    MOVE.L    D0, 20(A6) 
+
+    ; e7
+E7: 
+
+    ; rtrn t5 
+    MOVE.L    20(A6), D0
+    RTS 
 
     ; e2
 E2: 
+
+    ; t14 = 100
+    MOVE.L    #100, D0 
+    MOVE.L    D0, 56(A6) 
+
+    ; t15 = 100
+    MOVE.L    #100, D0 
+    MOVE.L    D0, 60(A6) 
+
+    ; t16 = 10
+    MOVE.L    #10, D0 
+    MOVE.L    D0, 64(A6) 
+
+    ; t17 = 10
+    MOVE.L    #10, D0 
+    MOVE.L    D0, 68(A6) 
+
+    ; t18 = -1
+    MOVE.L    #-1, D0 
+    MOVE.L    D0, 72(A6) 
+
+    ; t19 = -1
+    MOVE.L    #-1, D0 
+    MOVE.L    D0, 76(A6) 
+
+    ; t21 = 1
+    MOVE.L    #1, D0 
+    MOVE.L    D0, 84(A6) 
+
+    ; t22 = 10
+    MOVE.L    #10, D0 
+    MOVE.L    D0, 88(A6) 
+
+    ; t23 = 1
+    MOVE.L    #1, D0 
+    MOVE.L    D0, 92(A6) 
+
+    ; goto e9
+    BRA       E9 
+
+    ; e8
+E8: 
+
+    ; t24 = 10
+    MOVE.L    #10, D0 
+    MOVE.L    D0, 96(A6) 
+
+    ; t25 = 1
+    MOVE.L    #1, D0 
+    MOVE.L    D0, 100(A6) 
+
+    ; t23 = t23 + t25
+    MOVE.L    92(A6), D0 
+    MOVE.L    100(A6), D1 
+    ADD.L     D1, D0 
+    MOVE.L    D0, 92(A6) 
+
+    ; if t23 >= t24 then goto e10 
+    MOVE.L    92(A6), D0 
+    MOVE.L    96(A6), D1 
+    CMP.L     D1, D0 
+    BGE       E10 
+
+    ; e9
+E9: 
+
+    ; t26 = 1
+    MOVE.L    #1, D0 
+    MOVE.L    D0, 104(A6) 
+
+    ; t27 = t23
+    MOVE.L    92(A6), D0 
+    MOVE.L    D0, 108(A6) 
+
+    ; out(t27 :: 1) 
+    MOVE.L    #1, D0 
+    MOVE.L    108(A6), D1 
+    CMP.L     #1, D0 
+    BNE       E17   
+    JSR       PRINT_INTEGER   
+    BRA       E11   
+E17:   
+    CMP.L     #2, D0 
+    BNE       E18   
+    JSR       PRINT_BOOLEAN   
+    BRA       E11   
+E18:   
+    LEA       ERROR_MSG, A1 
+    MOVE.W  #14, D0 
+    TRAP    #15 
+E11: 
+
+    ; t28 = 10
+    MOVE.L    #10, D0 
+    MOVE.L    D0, 112(A6) 
+
+    ; t29 = -1
+    MOVE.L    #-1, D0 
+    MOVE.L    D0, 116(A6) 
+
+    ; t30 = 100
+    MOVE.L    #100, D0 
+    MOVE.L    D0, 120(A6) 
+
+    ; t1 = 100
+    MOVE.L    #100, D0 
+    MOVE.L    D0, 4(A6) 
+
+    ; t2 = t29
+    MOVE.L    116(A6), D0 
+    MOVE.L    D0, 8(A6) 
+
+    ; t3 = t28
+    MOVE.L    112(A6), D0 
+    MOVE.L    D0, 12(A6) 
+
+    ; t31 = e1() 
+    JSR       E1 
+    MOVE.L    D0, 124(A6) 
+
+    ; t32 = 1
+    MOVE.L    #1, D0 
+    MOVE.L    D0, 128(A6) 
+
+    ; t33 = t31
+    MOVE.L    124(A6), D0 
+    MOVE.L    D0, 132(A6) 
+
+    ; out(t33 :: 1) 
+    MOVE.L    #1, D0 
+    MOVE.L    132(A6), D1 
+    CMP.L     #1, D0 
+    BNE       E19   
+    JSR       PRINT_INTEGER   
+    BRA       E12   
+E19:   
+    CMP.L     #2, D0 
+    BNE       E20   
+    JSR       PRINT_BOOLEAN   
+    BRA       E12   
+E20:   
+    LEA       ERROR_MSG, A1 
+    MOVE.W  #14, D0 
+    TRAP    #15 
+E12: 
+
+    ; goto e8
+    BRA       E8 
+
+    ; e10
+E10: 
 
 ; FINAL 
 

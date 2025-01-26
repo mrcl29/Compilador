@@ -19,18 +19,12 @@ import compiler.c3a.*;
 class Parser;
 
 parser code {:
-/***
-    private Scanner scanner;
-    public Parser(Scanner scanner) {
-        this.scanner = scanner;
-    }
-***/
+    public boolean DEBUG = true;
 
     TaulaSimbols taulaSimbols = new TaulaSimbols();
 
     public boolean error_detectat = false;
 
-    public boolean DEBUG = true;
     public void print_this(Object msg){
         if(DEBUG){
             System.out.println(msg);
@@ -43,7 +37,7 @@ parser code {:
     GenerarCodi c3a = new GenerarCodi();
 
     int nbytes = 4;
-    String buid = "";
+    String buit = "";
 
     /**************************************************************
     ************************ GESTIÓ ERRORS ************************
@@ -118,13 +112,13 @@ non terminal FUNC_DECL, FUNCINIT, MF, PARAM_LIST, PARAM, COS, FINAL_RTN;
 non terminal CRID_FUNC, ARGS, ARGS_LIST;
 non terminal ASIG_SENT;
 non terminal IF_SENT, IF_ELSE, IF_INIT;
-non terminal WHILE_SENT, WHILE_REP, M;
+non terminal WHILE_SENT, WHILE_REP, MW;
 non terminal FOR_SENT, FORINIT;
 non terminal SAL_SENT;
-non terminal TIPO, EXP, CRID_SIMB, ARIT_TERM, LOG_TERM, TUPLA_ACCESS, LIT, ENT_LIT, POS_ENT_LIT, BOL_LIT, OUT_EXP, ENTR_FUNC;
+non terminal TIPO, EXP, CRID_SIMB, ARIT_TERM, LOG_TERM, TUPLA_ACCESS, LIT, ENT_LIT, POS_ENT_LIT, BOL_LIT, ENT_SENT;
 
 /* Precedencia y asociatividad */
-precedence left and, or;        // Menor precedencia
+precedence left and, or;
 precedence left equal, not_equal; // Operadores relacionales === y /=
 precedence left plus, minus;      // Operadores aritméticos + y -
 
@@ -133,7 +127,7 @@ start with S;
 
 /* Reglas de gramática */
 
-S ::= P {: c3a.tancar(); c3a.generarCodi(); done_parsing(); :};
+S ::= P {:  c3a.tancar(); c3a.escriureTaulaSimbols(taulaSimbols.toString()); c3a.generarCodi(); done_parsing(); :};
 
 P ::= SENT P
     | FUNC_DECL P
@@ -181,7 +175,7 @@ ASIG_SENT ::= id:vid assign EXP:vE semicolon
                     }else{
                         id.setValor(E.getValor());
 
-                        c3a.genera("copy", E.getR(), buid, id.getR()); // copy R.r = E.r
+                        c3a.genera("copy", E.getR(), buit, id.getR()); // copy R.r = E.r
 
                         RESULT = id;
                     }
@@ -236,7 +230,7 @@ IF_SENT ::= IF_ELSE:vIF_ELSE COS endif //if else
     if(!error_detectat){
         Simbol IF_ELSE = (Simbol) vIF_ELSE;
 
-        c3a.genera("skip", buid, buid, IF_ELSE.getEtiqueta()); //efi: skip
+        c3a.genera("skip", buit, buit, IF_ELSE.getEtiqueta()); //efi: skip
     }
 :}
           | IF_INIT:vIF_INIT COS endif //if
@@ -245,7 +239,7 @@ IF_SENT ::= IF_ELSE:vIF_ELSE COS endif //if else
     if(!error_detectat){
         Simbol IF_INIT = (Simbol) vIF_INIT;
 
-        c3a.genera("skip", buid, buid, IF_INIT.getEtiqueta()); //efi: skip
+        c3a.genera("skip", buit, buit, IF_INIT.getEtiqueta()); //efi: skip
     }
 :}
 ;
@@ -257,8 +251,8 @@ IF_ELSE ::= IF_INIT:vIF_INIT COS else_t colon
         Simbol IF_INIT = (Simbol) vIF_INIT;
 
         String efi = c3a.novaetiqueta();
-        c3a.genera("goto", buid, buid, efi);                  //goto efi
-        c3a.genera("skip", buid, buid, IF_INIT.getEtiqueta()); //e: skip
+        c3a.genera("goto", buit, buit, efi);                  //goto efi
+        c3a.genera("skip", buit, buit, IF_INIT.getEtiqueta()); //e: skip
         IF_INIT.setEtiqueta(efi);
 
         RESULT = IF_INIT;
@@ -299,13 +293,13 @@ WHILE_SENT ::= WHILE_REP:vWHILE_REP COS endwhile
     if(!error_detectat){
         Simbol WHILE_REP = (Simbol) vWHILE_REP;
 
-        c3a.genera("goto", buid, buid, WHILE_REP.getEtiqueta()); // goto WHILE_REP.ei
-        c3a.genera("skip", buid, buid, WHILE_REP.getEtiquetafi()); // WHILE_REP.efi: skip
+        c3a.genera("goto", buit, buit, WHILE_REP.getEtiqueta()); // goto WHILE_REP.ei
+        c3a.genera("skip", buit, buit, WHILE_REP.getEtiquetafi()); // WHILE_REP.efi: skip
     }
 :}
 ;
 
-WHILE_REP ::= while_t lparen M:vM EXP:vE rparen colon
+WHILE_REP ::= while_t lparen MW:vM EXP:vE rparen colon
 {:
     print_this("Estas en WHILE_REP");
     if(!error_detectat){
@@ -321,12 +315,12 @@ WHILE_REP ::= while_t lparen M:vM EXP:vE rparen colon
                 semantic_error(e, vE);
             }else{
                 Simbol WHILE_REP = new Simbol();
-                Simbol M = (Simbol) vM;
+                Simbol MW = (Simbol) vM;
 
                 String efi = c3a.novaetiqueta();
                 c3a.genera("if_EQ", E.getR(), "0", efi); // if E.r = 0 goto efi
                 WHILE_REP.setEtiquetafi(efi);
-                WHILE_REP.setEtiqueta(M.getEtiqueta());
+                WHILE_REP.setEtiqueta(MW.getEtiqueta());
 
                 RESULT = WHILE_REP;
             }
@@ -335,15 +329,15 @@ WHILE_REP ::= while_t lparen M:vM EXP:vE rparen colon
 :}
 ;
 
-M ::= /* epsilon */
+MW ::= /* epsilon */
 {:
-    Simbol M = new Simbol();
+    Simbol MW = new Simbol();
 
     String ei = c3a.novaetiqueta();
-    c3a.genera("skip", buid, buid, ei); // ei: skip
-    M.setEtiqueta(ei);
+    c3a.genera("skip", buit, buit, ei); // ei: skip
+    MW.setEtiqueta(ei);
 
-    RESULT = M;
+    RESULT = MW;
 :}
 ;
 
@@ -353,8 +347,8 @@ FOR_SENT ::= FORINIT:v1 COS endfor
     if(!error_detectat){
         Simbol aux_v1 = (Simbol) v1;
 
-        c3a.genera("goto", buid, buid, aux_v1.getEtiqueta());   // goto: ebucle
-        c3a.genera("skip", buid, buid, aux_v1.getEtiquetafi()); // efi: skip
+        c3a.genera("goto", buit, buit, aux_v1.getEtiqueta());   // goto: ebucle
+        c3a.genera("skip", buit, buit, aux_v1.getEtiquetafi()); // efi: skip
     }
 :}
 ;
@@ -387,14 +381,14 @@ FORINIT ::= for_t PARAM:v1 assign EXP:v2 to EXP:v3 colon
             String ebucle = c3a.novaetiqueta();
             String einici = c3a.novaetiqueta();
             String efi = c3a.novaetiqueta();
-            c3a.genera("copy", aux_v2.getR(), buid, t1); // t1 = INIT
-            c3a.genera("goto", buid, buid, einici);      // goto: einici
-            c3a.genera("skip", buid, buid, ebucle);      // ebucle: skip
-            c3a.genera("copy", aux_v3.getR(), buid, t2); // t2 = FINAL
-            c3a.genera("copy", "1", buid, t3);           // t3 = 1
+            c3a.genera("copy", aux_v2.getR(), buit, t1); // t1 = INIT
+            c3a.genera("goto", buit, buit, einici);      // goto: einici
+            c3a.genera("skip", buit, buit, ebucle);      // ebucle: skip
+            c3a.genera("copy", aux_v3.getR(), buit, t2); // t2 = FINAL
+            c3a.genera("copy", "1", buit, t3);           // t3 = 1
             c3a.genera("add", t1, t3, t1);               // t1 = t1 + 1
             c3a.genera("if_GE", t1, t2, efi);            // if t1 => t2 goto efi
-            c3a.genera("skip", buid, buid, einici);      // einici: skip
+            c3a.genera("skip", buit, buit, einici);      // einici: skip
 
             aux_v1.setR(t1);
             aux_v1.setEtiqueta(ebucle);
@@ -417,8 +411,8 @@ FUNC_DECL ::= FUNCINIT:vFUNCINIT COS FINAL_RTN:vRTN endfnct
             semantic_error(e, vRTN);
         }else{
 
-            c3a.genera("rtn", buid, buid, RTN.getR());
-            c3a.genera("skip", buid, buid, FUNCINIT.getEtiquetafi());
+            c3a.genera("rtn", buit, buit, RTN.getR());
+            c3a.genera("skip", buit, buit, FUNCINIT.getEtiquetafi());
             ambit = global;
             print_this("Nuevo ámbito: " + ambit);
 
@@ -437,8 +431,8 @@ FUNC_DECL ::= FUNCINIT:vFUNCINIT COS FINAL_RTN:vRTN endfnct
             semantic_error(e, vRTN);
         }else{
 
-            c3a.genera("rtn", buid, buid, RTN.getR());
-            c3a.genera("skip", buid, buid, FUNCINIT.getEtiquetafi());
+            c3a.genera("rtn", buit, buit, RTN.getR());
+            c3a.genera("skip", buit, buit, FUNCINIT.getEtiquetafi());
             ambit = global;
             print_this("Nuevo ámbito: " + ambit);
         }
@@ -486,9 +480,9 @@ MF ::= /* epsilon */
     ambit = np;
     print_this("Nuevo ámbito: " + ambit);
     String efi = c3a.novaetiqueta();
-    c3a.genera("goto", buid, buid, efi);
+    c3a.genera("goto", buit, buit, efi);
     MF.setEtiquetafi(efi);
-    c3a.genera("skip", buid, buid, e);
+    c3a.genera("skip", buit, buit, e);
     MF.setR(np);
 
     RESULT = MF;
@@ -533,6 +527,10 @@ PARAM ::= id:v1 double_colon TIPO:v2
             semantic_error(e, v1);
         }else{
             print_this("Parámetro '" + v1.getValue() + "' creado con éxito");
+
+            String t = c3a.novavar(varcon);
+            varcon.setR(t);
+
             RESULT = varcon;
         }
     }
@@ -553,7 +551,7 @@ FINAL_RTN ::= rtrn lparen EXP:v1 rparen semicolon
 :}
 ;
 
-SAL_SENT ::= out lparen OUT_EXP:vOUT rparen semicolon
+SAL_SENT ::= out lparen EXP:vOUT rparen semicolon
 {:
     print_this("Estas en SAL_SENT");
     Simbol OUT = (Simbol) vOUT;
@@ -571,20 +569,14 @@ SAL_SENT ::= out lparen OUT_EXP:vOUT rparen semicolon
 
         String efi = c3a.novaetiqueta();
         String d0 = c3a.novavar(OUT);
-        c3a.genera("copy", i, buid, d0);
+        c3a.genera("copy", i, buit, d0);
         String d1 = c3a.novavar(OUT);
-        c3a.genera("copy", OUT.getR(), buid, d1);
+        c3a.genera("copy", OUT.getR(), buit, d1);
 
         c3a.genera("out", d0, d1, efi); // Imprime d1 por consola, d0 indica si es integer o booleano, efi es para continuar despues de imprimir
     }
 :}
 ;
-
-OUT_EXP ::= CRID_SIMB:v1 {: print_this("Estas en OUT_EXP llamada a símbolo"); RESULT = v1; :}
-          | ARIT_TERM:v1 {: print_this("Estas en OUT_EXP llamada a término aritmético"); RESULT = v1; :}
-          | LOG_TERM:v1  {: print_this("Estas en OUT_EXP llamada a término lógico"); RESULT = v1; :}
-          | LIT:v1       {: print_this("Estas en OUT_EXP llamada a literal"); RESULT = v1; :}
-          ;
 
 CRID_FUNC ::= id:vid lparen ARGS:vARGS rparen
 {:
@@ -599,9 +591,12 @@ CRID_FUNC ::= id:vid lparen ARGS:vARGS rparen
         ArrayList<Simbol> ARGS = (ArrayList<Simbol>) vARGS;
         if(id.getValue() != ""){
             if(id.mateixosParametres(ARGS)){
-
+                ArrayList<VariableConstant> px = id.getParametres();
+                for(int i = 0; i < px.size(); i++){
+                    c3a.genera("copy", ARGS.get(i).getR(), buit, px.get(i).getR());
+                }
                 String t = c3a.novavar(id);
-                c3a.genera("call", t, buid, id.getEtiqueta());
+                c3a.genera("call", t, buit, id.getEtiqueta());
                 id.setR(t);
 
                 RESULT = id;
@@ -632,7 +627,7 @@ CRID_FUNC ::= id:vid lparen ARGS:vARGS rparen
             if(id.mateixosParametres(aux_v2)){
 
                 String t = c3a.novavar(id);
-                c3a.genera("call", t, buid, id.getEtiqueta());
+                c3a.genera("call", t, buit, id.getEtiqueta());
                 id.setR(t);
 
                 RESULT = id;
@@ -662,7 +657,7 @@ ARGS ::= EXP:vE ARGS_LIST:vARGS_LIST
             semantic_error(e, vE);
         }else{
             String t = c3a.novavar(E);
-            c3a.genera("copy", E.getR(), buid, t);
+            c3a.genera("copy", E.getR(), buit, t);
             E.setR(t);
 
             ArrayList<Simbol> ARGS_LIST = (ArrayList<Simbol>) vARGS_LIST;
@@ -686,13 +681,13 @@ ARGS_LIST ::= comma EXP:vE ARGS_LIST:vARGS_LIST
             semantic_error(e, vE);
         }else{
             String t = c3a.novavar(E);
-            c3a.genera("copy", E.getR(), buid, t);
+            c3a.genera("copy", E.getR(), buit, t);
             E.setR(t);
 
             ArrayList<Simbol> ARGS_LIST = (ArrayList<Simbol>) vARGS_LIST;
             ARGS_LIST.add(0, E);
 
-            c3a.genera("param_s", buid, buid, E.getR());
+            c3a.genera("param_s", buit, buit, E.getR());
 
             RESULT = ARGS_LIST;
         }
@@ -732,7 +727,7 @@ VAR_DECL ::= val id:vid double_colon TIPO:vTIPO assign EXP:vE semicolon
                     varcon.setValor(E.getValor());
 
                     String t_id = c3a.novavar(varcon);
-                    c3a.genera("copy", E.getR(), buid, t_id); // id.r = E.r
+                    c3a.genera("copy", E.getR(), buit, t_id); // id.r = E.r
 
                     varcon.setR(t_id);
                     RESULT = varcon;
@@ -774,7 +769,7 @@ CONS_DECL ::= con id:vid double_colon TIPO:vTIPO assign EXP:vE semicolon
                     varcon.setValor(E.getValor());
 
                     String t_id = c3a.novavar(varcon);
-                    c3a.genera("copy", E.getR(), buid, t_id); // id.r = E.r
+                    c3a.genera("copy", E.getR(), buit, t_id); // id.r = E.r
 
                     varcon.setR(t_id);
                     RESULT = varcon;
@@ -815,11 +810,12 @@ TUPLA_DECL ::= tuple id:vid assign lbrace TIPO:vTIPO1 comma TIPO:vTIPO2 rbrace s
 :}
 ;
 
-EXP ::= LOG_TERM:v1     {: print_this("Estas en EXP termino lógico"); RESULT = v1; :}
+EXP ::= lparen EXP:v1 rparen {: print_this("Estas en (EXP)"); RESULT = v1; :}
+      | LOG_TERM:v1     {: print_this("Estas en EXP termino lógico"); RESULT = v1; :}
       | ARIT_TERM:v1    {: print_this("Estas en EXP termino aritmético"); RESULT = v1; :}
       | CRID_SIMB:v1    {: print_this("Estas en EXP llamada a símbolo"); RESULT = v1; :}
       | LIT:v1          {: print_this("Estas en EXP llamada a literal"); RESULT = v1; :}
-      | ENTR_FUNC:v1    {: print_this("Estas en EXP entrada de sistema"); RESULT = v1; :}
+      | ENT_SENT:v1    {: print_this("Estas en EXP entrada de sistema"); RESULT = v1; :}
       ;
 
 LIT ::= ENT_LIT:v1 {: print_this("Estas en LIT integer"); RESULT = v1; :}
@@ -834,7 +830,7 @@ ENT_LIT ::= POS_ENT_LIT:v1 {: print_this("Estas en ENT_LIT positivo"); RESULT = 
     aux_v1.setValor(-1*aux_v1.getValor());
 
     String t = c3a.novavar(aux_v1);
-    c3a.genera("neg", aux_v1.getR(), buid, t);
+    c3a.genera("neg", aux_v1.getR(), buit, t);
     aux_v1.setR(t);
 
     RESULT = aux_v1;
@@ -849,7 +845,7 @@ POS_ENT_LIT ::= integer_literal:v1
     aux_v1.setValue("integer_literal");
 
     String t = c3a.novavar(aux_v1);
-    c3a.genera("copy", String.valueOf(aux_v1.getValor()), buid, t);
+    c3a.genera("copy", String.valueOf(aux_v1.getValor()), buit, t);
     aux_v1.setR(t);
 
     RESULT = aux_v1;
@@ -867,7 +863,7 @@ BOL_LIT ::= boolean_literal:v1
     }
 
     String t = c3a.novavar(aux_v1);
-    c3a.genera("copy", String.valueOf(aux_v1.getValor()), buid, t);
+    c3a.genera("copy", String.valueOf(aux_v1.getValor()), buit, t);
     aux_v1.setR(t);
 
     RESULT = aux_v1;
@@ -899,9 +895,9 @@ TUPLA_ACCESS ::= id:vid lbracket integer_literal:vindex rbracket
                 aux_TUPLA.setValor(TUPLA.getValor());
 
                 String t1 = c3a.novavar(new Simbol("t1", index.getTipus(), index.getValor()));
-                c3a.genera("copy", String.valueOf(index.getValor()), buid, t1);
+                c3a.genera("copy", String.valueOf(index.getValor()), buit, t1);
                 String t2 = c3a.novavar(new Simbol("t2", index.getTipus(), index.getValor()));
-                c3a.genera("copy", "4", buid, t2);
+                c3a.genera("copy", "4", buit, t2);
                 String t3 = c3a.novavar(new Simbol("t3", (index.getValor() * nbytes)));
                 c3a.genera("prod", t1, t2, t3);
                 aux_TUPLA.setD(t3);
@@ -946,7 +942,7 @@ LOG_TERM ::= EXP:vE1 equal EXP:vE2
                 String e = ("No se pueden comapar valores de diferente tipo");
                 semantic_error(e, vE1);
             }else{
-                print_this(E1.getValue() + " not_equal "+E2.getValue());
+                print_this(E1.getValue() + " equal "+E2.getValue());
 
                 int val = -3;
                 if(E1.getValor() == E2.getValor()){
@@ -962,13 +958,13 @@ LOG_TERM ::= EXP:vE1 equal EXP:vE2
                 String e2 = c3a.novaetiqueta();
                 String e3 = c3a.novaetiqueta();
                 c3a.genera("if_EQ", E1.getR(), E2.getR(), e1);
-                c3a.genera("goto", buid, buid, e2);
-                c3a.genera("skip", buid, buid, e1);
-                c3a.genera("copy", "-1", buid, t);
-                c3a.genera("goto", buid, buid, e3);
-                c3a.genera("skip", buid, buid, e2);
-                c3a.genera("copy", "0", buid, t);
-                c3a.genera("skip", buid, buid, e3);
+                c3a.genera("goto", buit, buit, e2);
+                c3a.genera("skip", buit, buit, e1);
+                c3a.genera("copy", "-1", buit, t);
+                c3a.genera("goto", buit, buit, e3);
+                c3a.genera("skip", buit, buit, e2);
+                c3a.genera("copy", "0", buit, t);
+                c3a.genera("skip", buit, buit, e3);
                 E1.setR(t);
 
                 RESULT = E1;
@@ -1013,13 +1009,13 @@ LOG_TERM ::= EXP:vE1 equal EXP:vE2
                 String e2 = c3a.novaetiqueta();
                 String e3 = c3a.novaetiqueta();
                 c3a.genera("if_NE", E1.getR(), E2.getR(), e1);
-                c3a.genera("goto", buid, buid, e2);
-                c3a.genera("skip", buid, buid, e1);
-                c3a.genera("copy", "-1", buid, t);
-                c3a.genera("goto", buid, buid, e3);
-                c3a.genera("skip", buid, buid, e2);
-                c3a.genera("copy", "0", buid, t);
-                c3a.genera("skip", buid, buid, e3);
+                c3a.genera("goto", buit, buit, e2);
+                c3a.genera("skip", buit, buit, e1);
+                c3a.genera("copy", "-1", buit, t);
+                c3a.genera("goto", buit, buit, e3);
+                c3a.genera("skip", buit, buit, e2);
+                c3a.genera("copy", "0", buit, t);
+                c3a.genera("skip", buit, buit, e3);
                 E1.setR(t);
 
                 RESULT = E1;
@@ -1054,18 +1050,18 @@ LOG_TERM ::= EXP:vE1 equal EXP:vE2
             String e1 = c3a.novaetiqueta();
             String e2 = c3a.novaetiqueta();
             String e3 = c3a.novaetiqueta();
-            c3a.genera("copy", E1.getR(), buid, t1);
+            c3a.genera("copy", E1.getR(), buit, t1);
             c3a.genera("if_EQ", t1, "-1", e1);
-            c3a.genera("copy", "0", buid, t2);
-            c3a.genera("goto", buid, buid, e2);
-            c3a.genera("skip", buid, buid, e1);
-            c3a.genera("copy", E2.getR(), buid, t3);
+            c3a.genera("copy", "0", buit, t2);
+            c3a.genera("goto", buit, buit, e2);
+            c3a.genera("skip", buit, buit, e1);
+            c3a.genera("copy", E2.getR(), buit, t3);
             c3a.genera("if_EQ", t3, "-1", e3);
-            c3a.genera("copy", "0", buid, t2);
-            c3a.genera("goto", buid, buid, e2);
-            c3a.genera("skip", buid, buid, e3);
-            c3a.genera("copy", "-1", buid, t2);
-            c3a.genera("skip", buid, buid, e2);
+            c3a.genera("copy", "0", buit, t2);
+            c3a.genera("goto", buit, buit, e2);
+            c3a.genera("skip", buit, buit, e3);
+            c3a.genera("copy", "-1", buit, t2);
+            c3a.genera("skip", buit, buit, e2);
             E1.setR(t2);
 
             RESULT = E1;
@@ -1098,18 +1094,18 @@ LOG_TERM ::= EXP:vE1 equal EXP:vE2
             String e1 = c3a.novaetiqueta();
             String e2 = c3a.novaetiqueta();
             String e3 = c3a.novaetiqueta();
-            c3a.genera("copy", E1.getR(), buid, t1);
+            c3a.genera("copy", E1.getR(), buit, t1);
             c3a.genera("if_EQ", t1, "0", e1);
-            c3a.genera("copy", "-1", buid, t2);
-            c3a.genera("goto", buid, buid, e2);
-            c3a.genera("skip", buid, buid, e1);
-            c3a.genera("copy", E2.getR(), buid, t3);
+            c3a.genera("copy", "-1", buit, t2);
+            c3a.genera("goto", buit, buit, e2);
+            c3a.genera("skip", buit, buit, e1);
+            c3a.genera("copy", E2.getR(), buit, t3);
             c3a.genera("if_EQ", t3, "0", e3);
-            c3a.genera("copy", "-1", buid, t2);
-            c3a.genera("goto", buid, buid, e2);
-            c3a.genera("skip", buid, buid, e3);
-            c3a.genera("copy", "0", buid, t2);
-            c3a.genera("skip", buid, buid, e2);
+            c3a.genera("copy", "-1", buit, t2);
+            c3a.genera("goto", buit, buit, e2);
+            c3a.genera("skip", buit, buit, e3);
+            c3a.genera("copy", "0", buit, t2);
+            c3a.genera("skip", buit, buit, e2);
             E1.setR(t2);
 
             RESULT = E1;
@@ -1172,16 +1168,16 @@ ARIT_TERM ::= EXP:vE1 plus EXP:vE2
 :}
 ;
 
-ENTR_FUNC ::= in lparen TIPO:vTIPO rparen
+ENT_SENT ::= in lparen TIPO:vTIPO rparen
 {:
-    print_this("Estas en ENTR_FUNC");
+    print_this("Estas en ENT_SENT");
     Simbol TIPO = (Simbol) vTIPO;
     TIPO = TIPO.clone();
 
     String d0 = c3a.novavar(TIPO);
-    c3a.genera("copy", String.valueOf(TIPO.getValor()), buid, d0);
+    c3a.genera("copy", String.valueOf(TIPO.getValor()), buit, d0);
     String d1 = c3a.novavar(new Simbol());
-    c3a.genera("in", d0, buid, d1);
+    c3a.genera("in", d0, buit, d1);
     TIPO.setR(d1);
 
     RESULT = TIPO;

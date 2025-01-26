@@ -18,12 +18,12 @@ package compiler.lexic;
 /* Lexer per al llenguatge inventat */
 
 import java.io.*;
+import java.util.*;
 
 import java_cup.runtime.*;
 import java_cup.runtime.ComplexSymbolFactory.ComplexSymbol;
 import java_cup.runtime.ComplexSymbolFactory.Location;
-import compiler.sintactic.Symbols.Simbol;
-import compiler.sintactic.Symbols.TipusDades;
+import compiler.sintactic.Symbols.*;
 
 import compiler.sintactic.ParserSym;
 
@@ -387,6 +387,14 @@ public class Scanner implements java_cup.runtime.Scanner {
   private boolean zzEOFDone;
 
   /* user code: */
+    private ArrayList<Simbol> tokens;
+    private void escribirTokens() throws IOException{
+        BufferedWriter buf = new BufferedWriter(new FileWriter("./src/compiler/lexic/Tokens.txt"));
+        for(Simbol s : tokens){
+            buf.write(s.toString() + "\n");
+        }
+        buf.close();
+    }
     /***
        Mecanismes de gestió de símbols basat en ComplexSymbol. Tot i que en
        aquest cas potser no és del tot necessari.
@@ -420,6 +428,7 @@ public class Scanner implements java_cup.runtime.Scanner {
    * @param   in  the java.io.Reader to read input from.
    */
   public Scanner(java.io.Reader in) {
+      tokens = new ArrayList<Simbol>();
     this.zzReader = in;
   }
 
@@ -817,13 +826,18 @@ public class Scanner implements java_cup.runtime.Scanner {
       if (zzInput == YYEOF && zzStartRead == zzCurrentPos) {
         zzAtEOF = true;
             zzDoEOF();
-          {   return symbol(ParserSym.EOF);
+          {     try{
+        escribirTokens();
+        return symbol(ParserSym.EOF);
+    }catch(IOException e){
+        System.err.println(e);
+    }
  }
       }
       else {
         switch (zzAction < 0 ? zzAction : ZZ_ACTION[zzAction]) {
           case 1:
-            { return symbol(ParserSym.error);
+            { System.out.println("Error léxico --> No se ha reconocido el símbolo en la fila "+String.valueOf(yyline+1)+" columna "+String.valueOf(yycolumn+1)); return symbol(ParserSym.error);
             }
             // fall through
           case 42: break;
@@ -833,107 +847,107 @@ public class Scanner implements java_cup.runtime.Scanner {
             // fall through
           case 43: break;
           case 3:
-            { return symbol(ParserSym.lparen);
+            { tokens.add(new Simbol("lparen")); return symbol(ParserSym.lparen);
             }
             // fall through
           case 44: break;
           case 4:
-            { return symbol(ParserSym.rparen);
+            { tokens.add(new Simbol("rparen")); return symbol(ParserSym.rparen);
             }
             // fall through
           case 45: break;
           case 5:
-            { return symbol(ParserSym.plus);
+            { tokens.add(new Simbol("plus")); return symbol(ParserSym.plus);
             }
             // fall through
           case 46: break;
           case 6:
-            { return symbol(ParserSym.comma);
+            { tokens.add(new Simbol("comma")); return symbol(ParserSym.comma);
             }
             // fall through
           case 47: break;
           case 7:
-            { return symbol(ParserSym.minus);
+            { tokens.add(new Simbol("minus")); return symbol(ParserSym.minus);
             }
             // fall through
           case 48: break;
           case 8:
-            { return symbol(ParserSym.integer_literal, new Simbol(Integer.parseInt(this.yytext()), TipusDades.INTEGER));
+            { tokens.add(new Simbol("integer_literal")); return symbol(ParserSym.integer_literal, new Simbol(Integer.parseInt(this.yytext()), TipusDades.INTEGER));
             }
             // fall through
           case 49: break;
           case 9:
-            { return symbol(ParserSym.colon);
+            { tokens.add(new Simbol("colon")); return symbol(ParserSym.colon);
             }
             // fall through
           case 50: break;
           case 10:
-            { return symbol(ParserSym.semicolon);
+            { tokens.add(new Simbol("semicolon")); return symbol(ParserSym.semicolon);
             }
             // fall through
           case 51: break;
           case 11:
-            { return symbol(ParserSym.assign);
+            { tokens.add(new Simbol("assign")); return symbol(ParserSym.assign);
             }
             // fall through
           case 52: break;
           case 12:
-            { return symbol(ParserSym.id, new Simbol(this.yytext()));
+            { tokens.add(new Simbol("id")); return symbol(ParserSym.id, new Simbol(this.yytext()));
             }
             // fall through
           case 53: break;
           case 13:
-            { return symbol(ParserSym.lbracket);
+            { tokens.add(new Simbol("lbracket")); return symbol(ParserSym.lbracket);
             }
             // fall through
           case 54: break;
           case 14:
-            { return symbol(ParserSym.rbracket);
+            { tokens.add(new Simbol("rbracket")); return symbol(ParserSym.rbracket);
             }
             // fall through
           case 55: break;
           case 15:
-            { return symbol(ParserSym.lbrace);
+            { tokens.add(new Simbol("lbrace")); return symbol(ParserSym.lbrace);
             }
             // fall through
           case 56: break;
           case 16:
-            { return symbol(ParserSym.rbrace);
+            { tokens.add(new Simbol("rbrace")); return symbol(ParserSym.rbrace);
             }
             // fall through
           case 57: break;
           case 17:
-            { return symbol(ParserSym.and);
+            { tokens.add(new Simbol("and")); return symbol(ParserSym.and);
             }
             // fall through
           case 58: break;
           case 18:
-            { return symbol(ParserSym.not_equal);
+            { tokens.add(new Simbol("not_equal")); return symbol(ParserSym.not_equal);
             }
             // fall through
           case 59: break;
           case 19:
-            { return symbol(ParserSym.double_colon);
+            { tokens.add(new Simbol("double_colon")); return symbol(ParserSym.double_colon);
             }
             // fall through
           case 60: break;
           case 20:
-            { return symbol(ParserSym.if_t, new Simbol(this.yytext()));
+            { tokens.add(new Simbol("if")); return symbol(ParserSym.if_t, new Simbol(this.yytext()));
             }
             // fall through
           case 61: break;
           case 21:
-            { return symbol(ParserSym.in);
+            { tokens.add(new Simbol("in")); return symbol(ParserSym.in);
             }
             // fall through
           case 62: break;
           case 22:
-            { return symbol(ParserSym.to);
+            { tokens.add(new Simbol("to")); return symbol(ParserSym.to);
             }
             // fall through
           case 63: break;
           case 23:
-            { return symbol(ParserSym.or);
+            { tokens.add(new Simbol("or")); return symbol(ParserSym.or);
             }
             // fall through
           case 64: break;
@@ -943,87 +957,87 @@ public class Scanner implements java_cup.runtime.Scanner {
             // fall through
           case 65: break;
           case 25:
-            { return symbol(ParserSym.equal);
+            { tokens.add(new Simbol("equal")); return symbol(ParserSym.equal);
             }
             // fall through
           case 66: break;
           case 26:
-            { return symbol(ParserSym.con);
+            { tokens.add(new Simbol("con")); return symbol(ParserSym.con);
             }
             // fall through
           case 67: break;
           case 27:
-            { return symbol(ParserSym.for_t, new Simbol(this.yytext()));
+            { tokens.add(new Simbol("for")); return symbol(ParserSym.for_t, new Simbol(this.yytext()));
             }
             // fall through
           case 68: break;
           case 28:
-            { return symbol(ParserSym.out);
+            { tokens.add(new Simbol("out")); return symbol(ParserSym.out);
             }
             // fall through
           case 69: break;
           case 29:
-            { return symbol(ParserSym.val);
+            { tokens.add(new Simbol("val")); return symbol(ParserSym.val);
             }
             // fall through
           case 70: break;
           case 30:
-            { return symbol(ParserSym.boolean_literal, new Simbol(this.yytext(), TipusDades.BOOLEAN));
+            { tokens.add(new Simbol("boolean_literal")); return symbol(ParserSym.boolean_literal, new Simbol(this.yytext(), TipusDades.BOOLEAN));
             }
             // fall through
           case 71: break;
           case 31:
-            { return symbol(ParserSym.else_t);
+            { tokens.add(new Simbol("else")); return symbol(ParserSym.else_t);
             }
             // fall through
           case 72: break;
           case 32:
-            { return symbol(ParserSym.fnct);
+            { tokens.add(new Simbol("fnct")); return symbol(ParserSym.fnct);
             }
             // fall through
           case 73: break;
           case 33:
-            { return symbol(ParserSym.rtrn);
+            { tokens.add(new Simbol("rtrn")); return symbol(ParserSym.rtrn);
             }
             // fall through
           case 74: break;
           case 34:
-            { return symbol(ParserSym.endif);
+            { tokens.add(new Simbol("endif")); return symbol(ParserSym.endif);
             }
             // fall through
           case 75: break;
           case 35:
-            { return symbol(ParserSym.tuple);
+            { tokens.add(new Simbol("tuple")); return symbol(ParserSym.tuple);
             }
             // fall through
           case 76: break;
           case 36:
-            { return symbol(ParserSym.while_t, new Simbol(this.yytext()));
+            { tokens.add(new Simbol("while")); return symbol(ParserSym.while_t, new Simbol(this.yytext()));
             }
             // fall through
           case 77: break;
           case 37:
-            { return symbol(ParserSym.endfor);
+            { tokens.add(new Simbol("endfor")); return symbol(ParserSym.endfor);
             }
             // fall through
           case 78: break;
           case 38:
-            { return symbol(ParserSym.endfnct);
+            { tokens.add(new Simbol("endfnct")); return symbol(ParserSym.endfnct);
             }
             // fall through
           case 79: break;
           case 39:
-            { return symbol(ParserSym.integer);
+            { tokens.add(new Simbol("integer")); return symbol(ParserSym.integer);
             }
             // fall through
           case 80: break;
           case 40:
-            { return symbol(ParserSym.logical);
+            { tokens.add(new Simbol("logical")); return symbol(ParserSym.logical);
             }
             // fall through
           case 81: break;
           case 41:
-            { return symbol(ParserSym.endwhile);
+            { tokens.add(new Simbol("endwhile")); return symbol(ParserSym.endwhile);
             }
             // fall through
           case 82: break;

@@ -389,7 +389,7 @@ public class Scanner implements java_cup.runtime.Scanner {
   /* user code: */
     private ArrayList<Simbol> tokens;
     private void escribirTokens() throws IOException{
-        BufferedWriter buf = new BufferedWriter(new FileWriter("src/tokens.txt"));
+        BufferedWriter buf = new BufferedWriter(new FileWriter("./src/compiler/lexic/Tokens.txt"));
         for(Simbol s : tokens){
             buf.write(s.toString() + "\n");
         }
@@ -837,7 +837,7 @@ public class Scanner implements java_cup.runtime.Scanner {
       else {
         switch (zzAction < 0 ? zzAction : ZZ_ACTION[zzAction]) {
           case 1:
-            { return symbol(ParserSym.error);
+            { System.out.println("Error léxico --> No se ha reconocido el símbolo en la fila "+String.valueOf(yyline+1)+" columna "+String.valueOf(yycolumn+1)); return symbol(ParserSym.error);
             }
             // fall through
           case 42: break;

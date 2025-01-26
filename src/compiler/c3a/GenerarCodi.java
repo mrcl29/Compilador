@@ -10,16 +10,17 @@ import compiler.sintactic.Symbols.*;
 public class GenerarCodi {
     private final String fitxerC3a = "./src/compiler/c3a/codi3a";
     private final String fitxerEnsamblador = "./src/compiler/c3a/ensamblador";
-    private final String opt = "Optimitzat.txt";
-    private final String noOpt = "NoOptimitzat.txt";
+    private final String taulaSimbols = "./src/compiler/sintactic/TaulaSimbols.txt";
+    private final String opt = "Optimitzat";
+    private final String noOpt = "NoOptimitzat";
     private final int nbytes = 4;
     private BufferedWriter bufw;
     // ------------------------------------------------
     // VARIABLES PER A LA CREACIÓ DEL CODI INTERMIG
-    private static int nv = -1;
-    private static int np = -1;
-    private static int ne = -1;
-    private static int nmsg = -1;
+    private static int nv = 0;
+    private static int np = 0;
+    private static int ne = 0;
+    private static int nmsg = 0;
     ArrayList<String> ins1 = new ArrayList<String>();
     ArrayList<String> ins2 = new ArrayList<String>();
     ArrayList<String> ins3 = new ArrayList<String>();
@@ -38,16 +39,16 @@ public class GenerarCodi {
 
     public GenerarCodi() {
         try {
-            bufw = new BufferedWriter(new FileWriter(fitxerC3a + noOpt));
+            bufw = new BufferedWriter(new FileWriter(fitxerC3a + noOpt + ".txt"));
         } catch (IOException e) {
             System.err.println(e);
         }
     }
 
     public void generarCodi() {
-        crearEnsamblador(noOpt);
+        crearEnsamblador(noOpt + ".X68");
         optimitzarCodi();
-        crearEnsamblador(opt);
+        crearEnsamblador(opt + ".X68");
     }
 
     // ----- FUNCIONS D'OPTIMITZACIÓ ----- //
@@ -67,7 +68,7 @@ public class GenerarCodi {
                 repetirIteracio = false;
 
                 // Brancaments Adjacents
-                System.out.println("Brancaments Adjacents");
+                // System.out.println("Brancaments Adjacents");
                 for (int i = 0; i < ins1x.size(); i++) {
                     switch (ins1x.get(i)) {
                         case "if_LT":
@@ -88,7 +89,7 @@ public class GenerarCodi {
                 }
 
                 // Brancaments Sobre Brancaments
-                System.out.println("Brancaments Sobre Brancaments");
+                // System.out.println("Brancaments Sobre Brancaments");
                 for (int i = 0; i < ins1x.size(); i++) {
                     switch (ins1x.get(i)) {
                         case "skip":
@@ -105,7 +106,7 @@ public class GenerarCodi {
                 }
 
                 // Operacions constants
-                System.out.println("Operacions Constants");
+                // System.out.println("Operacions Constants");
                 for (int i = 0; i < ins1x.size(); i++) {
                     switch (ins1x.get(i)) {
                         case "add":
@@ -128,7 +129,7 @@ public class GenerarCodi {
                 }
 
                 // Codi Inaccessible
-                System.out.println("Codi Inaccessible");
+                // System.out.println("Codi Inaccessible");
                 for (int i = 0; i < ins1x.size(); i++) {
                     switch (ins1x.get(i)) {
                         case "goto":
@@ -140,7 +141,7 @@ public class GenerarCodi {
                 }
 
                 // Assignacions Diferides
-                System.out.println("Assignacions Diferides");
+                // System.out.println("Assignacions Diferides");
                 for (int i = 0; i < ins1x.size(); i++) {
                     switch (ins1x.get(i)) {
                         case "copy":
@@ -159,7 +160,7 @@ public class GenerarCodi {
             ins2 = ins2x;
             ins3 = ins3x;
             ins4 = ins4x;
-            bufw = new BufferedWriter(new FileWriter(fitxerC3a + opt));
+            bufw = new BufferedWriter(new FileWriter(fitxerC3a + opt + ".txt"));
             for (int i = 0; i < ins1.size(); i++) {
                 escriureLinia(ins1.get(i) + " " + ins2.get(i) + " " + ins3.get(i) + " " + ins4.get(i));
             }
@@ -345,7 +346,6 @@ public class GenerarCodi {
             for (int x = i + 1; x < ins1x.size(); x++) {
                 if (ins1x.get(x) == "skip") {
                     if (ins4x.get(x) != ins4x.get(i)) {
-
                         for (int j = 0; j < ins1x.size(); j++) {
                             if (ins4x.get(j) == ins4x.get(x) && j != x) {
                                 index = -2;
@@ -370,7 +370,7 @@ public class GenerarCodi {
                     ins2x.remove(j);
                     ins3x.remove(j);
                     ins4x.remove(j);
-                    System.out.println("CI: " + String.valueOf(i));
+                    // System.out.println("CI: " + String.valueOf(i));
                     repetirIteracio = true;
                 }
             }
@@ -746,10 +746,10 @@ public class GenerarCodi {
             if (x.charAt(0) == 't') {
                 String aux = x.substring(1);
                 if (aux == "0") {
-                    return "(A7)";
+                    return "(A6)";
                 }
                 aux = String.valueOf(Integer.parseInt(aux) * nbytes);
-                return aux + "(A7)";
+                return aux + "(A6)";
             } else if (x.charAt(0) == 'e') {
                 String aux = x.substring(1);
                 return aux;
@@ -1059,6 +1059,17 @@ public class GenerarCodi {
             bufw.write(texte + "\n");
         } catch (IOException e) {
             System.err.println(e);
+        }
+    }
+
+    public void escriureTaulaSimbols(String texte) {
+        try {
+            bufw = new BufferedWriter(new FileWriter(taulaSimbols));
+            bufw.write(texte + "\n");
+        } catch (IOException e) {
+            System.err.println(e);
+        } finally {
+            tancar();
         }
     }
 
