@@ -1,0 +1,8 @@
+fnct integer suma(y::integer, x::logical):
+rtrn (y+x);
+endfnct
+
+val x::integer = suma(2+3);
+
+
+// Error--> Error semántico en la linea 2 y columna 9 --> El término aritmético solo puede sumar tipos integer: INTEGER + BOOLEAN

@@ -1,0 +1,9 @@
+/// * Error sintàctic degut a que no li estas asignant dos paràmetres a una tupla, si s'arregla aquest també bota l'error de que s'està assignant un tipus incorrecte a la tupla *
+
+tuple x = {integer};
+x[0] = FALSE;
+
+/// Error--> Error en la linea 1 y columna 19: Symbol: rbrace (unknown:1/19(-1) - unknown:1/20(-1)) --> Error sintáctico
+/// Error--> Error en la linea 1 y columna 19: Symbol: rbrace (unknown:1/19(-1) - unknown:1/20(-1)) --> Error sintáctico inrrecuperable
+
+/// Error--> Error semántico en la linea 4 y columna 8 --> A la tupla x se le esta asignando un tipo incorrecto.

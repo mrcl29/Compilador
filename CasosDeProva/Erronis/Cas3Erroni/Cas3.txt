@@ -1,0 +1,30 @@
+/// Aquest codi mostra com no hi ha conflictes de localitat en la declaració de variables,
+/// a més es veu com es pot tenir variables (o constants), tuples i funcions amb el mateix nom i en el mateix nivell.
+/// El problema ve amb la variable 'x' final ja que es una variable global i entra en conflicte amb les variables creades a nivell de funcio.
+/// És un problema perque el programa quan usa el nom 'x' a la funció no sap si usar la que esta declarada a la funcio o la que està a nivell global.
+
+fnct integer x(y::logical):
+val x::integer = 0;
+rtrn (2);
+endfnct
+
+fnct integer y(y::logical):
+val x::integer = 0;
+rtrn (2);
+endfnct
+
+fnct logical z(x::logical):
+val y::integer = 0;
+rtrn (TRUE);
+endfnct
+
+fnct integer hola(y::logical, z::integer):
+con x::integer = 0;
+rtrn (2);
+endfnct
+
+tuple z = {integer, integer};
+
+val x::logical = TRUE;
+
+/// Error--> Error semántico en la linea 25 y columna 5 --> Ya existe una variable o constante con el nombre 'x'

@@ -1,0 +1,24 @@
+
+/// En aquest cas provarem els bucles while amb crides a funció i també com podem simular una funció main com a pyhton
+
+fnct integer suma(z::integer, b::integer):
+rtrn (z+b);
+endfnct
+
+con x::integer = 10;
+
+fnct logical main():
+    val z::integer = 0;
+    while(x /= z):
+        val b::logical = (z === 2);
+        if(b):
+        out(suma(z, 0));
+        else:
+        out(suma(x,z));
+        endif
+        z = z + 1;
+    endwhile
+    rtrn (true);
+endfnct
+
+main()
