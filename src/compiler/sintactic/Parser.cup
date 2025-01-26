@@ -19,7 +19,7 @@ import compiler.c3a.*;
 class Parser;
 
 parser code {:
-    public boolean DEBUG = true;
+    public boolean DEBUG = false;
 
     TaulaSimbols taulaSimbols = new TaulaSimbols();
 

@@ -4,7 +4,7 @@ import compiler.lexic.Scanner;
 import compiler.sintactic.Parser;
 
 public class Executar {
-    private static final Boolean compilar = true;
+    private static final Boolean compilar = false;
 
     private static final String JFLEX_PATH = "./lib/JFlex/jflex-full-1.8.2.jar";
     private static final String CUP_PATH = "./lib/JavaCUP/java-cup-11b.jar";

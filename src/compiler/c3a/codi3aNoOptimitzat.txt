@@ -1,60 +1,22 @@
 goto   e2
 skip   e1
-copy 0  t4
-copy t4  t5
-copy 0  t6
-if_NE t2 t6 e3
-goto   e4
-skip   e3
-copy -1  t7
-goto   e5
-skip   e4
-copy 0  t7
-skip   e5
-if_EQ t7 0 e6
-add t1 t3 t8
-copy 10  t9
-sub t8 t9 t10
-copy t10  t5
-goto   e7
-skip   e6
-add t1 t3 t11
-copy 10  t12
-add t11 t12 t13
-copy t13  t5
-skip   e7
+add t3 t4 t5
 rtn   t5
 skip   e2
-copy 100  t14
-copy t14  t15
-copy 10  t16
-copy t16  t17
-copy -1  t18
-copy t18  t19
-copy 1  t21
-copy 10  t22
-copy t21  t23
-goto   e9
-skip   e8
-copy t22  t24
-copy 1  t25
-add t23 t25 t23
-if_GE t23 t24 e10
-skip   e9
-copy 1  t26
-copy t23  t27
-out t26 t27 e11
-copy t17  t28
-param_s   t28
-copy t19  t29
-param_s   t29
-copy t15  t30
-copy t30  t1
-copy t29  t2
-copy t28  t3
-call t31  e1
-copy 1  t32
-copy t31  t33
-out t32 t33 e12
-goto   e8
-skip   e10
+goto   e4
+skip   e3
+copy 1  t6
+copy 2  t7
+copy t7  t8
+param_s   t8
+copy t6  t9
+copy t9  t3
+copy t8  t4
+call t10  e1
+copy 1  t11
+copy t10  t12
+out t11 t12 e5
+copy -1  t13
+rtn   t13
+skip   e4
+call t14  e3

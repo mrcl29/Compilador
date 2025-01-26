@@ -1,11 +1,7 @@
-x [Variable]
-y [Variable]
-z [Variable]
-calcul [Funcio]
-t [Variable]
-xx [Constant]
-zz [Variable]
-xz1234 [Constant]
-index [Variable]
+x [Tupla]
+a [Variable]
+b [Variable]
+suma [Funcio]
+main [Funcio]
 
 

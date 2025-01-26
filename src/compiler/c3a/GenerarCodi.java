@@ -67,26 +67,26 @@ public class GenerarCodi {
             do {
                 repetirIteracio = false;
 
-                // Brancaments Adjacents
-                // System.out.println("Brancaments Adjacents");
-                for (int i = 0; i < ins1x.size(); i++) {
-                    switch (ins1x.get(i)) {
-                        case "if_LT":
-                            optimitzacioBrancamentAdjacent(i, "if_GE");
-                            break;
-                        case "if_EQ":
-                            optimitzacioBrancamentAdjacent(i, "if_NE");
-                            break;
-                        case "if_NE":
-                            optimitzacioBrancamentAdjacent(i, "if_EQ");
-                            break;
-                        case "if_GE":
-                            optimitzacioBrancamentAdjacent(i, "if_LT");
-                            break;
-                        default:
-                            break;
-                    }
-                }
+                // // Brancaments Adjacents
+                // // System.out.println("Brancaments Adjacents");
+                // for (int i = 0; i < ins1x.size(); i++) {
+                // switch (ins1x.get(i)) {
+                // case "if_LT":
+                // optimitzacioBrancamentAdjacent(i, "if_GE");
+                // break;
+                // case "if_EQ":
+                // optimitzacioBrancamentAdjacent(i, "if_NE");
+                // break;
+                // case "if_NE":
+                // optimitzacioBrancamentAdjacent(i, "if_EQ");
+                // break;
+                // case "if_GE":
+                // optimitzacioBrancamentAdjacent(i, "if_LT");
+                // break;
+                // default:
+                // break;
+                // }
+                // }
 
                 // Brancaments Sobre Brancaments
                 // System.out.println("Brancaments Sobre Brancaments");
@@ -190,24 +190,25 @@ public class GenerarCodi {
      * ...
      * e2: skip
      */
-    private void optimitzacioBrancamentAdjacent(int i, String condicioInvertida) {
-        try {
-            if (ins1x.get(i + 1) == "goto" && ins1x.get(i + 2) == "skip"
-                    && ins4x.get(i + 2) == ins4x.get(i)) {
-                ins1x.set(i, condicioInvertida); // invertim condició
-                ins4x.set(i, ins4.get(i + 1)); // bot a final
+    // private void optimitzacioBrancamentAdjacent(int i, String condicioInvertida)
+    // {
+    // try {
+    // if (ins1x.get(i + 1) == "goto" && ins1x.get(i + 2) == "skip"
+    // && ins4x.get(i + 2) == ins4x.get(i)) {
+    // ins1x.set(i, condicioInvertida); // invertim condició
+    // ins4x.set(i, ins4.get(i + 1)); // bot a final
 
-                // eliminam goto
-                ins1x.remove(i + 1);
-                ins2x.remove(i + 1);
-                ins3x.remove(i + 1);
-                ins4x.remove(i + 1);
-                System.out.println("BA: " + String.valueOf(i));
-                repetirIteracio = true;
-            }
-        } catch (IndexOutOfBoundsException e) {
-        }
-    }
+    // // eliminam goto
+    // ins1x.remove(i + 1);
+    // ins2x.remove(i + 1);
+    // ins3x.remove(i + 1);
+    // ins4x.remove(i + 1);
+    // System.out.println("BA: " + String.valueOf(i));
+    // repetirIteracio = true;
+    // }
+    // } catch (IndexOutOfBoundsException e) {
+    // }
+    // }
 
     /*
      * if condició goto e1
@@ -231,7 +232,7 @@ public class GenerarCodi {
             for (int x = 0; x < ins1x.size(); x++) { // Recorrem totes les instrucions
                 if (ins4x.get(x) == ins4x.get(i) && x != i) { // Si hi ha algun bot a l'etiqueta identificada
                     ins4x.set(x, ins4x.get(i + 1)); // Cambiam la etiqueta del bot per l'etiqueta del goto
-                    System.out.println("BSB: " + String.valueOf(i));
+                    // System.out.println("BSB: " + String.valueOf(i));
                     repetirIteracio = true;
                 }
             }
